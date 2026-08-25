@@ -1,0 +1,2813 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "CULR-56000001",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000001",
+        "survey_number": "125/1",
+        "land_use": "Residential",
+        "area_sq_m": 9633.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000002",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000002",
+        "survey_number": "125/2",
+        "land_use": "Residential",
+        "area_sq_m": 10401.7,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000003",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000003",
+        "survey_number": "125/3",
+        "land_use": "Commercial",
+        "area_sq_m": 11199.6,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000004",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000004",
+        "survey_number": "125/4",
+        "land_use": "Mixed use",
+        "area_sq_m": 10665.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000005",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000005",
+        "survey_number": "125/5",
+        "land_use": "Institutional",
+        "area_sq_m": 10043.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000006",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000006",
+        "survey_number": "125/6",
+        "land_use": "Residential",
+        "area_sq_m": 10826.3,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000007",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000007",
+        "survey_number": "125/7",
+        "land_use": "Residential",
+        "area_sq_m": 10321.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000008",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000008",
+        "survey_number": "125/8",
+        "land_use": "Commercial",
+        "area_sq_m": 11119.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000009",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000009",
+        "survey_number": "125/9",
+        "land_use": "Mixed use",
+        "area_sq_m": 10453.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000010",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000010",
+        "survey_number": "125/10",
+        "land_use": "Institutional",
+        "area_sq_m": 9977.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000011",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000011",
+        "survey_number": "125/11",
+        "land_use": "Residential",
+        "area_sq_m": 10760.4,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000012",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000012",
+        "survey_number": "125/12",
+        "land_use": "Residential",
+        "area_sq_m": 11572.9,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000013",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000013",
+        "survey_number": "126/1",
+        "land_use": "Commercial",
+        "area_sq_m": 9633.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000014",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000014",
+        "survey_number": "126/2",
+        "land_use": "Mixed use",
+        "area_sq_m": 10401.7,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000015",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000015",
+        "survey_number": "126/3",
+        "land_use": "Institutional",
+        "area_sq_m": 11199.6,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000016",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000016",
+        "survey_number": "126/4",
+        "land_use": "Residential",
+        "area_sq_m": 10665.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000017",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000017",
+        "survey_number": "126/5",
+        "land_use": "Residential",
+        "area_sq_m": 10043.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000018",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000018",
+        "survey_number": "126/6",
+        "land_use": "Commercial",
+        "area_sq_m": 10826.3,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000019",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000019",
+        "survey_number": "126/7",
+        "land_use": "Mixed use",
+        "area_sq_m": 10321.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000020",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000020",
+        "survey_number": "126/8",
+        "land_use": "Institutional",
+        "area_sq_m": 11119.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000021",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000021",
+        "survey_number": "126/9",
+        "land_use": "Residential",
+        "area_sq_m": 10453.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000022",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000022",
+        "survey_number": "126/10",
+        "land_use": "Residential",
+        "area_sq_m": 9977.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000023",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000023",
+        "survey_number": "126/11",
+        "land_use": "Commercial",
+        "area_sq_m": 10760.4,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000024",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000024",
+        "survey_number": "126/12",
+        "land_use": "Mixed use",
+        "area_sq_m": 11572.9,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000025",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000025",
+        "survey_number": "127/1",
+        "land_use": "Institutional",
+        "area_sq_m": 9633.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000026",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000026",
+        "survey_number": "127/2",
+        "land_use": "Residential",
+        "area_sq_m": 10401.7,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000027",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000027",
+        "survey_number": "127/3",
+        "land_use": "Residential",
+        "area_sq_m": 11199.6,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000028",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000028",
+        "survey_number": "127/4",
+        "land_use": "Commercial",
+        "area_sq_m": 10665.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000029",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000029",
+        "survey_number": "127/5",
+        "land_use": "Mixed use",
+        "area_sq_m": 10043.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000030",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000030",
+        "survey_number": "127/6",
+        "land_use": "Institutional",
+        "area_sq_m": 10826.3,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000031",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000031",
+        "survey_number": "127/7",
+        "land_use": "Residential",
+        "area_sq_m": 10321.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000032",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000032",
+        "survey_number": "127/8",
+        "land_use": "Residential",
+        "area_sq_m": 11119.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000033",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000033",
+        "survey_number": "127/9",
+        "land_use": "Commercial",
+        "area_sq_m": 10453.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000034",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000034",
+        "survey_number": "127/10",
+        "land_use": "Mixed use",
+        "area_sq_m": 9977.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000035",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000035",
+        "survey_number": "127/11",
+        "land_use": "Institutional",
+        "area_sq_m": 10760.4,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000036",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000036",
+        "survey_number": "127/12",
+        "land_use": "Residential",
+        "area_sq_m": 11572.9,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000037",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000037",
+        "survey_number": "128/1",
+        "land_use": "Residential",
+        "area_sq_m": 9633.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000038",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000038",
+        "survey_number": "128/2",
+        "land_use": "Commercial",
+        "area_sq_m": 10401.7,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000039",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000039",
+        "survey_number": "128/3",
+        "land_use": "Mixed use",
+        "area_sq_m": 11199.6,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000040",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000040",
+        "survey_number": "128/4",
+        "land_use": "Institutional",
+        "area_sq_m": 10665.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000041",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000041",
+        "survey_number": "128/5",
+        "land_use": "Residential",
+        "area_sq_m": 10043.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000042",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000042",
+        "survey_number": "128/6",
+        "land_use": "Residential",
+        "area_sq_m": 10826.3,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000043",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000043",
+        "survey_number": "128/7",
+        "land_use": "Commercial",
+        "area_sq_m": 10321.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000044",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000044",
+        "survey_number": "128/8",
+        "land_use": "Mixed use",
+        "area_sq_m": 11119.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000045",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000045",
+        "survey_number": "128/9",
+        "land_use": "Institutional",
+        "area_sq_m": 10453.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000046",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000046",
+        "survey_number": "128/10",
+        "land_use": "Residential",
+        "area_sq_m": 9977.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000047",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000047",
+        "survey_number": "128/11",
+        "land_use": "Residential",
+        "area_sq_m": 10760.4,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000048",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000048",
+        "survey_number": "128/12",
+        "land_use": "Commercial",
+        "area_sq_m": 11572.9,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000049",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000049",
+        "survey_number": "129/1",
+        "land_use": "Mixed use",
+        "area_sq_m": 9633.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000050",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000050",
+        "survey_number": "129/2",
+        "land_use": "Institutional",
+        "area_sq_m": 10401.7,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000051",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000051",
+        "survey_number": "129/3",
+        "land_use": "Residential",
+        "area_sq_m": 11199.6,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000052",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000052",
+        "survey_number": "129/4",
+        "land_use": "Residential",
+        "area_sq_m": 10665.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000053",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000053",
+        "survey_number": "129/5",
+        "land_use": "Commercial",
+        "area_sq_m": 10043.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000054",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000054",
+        "survey_number": "129/6",
+        "land_use": "Mixed use",
+        "area_sq_m": 10826.3,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000055",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000055",
+        "survey_number": "129/7",
+        "land_use": "Institutional",
+        "area_sq_m": 10321.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000056",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000056",
+        "survey_number": "129/8",
+        "land_use": "Residential",
+        "area_sq_m": 11119.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000057",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000057",
+        "survey_number": "129/9",
+        "land_use": "Residential",
+        "area_sq_m": 10453.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000058",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000058",
+        "survey_number": "129/10",
+        "land_use": "Commercial",
+        "area_sq_m": 9977.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000059",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000059",
+        "survey_number": "129/11",
+        "land_use": "Mixed use",
+        "area_sq_m": 10760.4,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000060",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000060",
+        "survey_number": "129/12",
+        "land_use": "Institutional",
+        "area_sq_m": 11572.9,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000061",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000061",
+        "survey_number": "130/1",
+        "land_use": "Residential",
+        "area_sq_m": 9633.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000062",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000062",
+        "survey_number": "130/2",
+        "land_use": "Residential",
+        "area_sq_m": 10401.7,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000063",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000063",
+        "survey_number": "130/3",
+        "land_use": "Commercial",
+        "area_sq_m": 11199.6,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000064",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000064",
+        "survey_number": "130/4",
+        "land_use": "Mixed use",
+        "area_sq_m": 10665.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000065",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000065",
+        "survey_number": "130/5",
+        "land_use": "Institutional",
+        "area_sq_m": 10043.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000066",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000066",
+        "survey_number": "130/6",
+        "land_use": "Residential",
+        "area_sq_m": 10826.3,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000067",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000067",
+        "survey_number": "130/7",
+        "land_use": "Residential",
+        "area_sq_m": 10321.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000068",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000068",
+        "survey_number": "130/8",
+        "land_use": "Commercial",
+        "area_sq_m": 11119.1,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000069",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000069",
+        "survey_number": "130/9",
+        "land_use": "Mixed use",
+        "area_sq_m": 10453.0,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000070",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000070",
+        "survey_number": "130/10",
+        "land_use": "Institutional",
+        "area_sq_m": 9977.2,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000071",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000071",
+        "survey_number": "130/11",
+        "land_use": "Residential",
+        "area_sq_m": 10760.4,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CULR-56000072",
+      "properties": {
+        "canonical_parcel_id": "CULR-56000072",
+        "survey_number": "130/12",
+        "land_use": "Residential",
+        "area_sq_m": 11572.9,
+        "ward": "Demo Ward 14",
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

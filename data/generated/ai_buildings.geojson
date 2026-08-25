@@ -1,0 +1,2741 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "BLD-001",
+      "properties": {
+        "building_id": "BLD-001",
+        "parcel_hint": "CULR-56000001",
+        "source": "AI building extraction",
+        "confidence": 0.84,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-002",
+      "properties": {
+        "building_id": "BLD-002",
+        "parcel_hint": "CULR-56000002",
+        "source": "AI building extraction",
+        "confidence": 0.85,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-003",
+      "properties": {
+        "building_id": "BLD-003",
+        "parcel_hint": "CULR-56000003",
+        "source": "AI building extraction",
+        "confidence": 0.86,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-004",
+      "properties": {
+        "building_id": "BLD-004",
+        "parcel_hint": "CULR-56000004",
+        "source": "AI building extraction",
+        "confidence": 0.87,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-005",
+      "properties": {
+        "building_id": "BLD-005",
+        "parcel_hint": "CULR-56000005",
+        "source": "AI building extraction",
+        "confidence": 0.88,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-006",
+      "properties": {
+        "building_id": "BLD-006",
+        "parcel_hint": "CULR-56000006",
+        "source": "AI building extraction",
+        "confidence": 0.89,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-007",
+      "properties": {
+        "building_id": "BLD-007",
+        "parcel_hint": "CULR-56000007",
+        "source": "AI building extraction",
+        "confidence": 0.9,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-008",
+      "properties": {
+        "building_id": "BLD-008",
+        "parcel_hint": "CULR-56000008",
+        "source": "AI building extraction",
+        "confidence": 0.91,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-009",
+      "properties": {
+        "building_id": "BLD-009",
+        "parcel_hint": "CULR-56000009",
+        "source": "AI building extraction",
+        "confidence": 0.92,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-010",
+      "properties": {
+        "building_id": "BLD-010",
+        "parcel_hint": "CULR-56000010",
+        "source": "AI building extraction",
+        "confidence": 0.93,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-011",
+      "properties": {
+        "building_id": "BLD-011",
+        "parcel_hint": "CULR-56000011",
+        "source": "AI building extraction",
+        "confidence": 0.94,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-012",
+      "properties": {
+        "building_id": "BLD-012",
+        "parcel_hint": "CULR-56000012",
+        "source": "AI building extraction",
+        "confidence": 0.95,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-013",
+      "properties": {
+        "building_id": "BLD-013",
+        "parcel_hint": "CULR-56000013",
+        "source": "AI building extraction",
+        "confidence": 0.96,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-014",
+      "properties": {
+        "building_id": "BLD-014",
+        "parcel_hint": "CULR-56000014",
+        "source": "AI building extraction",
+        "confidence": 0.97,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-015",
+      "properties": {
+        "building_id": "BLD-015",
+        "parcel_hint": "CULR-56000015",
+        "source": "AI building extraction",
+        "confidence": 0.84,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-016",
+      "properties": {
+        "building_id": "BLD-016",
+        "parcel_hint": "CULR-56000016",
+        "source": "AI building extraction",
+        "confidence": 0.85,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-017",
+      "properties": {
+        "building_id": "BLD-017",
+        "parcel_hint": "CULR-56000017",
+        "source": "AI building extraction",
+        "confidence": 0.86,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-018",
+      "properties": {
+        "building_id": "BLD-018",
+        "parcel_hint": "CULR-56000018",
+        "source": "AI building extraction",
+        "confidence": 0.87,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-019",
+      "properties": {
+        "building_id": "BLD-019",
+        "parcel_hint": "CULR-56000019",
+        "source": "AI building extraction",
+        "confidence": 0.88,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-020",
+      "properties": {
+        "building_id": "BLD-020",
+        "parcel_hint": "CULR-56000020",
+        "source": "AI building extraction",
+        "confidence": 0.89,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-021",
+      "properties": {
+        "building_id": "BLD-021",
+        "parcel_hint": "CULR-56000021",
+        "source": "AI building extraction",
+        "confidence": 0.9,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-022",
+      "properties": {
+        "building_id": "BLD-022",
+        "parcel_hint": "CULR-56000022",
+        "source": "AI building extraction",
+        "confidence": 0.91,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-023",
+      "properties": {
+        "building_id": "BLD-023",
+        "parcel_hint": "CULR-56000023",
+        "source": "AI building extraction",
+        "confidence": 0.92,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-024",
+      "properties": {
+        "building_id": "BLD-024",
+        "parcel_hint": "CULR-56000024",
+        "source": "AI building extraction",
+        "confidence": 0.93,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-025",
+      "properties": {
+        "building_id": "BLD-025",
+        "parcel_hint": "CULR-56000025",
+        "source": "AI building extraction",
+        "confidence": 0.94,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-026",
+      "properties": {
+        "building_id": "BLD-026",
+        "parcel_hint": "CULR-56000026",
+        "source": "AI building extraction",
+        "confidence": 0.95,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-027",
+      "properties": {
+        "building_id": "BLD-027",
+        "parcel_hint": "CULR-56000027",
+        "source": "AI building extraction",
+        "confidence": 0.96,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-028",
+      "properties": {
+        "building_id": "BLD-028",
+        "parcel_hint": "CULR-56000028",
+        "source": "AI building extraction",
+        "confidence": 0.97,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-029",
+      "properties": {
+        "building_id": "BLD-029",
+        "parcel_hint": "CULR-56000029",
+        "source": "AI building extraction",
+        "confidence": 0.84,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-030",
+      "properties": {
+        "building_id": "BLD-030",
+        "parcel_hint": "CULR-56000030",
+        "source": "AI building extraction",
+        "confidence": 0.85,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-031",
+      "properties": {
+        "building_id": "BLD-031",
+        "parcel_hint": "CULR-56000031",
+        "source": "AI building extraction",
+        "confidence": 0.86,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-032",
+      "properties": {
+        "building_id": "BLD-032",
+        "parcel_hint": "CULR-56000032",
+        "source": "AI building extraction",
+        "confidence": 0.87,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-033",
+      "properties": {
+        "building_id": "BLD-033",
+        "parcel_hint": "CULR-56000033",
+        "source": "AI building extraction",
+        "confidence": 0.88,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-034",
+      "properties": {
+        "building_id": "BLD-034",
+        "parcel_hint": "CULR-56000034",
+        "source": "AI building extraction",
+        "confidence": 0.89,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-035",
+      "properties": {
+        "building_id": "BLD-035",
+        "parcel_hint": "CULR-56000035",
+        "source": "AI building extraction",
+        "confidence": 0.9,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-036",
+      "properties": {
+        "building_id": "BLD-036",
+        "parcel_hint": "CULR-56000036",
+        "source": "AI building extraction",
+        "confidence": 0.91,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-037",
+      "properties": {
+        "building_id": "BLD-037",
+        "parcel_hint": "CULR-56000037",
+        "source": "AI building extraction",
+        "confidence": 0.92,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-038",
+      "properties": {
+        "building_id": "BLD-038",
+        "parcel_hint": "CULR-56000038",
+        "source": "AI building extraction",
+        "confidence": 0.93,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-039",
+      "properties": {
+        "building_id": "BLD-039",
+        "parcel_hint": "CULR-56000039",
+        "source": "AI building extraction",
+        "confidence": 0.94,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-040",
+      "properties": {
+        "building_id": "BLD-040",
+        "parcel_hint": "CULR-56000040",
+        "source": "AI building extraction",
+        "confidence": 0.95,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-041",
+      "properties": {
+        "building_id": "BLD-041",
+        "parcel_hint": "CULR-56000041",
+        "source": "AI building extraction",
+        "confidence": 0.96,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-042",
+      "properties": {
+        "building_id": "BLD-042",
+        "parcel_hint": "CULR-56000042",
+        "source": "AI building extraction",
+        "confidence": 0.97,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-043",
+      "properties": {
+        "building_id": "BLD-043",
+        "parcel_hint": "CULR-56000043",
+        "source": "AI building extraction",
+        "confidence": 0.84,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-044",
+      "properties": {
+        "building_id": "BLD-044",
+        "parcel_hint": "CULR-56000044",
+        "source": "AI building extraction",
+        "confidence": 0.85,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-045",
+      "properties": {
+        "building_id": "BLD-045",
+        "parcel_hint": "CULR-56000045",
+        "source": "AI building extraction",
+        "confidence": 0.86,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-046",
+      "properties": {
+        "building_id": "BLD-046",
+        "parcel_hint": "CULR-56000046",
+        "source": "AI building extraction",
+        "confidence": 0.87,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-047",
+      "properties": {
+        "building_id": "BLD-047",
+        "parcel_hint": "CULR-56000047",
+        "source": "AI building extraction",
+        "confidence": 0.88,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-048",
+      "properties": {
+        "building_id": "BLD-048",
+        "parcel_hint": "CULR-56000048",
+        "source": "AI building extraction",
+        "confidence": 0.89,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-049",
+      "properties": {
+        "building_id": "BLD-049",
+        "parcel_hint": "CULR-56000049",
+        "source": "AI building extraction",
+        "confidence": 0.9,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-050",
+      "properties": {
+        "building_id": "BLD-050",
+        "parcel_hint": "CULR-56000050",
+        "source": "AI building extraction",
+        "confidence": 0.91,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-051",
+      "properties": {
+        "building_id": "BLD-051",
+        "parcel_hint": "CULR-56000051",
+        "source": "AI building extraction",
+        "confidence": 0.92,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-052",
+      "properties": {
+        "building_id": "BLD-052",
+        "parcel_hint": "CULR-56000052",
+        "source": "AI building extraction",
+        "confidence": 0.93,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-053",
+      "properties": {
+        "building_id": "BLD-053",
+        "parcel_hint": "CULR-56000053",
+        "source": "AI building extraction",
+        "confidence": 0.94,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-054",
+      "properties": {
+        "building_id": "BLD-054",
+        "parcel_hint": "CULR-56000054",
+        "source": "AI building extraction",
+        "confidence": 0.95,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-055",
+      "properties": {
+        "building_id": "BLD-055",
+        "parcel_hint": "CULR-56000055",
+        "source": "AI building extraction",
+        "confidence": 0.96,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-056",
+      "properties": {
+        "building_id": "BLD-056",
+        "parcel_hint": "CULR-56000056",
+        "source": "AI building extraction",
+        "confidence": 0.97,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-057",
+      "properties": {
+        "building_id": "BLD-057",
+        "parcel_hint": "CULR-56000057",
+        "source": "AI building extraction",
+        "confidence": 0.84,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-058",
+      "properties": {
+        "building_id": "BLD-058",
+        "parcel_hint": "CULR-56000058",
+        "source": "AI building extraction",
+        "confidence": 0.85,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-059",
+      "properties": {
+        "building_id": "BLD-059",
+        "parcel_hint": "CULR-56000059",
+        "source": "AI building extraction",
+        "confidence": 0.86,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-060",
+      "properties": {
+        "building_id": "BLD-060",
+        "parcel_hint": "CULR-56000060",
+        "source": "AI building extraction",
+        "confidence": 0.87,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-061",
+      "properties": {
+        "building_id": "BLD-061",
+        "parcel_hint": "CULR-56000061",
+        "source": "AI building extraction",
+        "confidence": 0.88,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-062",
+      "properties": {
+        "building_id": "BLD-062",
+        "parcel_hint": "CULR-56000062",
+        "source": "AI building extraction",
+        "confidence": 0.89,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-063",
+      "properties": {
+        "building_id": "BLD-063",
+        "parcel_hint": "CULR-56000063",
+        "source": "AI building extraction",
+        "confidence": 0.9,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-064",
+      "properties": {
+        "building_id": "BLD-064",
+        "parcel_hint": "CULR-56000064",
+        "source": "AI building extraction",
+        "confidence": 0.91,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-065",
+      "properties": {
+        "building_id": "BLD-065",
+        "parcel_hint": "CULR-56000065",
+        "source": "AI building extraction",
+        "confidence": 0.92,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-066",
+      "properties": {
+        "building_id": "BLD-066",
+        "parcel_hint": "CULR-56000066",
+        "source": "AI building extraction",
+        "confidence": 0.93,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-067",
+      "properties": {
+        "building_id": "BLD-067",
+        "parcel_hint": "CULR-56000067",
+        "source": "AI building extraction",
+        "confidence": 0.94,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-068",
+      "properties": {
+        "building_id": "BLD-068",
+        "parcel_hint": "CULR-56000068",
+        "source": "AI building extraction",
+        "confidence": 0.95,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-069",
+      "properties": {
+        "building_id": "BLD-069",
+        "parcel_hint": "CULR-56000069",
+        "source": "AI building extraction",
+        "confidence": 0.96,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-070",
+      "properties": {
+        "building_id": "BLD-070",
+        "parcel_hint": "CULR-56000070",
+        "source": "AI building extraction",
+        "confidence": 0.97,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-071",
+      "properties": {
+        "building_id": "BLD-071",
+        "parcel_hint": "CULR-56000071",
+        "source": "AI building extraction",
+        "confidence": 0.84,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "BLD-072",
+      "properties": {
+        "building_id": "BLD-072",
+        "parcel_hint": "CULR-56000072",
+        "source": "AI building extraction",
+        "confidence": 0.85,
+        "capture_date": "2026-07-15"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: urbanland
+      POSTGRES_USER: urbanland
+      POSTGRES_PASSWORD: urbanland_dev
+    ports: ["5432:5432"]
+    volumes: ["postgis_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U urbanland -d urbanland"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://urbanland:urbanland_dev@db:5432/urbanland
+      DEMO_DATA_DIR: /app/data/generated
+    ports: ["8000:8000"]
+    volumes: ["./data/generated:/app/data/generated:ro"]
+    depends_on:
+      db:
+        condition: service_healthy
+  web:
+    build: ./frontend
+    ports: ["5173:80"]
+    depends_on: [api]
+volumes:
+  postgis_data:
