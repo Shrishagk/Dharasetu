@@ -1,0 +1,2925 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "MUN-001",
+      "properties": {
+        "source_record_id": "MUN-001",
+        "source": "Municipal",
+        "survey_number": "125/1",
+        "land_use": "Residential",
+        "area_sq_m": 9729.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-002",
+      "properties": {
+        "source_record_id": "MUN-002",
+        "source": "Municipal",
+        "survey_number": "125/2",
+        "land_use": "Residential",
+        "area_sq_m": 10505.7,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-003",
+      "properties": {
+        "source_record_id": "MUN-003",
+        "source": "Municipal",
+        "survey_number": "125/3",
+        "land_use": "Commercial",
+        "area_sq_m": 11311.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-004",
+      "properties": {
+        "source_record_id": "MUN-004",
+        "source": "Municipal",
+        "survey_number": "125/4",
+        "land_use": "Mixed use",
+        "area_sq_m": 10771.9,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-005",
+      "properties": {
+        "source_record_id": "MUN-005",
+        "source": "Municipal",
+        "survey_number": "125/5",
+        "land_use": "Institutional",
+        "area_sq_m": 10143.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-006",
+      "properties": {
+        "source_record_id": "MUN-006",
+        "source": "Municipal",
+        "survey_number": "125/6",
+        "land_use": "Residential",
+        "area_sq_m": 10934.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-007",
+      "properties": {
+        "source_record_id": "MUN-007",
+        "source": "Municipal",
+        "survey_number": "125/7",
+        "land_use": "Residential",
+        "area_sq_m": 10424.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-008",
+      "properties": {
+        "source_record_id": "MUN-008",
+        "source": "Municipal",
+        "survey_number": "125/8",
+        "land_use": "Commercial",
+        "area_sq_m": 11230.3,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-009",
+      "properties": {
+        "source_record_id": "MUN-009",
+        "source": "Municipal",
+        "survey_number": "125/9",
+        "land_use": "Mixed use",
+        "area_sq_m": 10557.5,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-010",
+      "properties": {
+        "source_record_id": "MUN-010",
+        "source": "Municipal",
+        "survey_number": "125/10",
+        "land_use": "Institutional",
+        "area_sq_m": 10077.0,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-011",
+      "properties": {
+        "source_record_id": "MUN-011",
+        "source": "Municipal",
+        "survey_number": "125/11",
+        "land_use": "Residential",
+        "area_sq_m": 10868.0,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-012",
+      "properties": {
+        "source_record_id": "MUN-012",
+        "source": "Municipal",
+        "survey_number": "125/12",
+        "land_use": "Commercial",
+        "area_sq_m": 11688.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-013",
+      "properties": {
+        "source_record_id": "MUN-013",
+        "source": "Municipal",
+        "survey_number": "126/1",
+        "land_use": "Commercial",
+        "area_sq_m": 9729.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-014",
+      "properties": {
+        "source_record_id": "MUN-014",
+        "source": "Municipal",
+        "survey_number": "126/2",
+        "land_use": "Mixed use",
+        "area_sq_m": 10505.7,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-015",
+      "properties": {
+        "source_record_id": "MUN-015",
+        "source": "Municipal",
+        "survey_number": "126/3",
+        "land_use": "Institutional",
+        "area_sq_m": 11311.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-016",
+      "properties": {
+        "source_record_id": "MUN-016",
+        "source": "Municipal",
+        "survey_number": "126/4",
+        "land_use": "Residential",
+        "area_sq_m": 10771.9,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-017",
+      "properties": {
+        "source_record_id": "MUN-017",
+        "source": "Municipal",
+        "survey_number": "126/5",
+        "land_use": "Residential",
+        "area_sq_m": 10143.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-018",
+      "properties": {
+        "source_record_id": "MUN-018",
+        "source": "Municipal",
+        "survey_number": "126/6",
+        "land_use": "Commercial",
+        "area_sq_m": 10934.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-019",
+      "properties": {
+        "source_record_id": "MUN-019",
+        "source": "Municipal",
+        "survey_number": "126/7",
+        "land_use": "Mixed use",
+        "area_sq_m": 10424.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-020",
+      "properties": {
+        "source_record_id": "MUN-020",
+        "source": "Municipal",
+        "survey_number": "126/8",
+        "land_use": "Institutional",
+        "area_sq_m": 11230.3,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-020-DUP",
+      "properties": {
+        "source_record_id": "MUN-020-DUP",
+        "source": "Municipal",
+        "survey_number": "126/8",
+        "land_use": "Institutional",
+        "area_sq_m": 11119.1,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-021",
+      "properties": {
+        "source_record_id": "MUN-021",
+        "source": "Municipal",
+        "survey_number": "126/9",
+        "land_use": "Residential",
+        "area_sq_m": 10557.5,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-022",
+      "properties": {
+        "source_record_id": "MUN-022",
+        "source": "Municipal",
+        "survey_number": "126/10",
+        "land_use": "Residential",
+        "area_sq_m": 10077.0,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-023",
+      "properties": {
+        "source_record_id": "MUN-023",
+        "source": "Municipal",
+        "survey_number": "126/11",
+        "land_use": "Commercial",
+        "area_sq_m": 10868.0,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-024",
+      "properties": {
+        "source_record_id": "MUN-024",
+        "source": "Municipal",
+        "survey_number": "126/12",
+        "land_use": "Mixed use",
+        "area_sq_m": 11688.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-025",
+      "properties": {
+        "source_record_id": "MUN-025",
+        "source": "Municipal",
+        "survey_number": "127/1",
+        "land_use": "Institutional",
+        "area_sq_m": 9729.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-026",
+      "properties": {
+        "source_record_id": "MUN-026",
+        "source": "Municipal",
+        "survey_number": "127/2",
+        "land_use": "Residential",
+        "area_sq_m": 10505.7,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-027",
+      "properties": {
+        "source_record_id": "MUN-027",
+        "source": "Municipal",
+        "survey_number": "127/3",
+        "land_use": "Residential",
+        "area_sq_m": 11311.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-028",
+      "properties": {
+        "source_record_id": "MUN-028",
+        "source": "Municipal",
+        "survey_number": null,
+        "land_use": "Commercial",
+        "area_sq_m": 10771.9,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-029",
+      "properties": {
+        "source_record_id": "MUN-029",
+        "source": "Municipal",
+        "survey_number": "127/5",
+        "land_use": "Mixed use",
+        "area_sq_m": 10143.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-030",
+      "properties": {
+        "source_record_id": "MUN-030",
+        "source": "Municipal",
+        "survey_number": "127/6",
+        "land_use": "Institutional",
+        "area_sq_m": 10934.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-031",
+      "properties": {
+        "source_record_id": "MUN-031",
+        "source": "Municipal",
+        "survey_number": "127/7",
+        "land_use": "Residential",
+        "area_sq_m": 10424.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-032",
+      "properties": {
+        "source_record_id": "MUN-032",
+        "source": "Municipal",
+        "survey_number": "127/8",
+        "land_use": "Residential",
+        "area_sq_m": 11230.3,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-033",
+      "properties": {
+        "source_record_id": "MUN-033",
+        "source": "Municipal",
+        "survey_number": "127/9",
+        "land_use": "Commercial",
+        "area_sq_m": 10557.5,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-034",
+      "properties": {
+        "source_record_id": "MUN-034",
+        "source": "Municipal",
+        "survey_number": "127/10",
+        "land_use": "Mixed use",
+        "area_sq_m": 10077.0,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-035",
+      "properties": {
+        "source_record_id": "MUN-035",
+        "source": "Municipal",
+        "survey_number": "127/11",
+        "land_use": "Institutional",
+        "area_sq_m": 11621.2,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-036",
+      "properties": {
+        "source_record_id": "MUN-036",
+        "source": "Municipal",
+        "survey_number": "127/12",
+        "land_use": "Residential",
+        "area_sq_m": 11688.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-037",
+      "properties": {
+        "source_record_id": "MUN-037",
+        "source": "Municipal",
+        "survey_number": "128/1",
+        "land_use": "Residential",
+        "area_sq_m": 9729.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-038",
+      "properties": {
+        "source_record_id": "MUN-038",
+        "source": "Municipal",
+        "survey_number": "128/2",
+        "land_use": "Commercial",
+        "area_sq_m": 10505.7,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-039",
+      "properties": {
+        "source_record_id": "MUN-039",
+        "source": "Municipal",
+        "survey_number": "128/3",
+        "land_use": "Mixed use",
+        "area_sq_m": 11311.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-040",
+      "properties": {
+        "source_record_id": "MUN-040",
+        "source": "Municipal",
+        "survey_number": "128/4",
+        "land_use": "Institutional",
+        "area_sq_m": 10771.9,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-041",
+      "properties": {
+        "source_record_id": "MUN-041",
+        "source": "Municipal",
+        "survey_number": "128/5",
+        "land_use": "Residential",
+        "area_sq_m": 10143.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-042",
+      "properties": {
+        "source_record_id": "MUN-042",
+        "source": "Municipal",
+        "survey_number": "128/6",
+        "land_use": "Residential",
+        "area_sq_m": 10934.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-043",
+      "properties": {
+        "source_record_id": "MUN-043",
+        "source": "Municipal",
+        "survey_number": "128/7",
+        "land_use": "Commercial",
+        "area_sq_m": 10424.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-044",
+      "properties": {
+        "source_record_id": "MUN-044",
+        "source": "Municipal",
+        "survey_number": "128/8",
+        "land_use": "Mixed use",
+        "area_sq_m": 11230.3,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-045",
+      "properties": {
+        "source_record_id": "MUN-045",
+        "source": "Municipal",
+        "survey_number": "128/9",
+        "land_use": "Institutional",
+        "area_sq_m": 10557.5,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-046",
+      "properties": {
+        "source_record_id": "MUN-046",
+        "source": "Municipal",
+        "survey_number": "128/10",
+        "land_use": "Residential",
+        "area_sq_m": 10077.0,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-047",
+      "properties": {
+        "source_record_id": "MUN-047",
+        "source": "Municipal",
+        "survey_number": "128/11",
+        "land_use": "Residential",
+        "area_sq_m": 10868.0,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-048",
+      "properties": {
+        "source_record_id": "MUN-048",
+        "source": "Municipal",
+        "survey_number": "128/12",
+        "land_use": "Commercial",
+        "area_sq_m": 11688.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-049",
+      "properties": {
+        "source_record_id": "MUN-049",
+        "source": "Municipal",
+        "survey_number": "129/1",
+        "land_use": "Mixed use",
+        "area_sq_m": 9729.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-050",
+      "properties": {
+        "source_record_id": "MUN-050",
+        "source": "Municipal",
+        "survey_number": "129/2",
+        "land_use": "Institutional",
+        "area_sq_m": 10505.7,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-051",
+      "properties": {
+        "source_record_id": "MUN-051",
+        "source": "Municipal",
+        "survey_number": "129/3",
+        "land_use": "Residential",
+        "area_sq_m": 11311.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-052",
+      "properties": {
+        "source_record_id": "MUN-052",
+        "source": "Municipal",
+        "survey_number": "129/4",
+        "land_use": "Residential",
+        "area_sq_m": 10771.9,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-053",
+      "properties": {
+        "source_record_id": "MUN-053",
+        "source": "Municipal",
+        "survey_number": "129/5",
+        "land_use": "Commercial",
+        "area_sq_m": 10143.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-054",
+      "properties": {
+        "source_record_id": "MUN-054",
+        "source": "Municipal",
+        "survey_number": "129/6",
+        "land_use": "Mixed use",
+        "area_sq_m": 10934.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-055",
+      "properties": {
+        "source_record_id": "MUN-055",
+        "source": "Municipal",
+        "survey_number": "129/7",
+        "land_use": "Institutional",
+        "area_sq_m": 10424.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-056",
+      "properties": {
+        "source_record_id": "MUN-056",
+        "source": "Municipal",
+        "survey_number": "129/8",
+        "land_use": "Residential",
+        "area_sq_m": 11230.3,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-057",
+      "properties": {
+        "source_record_id": "MUN-057",
+        "source": "Municipal",
+        "survey_number": "129/9",
+        "land_use": "Residential",
+        "area_sq_m": 10557.5,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-058",
+      "properties": {
+        "source_record_id": "MUN-058",
+        "source": "Municipal",
+        "survey_number": "129/10",
+        "land_use": "Commercial",
+        "area_sq_m": 10077.0,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-059",
+      "properties": {
+        "source_record_id": "MUN-059",
+        "source": "Municipal",
+        "survey_number": "129/11",
+        "land_use": "Mixed use",
+        "area_sq_m": 10868.0,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-060",
+      "properties": {
+        "source_record_id": "MUN-060",
+        "source": "Municipal",
+        "survey_number": "129/12",
+        "land_use": "Institutional",
+        "area_sq_m": 11688.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-061",
+      "properties": {
+        "source_record_id": "MUN-061",
+        "source": "Municipal",
+        "survey_number": "130/1",
+        "land_use": "Residential",
+        "area_sq_m": 9729.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-062",
+      "properties": {
+        "source_record_id": "MUN-062",
+        "source": "Municipal",
+        "survey_number": "130/2",
+        "land_use": "Residential",
+        "area_sq_m": 10505.7,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-063",
+      "properties": {
+        "source_record_id": "MUN-063",
+        "source": "Municipal",
+        "survey_number": "130/3",
+        "land_use": "Commercial",
+        "area_sq_m": 11311.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-064",
+      "properties": {
+        "source_record_id": "MUN-064",
+        "source": "Municipal",
+        "survey_number": "130/5",
+        "land_use": "Mixed use",
+        "area_sq_m": 10771.9,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-065",
+      "properties": {
+        "source_record_id": "MUN-065",
+        "source": "Municipal",
+        "survey_number": "130/5",
+        "land_use": "Institutional",
+        "area_sq_m": 10143.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ],
+            [
+              77.59,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-066",
+      "properties": {
+        "source_record_id": "MUN-066",
+        "source": "Municipal",
+        "survey_number": "130/6",
+        "land_use": "Residential",
+        "area_sq_m": 10934.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-067",
+      "properties": {
+        "source_record_id": "MUN-067",
+        "source": "Municipal",
+        "survey_number": "130/7",
+        "land_use": "Residential",
+        "area_sq_m": 10424.4,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-068",
+      "properties": {
+        "source_record_id": "MUN-068",
+        "source": "Municipal",
+        "survey_number": "130/8",
+        "land_use": "Commercial",
+        "area_sq_m": 11230.3,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-069",
+      "properties": {
+        "source_record_id": "MUN-069",
+        "source": "Municipal",
+        "survey_number": "130/9",
+        "land_use": "Mixed use",
+        "area_sq_m": 10557.5,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-070",
+      "properties": {
+        "source_record_id": "MUN-070",
+        "source": "Municipal",
+        "survey_number": "130/10",
+        "land_use": "Institutional",
+        "area_sq_m": 10077.0,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-071",
+      "properties": {
+        "source_record_id": "MUN-071",
+        "source": "Municipal",
+        "survey_number": "130/11",
+        "land_use": "Residential",
+        "area_sq_m": 10868.0,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-072",
+      "properties": {
+        "source_record_id": "MUN-072",
+        "source": "Municipal",
+        "survey_number": "130/12",
+        "land_use": "Residential",
+        "area_sq_m": 11688.6,
+        "capture_date": "2026-06-10",
+        "positional_accuracy_m": 2.5
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ],
+            [
+              77.6,
+              12.97
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

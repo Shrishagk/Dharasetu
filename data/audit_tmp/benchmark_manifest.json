@@ -1,0 +1,66 @@
+{
+  "seed": 56000123,
+  "crs": "EPSG:4326",
+  "canonical_parcel_count": 72,
+  "source_datasets": [
+    "cadastral_parcels.geojson",
+    "municipal_parcels.geojson",
+    "ai_buildings.geojson",
+    "revenue_records.csv"
+  ],
+  "injected_conflicts": [
+    {
+      "canonical_parcel_id": "CULR-56000006",
+      "type": "boundary_offset",
+      "severity": "high",
+      "expected_detection": true
+    },
+    {
+      "canonical_parcel_id": "CULR-56000012",
+      "type": "land_use",
+      "severity": "medium",
+      "expected_detection": true
+    },
+    {
+      "canonical_parcel_id": "CULR-56000020",
+      "type": "duplicate",
+      "severity": "medium",
+      "expected_detection": true
+    },
+    {
+      "canonical_parcel_id": "CULR-56000028",
+      "type": "missing_id",
+      "severity": "medium",
+      "expected_detection": true
+    },
+    {
+      "canonical_parcel_id": "CULR-56000035",
+      "type": "area_error",
+      "severity": "medium",
+      "expected_detection": true
+    },
+    {
+      "canonical_parcel_id": "CULR-56000044",
+      "type": "topology_overlap",
+      "severity": "high",
+      "expected_detection": true
+    },
+    {
+      "canonical_parcel_id": "CULR-56000052",
+      "type": "outdated_building",
+      "severity": "medium",
+      "expected_detection": true
+    },
+    {
+      "canonical_parcel_id": "CULR-56000064",
+      "type": "survey_id",
+      "severity": "high",
+      "expected_detection": true
+    }
+  ],
+  "metrics_target": {
+    "match_f1": 0.9,
+    "conflict_recall": 0.9,
+    "auto_resolved_share": 0.6
+  }
+}
