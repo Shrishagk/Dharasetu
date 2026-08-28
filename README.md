@@ -72,6 +72,13 @@ Ground truth, conflict metadata, and success targets are saved in [data/generate
 | `GET /api/v1/dashboard` | Counts and priority-ranked review cases |
 | `GET /api/v1/layers/{canonical|cadastral|municipal|buildings}` | GeoJSON map layers |
 | `GET /api/v1/parcels/{canonical_parcel_id}` | Parcel geometry, evidence, and AI recommendation |
+| `GET /api/v1/sources` | Data source catalog with readiness, validation, provenance, and harmonization metadata |
+| `GET /api/v1/sources/{source_id}` | Source detail, schema, validation checks, and preview link |
+| `GET /api/v1/sources/{source_id}/preview` | GeoJSON preview for spatial sources |
+| `POST /api/v1/sources/upload` | Multipart GeoJSON, JSON, or CSV upload with metadata extraction and validation |
+| `POST /api/v1/sources/sample` | Load the deterministic Demo Ward 14 source bundle |
+| `POST /api/v1/sources/{source_id}/archive` | Archive a source while retaining its audit metadata |
+| `POST /api/v1/harmonization/jobs` | Start a harmonization run for two or more compatible sources |
 
 ## Project structure
 
@@ -86,7 +93,7 @@ project_spec.md          Product and technical specification
 
 ## Current scope and next steps
 
-This prototype uses controlled source data and rule-based reconciliation responses to provide a reliable demo. The next production increments are:
+This prototype uses controlled source data and rule-based reconciliation responses to provide a reliable demo. The Data Sources workspace now supports real multipart parsing and validation for GeoJSON/CSV uploads, while the current local registry is intentionally held in API memory for fast demo reset. The next production increments are:
 
 1. Persist uploaded source layers and canonical records in PostGIS.
 2. Implement CRS normalization, topology repair, and spatial matching jobs.
