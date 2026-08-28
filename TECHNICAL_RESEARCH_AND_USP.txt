@@ -1,0 +1,93 @@
+Engine 1: Spatial matching — treat it as a graph problem, not a distance problem
+
+Every naive implementation of "spatial matching" does nearest-centroid or IoU-overlap matching: take a parcel from the drone-ORI layer, find the closest polygon in the cadastral layer, call it a match. This breaks constantly in real cadastral data because parcels get subdivided, merged, or redrawn at different scales between epochs — a single 2020 revenue plot might correspond to three 2026 municipal sub-plots, and centroid distance has no way to express that.
+
+The actual research solution, and what should be the core of this engine, is to stop matching individual geometries and instead match graphs:
+
+Convert each dataset's features into nodes of a graph — each node embeds shape (morphology), absolute position, and relative position to its neighbours, not just its own coordinates.
+
+A 2025 paper on this exact problem (matching map features extracted by deep learning from different sensor sources) builds (cite index="121-1">a graph neural network approach — KRAFT — that constructs a knowledge graph of spatial relationships, aligns entities through graph alignment and geospatial encoding, and merges unmatched features through mixed-integer linear programming rather than heuristic buffering.</cite>
+
+This directly solves the many-to-many subdivision/merger problem: a 2011-era but still-standard technique for exactly this uses (cite index="119-1">a global optimisation approach where road networks segment candidate regions, spatial and attribute similarity is computed with entropy-weighted criteria, and the actual assignment is solved as a Hungarian-algorithm allocation problem — achieving 97.2% precision and 97% recall on building-entity matching,</cite> far outperforming greedy nearest-neighbour approaches.
+
+For cases with heavy positional distortion between sources (a hand-digitized 1990s revenue map vs. a 2026 CORS-corrected drone survey), genetic-algorithm and integer-linear-programming formulations exist specifically because the problem is combinatorial, not distance-based — (cite index="117-1">shape-context descriptors combined with genetic algorithms have matched up to 40% of polygons even where geometric attributes differed significantly between sources,</cite> and more recent work frames the whole thing as (cite index="120-1">an integer linear program with a divide-and-conquer tiling scheme to keep large-scale (e.g., ULB or state-wide) conflation computationally tractable.</cite>
+
+The practical build choice that makes this a real USP, not a paper reference: don't train a shape-embedding network from scratch — a hackathon team doesn't have the labeled Indian cadastral data to do that well. Instead, use a pretrained geospatial foundation model as the encoder backbone. Models like (cite index="150-1">IBM-NASA's Prithvi, pretrained on over a terabyte of multi-temporal satellite imagery via self-supervised masked-autoencoding, transfer to downstream tasks with up to 90% less labeled data than training from scratch,</cite> and by 2026 there are (cite index="153-1">three production-ready options — Prithvi-EO-2.0, Clay v1.5, and Google's AlphaEarth Foundations — all open-weight and usable as drop-in embedding extractors for similarity search and change detection without training a model yourself.</cite> Use one of these to embed each building/parcel footprint, then run change-detection-style Siamese comparison on the embeddings — this is a mature technique achieving (cite index="137-1">F1 scores exceeding 90% on standard benchmarks (LEVIR-CD, OSCD) using paired-image Siamese networks that share weights and compare feature maps rather than raw pixels.</cite>
+
+So Engine 1, concretely: feature graph construction → foundation-model embeddings (not trained from scratch) → GNN-based relational matching → Hungarian/ILP optimal assignment for many-to-many resolution.
+
+Engine 2: Semantic attribute mapping — this is the one nobody has actually solved for cadastral data yet
+
+This is the strongest part of your USP because the enabling technique is barely a year old. The problem: a Karnataka revenue record has "Khata No.", a Tamil Nadu municipal layer has "Patta No.", a utility database has "Consumer Property ID", and NGDRS has yet another field name — often in different scripts. Every platform I found last time (FME, NGDRS, GeoMedia Fusion) solves this with a human sitting down and authoring a static crosswalk table per state, per department. That doesn't scale to 152 ULBs today and ~4,912 eventually.
+
+The 2024–2026 research answer is retrieval-augmented LLM schema matching, and it's specifically designed to replace exactly this kind of manual crosswalk:
+
+Rather than one brittle LLM call, the state of the art generates candidate matches first (via embedding similarity), then uses an LLM as a reranker that reads field names, descriptions, and sample values together. (cite index="124-1">ReMatch converts target schemas into retrievable documents and filters candidates by semantic similarity before LLM reranking; KG-RAG4SM goes further by grounding the match against an external knowledge graph rather than relying on field-name similarity alone; Matchmaker iteratively refines candidates using confidence scores across multiple rounds of LLM feedback.</cite>
+
+This matters a lot for your case specifically: a 2025 paper on unified LLM schema matching found real multi-table enterprise schema alignment (exactly your NGDRS + municipal + utility + revenue situation) needs (cite index="127-1">a two-stage strategy — a "rollup" step that consolidates semantically related columns into higher-order concepts, then a "drilldown" step that re-expands them for fine-grained column mapping</cite> — because a flat one-to-one field comparison misses that "Khata No." and "Survey No." both roll up to the same higher concept ("parcel identifier") even though they aren't identical fields.
+
+The honest caveat, also from the research: raw LLM calls are unreliable on their own. A 2025 paper on scalable schema mapping found (cite index="123-1">LLM outputs are sensitive to input phrasing and structure, requiring sampling-and-aggregation strategies rather than trusting a single response, and that repeated LLM calls carry real computational cost that needs prefiltering by data type to control.</cite> Build this in from day one — it's a legitimate engineering answer to a legitimate limitation, and saying so in your pitch reads as more credible than pretending LLMs just work out of the box.
+
+The piece that makes this specifically defensible for land records (not generic enterprise data): ground the LLM's target schema in the Land Administration Domain Model (LADM/ISO 19152) instead of an arbitrary internal schema. This isn't hypothetical — Colombia has already built and deployed almost exactly this for a decentralized multi-agency land system: (cite index="158-1">a graph-based knowledge representation built on an LADM-grounded ontology, specifically designed to integrate heterogeneous distributed data — tables, shapefiles, geodatabases, and live WFS services — from separate cadastral agencies while preventing data isolation.</cite> Their pipeline concretely (cite index="164-1">transforms each agency's data into RDF using a shared ontology network, producing integrated knowledge graphs that work as, in their words, a common language between humans and machines.</cite> For India, that means: LLM proposes the match ("Khata No." → LADM's spatial_unit.id), the knowledge graph validates it's semantically consistent with LADM's Party/Administrative Unit/Spatial Unit structure, and — crucially — this works across Hindi/Tamil/Telugu/English field labels because embedding models and LLMs handle cross-lingual semantic similarity natively, which a static string-matching crosswalk never could.
+
+So Engine 2, concretely: embed field name + description + sample values → retrieve candidate LADM-ontology matches → LLM reranks with rollup/drilldown for multi-table cases → validate against the knowledge graph → emit mapping with per-field confidence.
+
+The layer that makes both engines trustworthy: confidence scoring via conformal prediction
+
+This is the single most underexploited opportunity in the entire landscape I found last time. Every platform either has no confidence score at all, or a raw, uncalibrated softmax number that doesn't actually mean "there's a 90% chance this match is correct." The fix that's statistically rigorous rather than hand-wavy is conformal prediction:
+
+(cite index="141-1">Conformal prediction uses past calibration data to determine precise, statistically valid confidence levels for new predictions, relying only on a weak exchangeability assumption rather than any specific distributional assumption — and it's model-agnostic, so it wraps around your GNN and your LLM matcher identically.</cite>
+
+Concretely, (cite index="142-1">if you specify a 95% confidence level, the conformal predictor guarantees the true match is in its output set 95% of the time — and when a prediction doesn't reach that confidence level, it can emit a null result or flag the case for human intervention automatically,</cite> which is exactly the auto-merge/human-review fork in the diagram above — it's not a heuristic threshold you tune by guessing, it's a mathematically calibrated one.
+
+This genuinely is white space: a 2024 review of Earth observation ML found (cite index="147-1">only 22.5% of EO datasets incorporate any uncertainty information at all, with unreliable methods prevalent where it exists,</cite> and a separate paper notes plainly that (cite index="142-1">conformal prediction has yet to be widely adopted within GeoAI despite its maturity elsewhere.</cite> You'd be applying a well-proven statistical method to a domain that hasn't picked it up yet — that's a real, citable novelty claim, not marketing language.
+
+There's a wrinkle worth knowing (and worth mentioning in your pitch, because catching it yourself is a credibility signal): land/property data is spatially autocorrelated, so naive conformal prediction miscalibrates — confidence sets end up too wide in some areas and too narrow in others. Research on exactly this problem in property valuation found (cite index="144-1">spatially-weighted conformal prediction, calibrating on a locally-weighted version of the nonconformity scores, produces confidence sets that stay properly calibrated across different geographic regions</cite> — directly transferable to your case, since match confidence in dense urban cores (Chandigarh sectors) will behave differently than in sparse peri-urban NAKSHA sites.
+
+Why this combination is a genuine, defensible USP
+
+Going back to the landscape I found earlier: FME does rule-based ETL, Esri Parcel Fabric does rule-based topology/COGO correction, NGDRS does document workflow, and even RMSI's utility-network conflation work is a specialized, non-cadastral application of similar ideas. Nowhere did I find a system that combines all three of: (1) graph/GNN-based many-to-many geometric matching, (2) LADM-grounded LLM+knowledge-graph semantic mapping, and (3) conformal-prediction-based confidence scoring, applied specifically to cadastral integration. Each piece individually is 2024–2026 research; the combination, for this exact problem, doesn't appear to exist in production anywhere.
+
+It's also genuinely buildable in a hackathon timeframe because it leans on pretrained, open components rather than requiring you to train anything large from scratch:
+
+ComponentSuggested tool
+
+
+
+Foundation-model embeddings
+
+Prithvi-EO-2.0 or Clay v1.5 (open weights, Hugging Face)
+
+Graph construction + GNN
+
+PyTorch Geometric
+
+Optimal assignment
+
+scipy.optimize.linear_sum_assignment (Hungarian algorithm)
+
+Semantic field embeddings
+
+sentence-transformers (multilingual model for Hindi/Tamil/Telugu field names)
+
+LLM reranking
+
+Claude or GPT API, prompted per the rollup/drilldown pattern
+
+LADM knowledge graph
+
+Neo4j or an RDF store (rdflib), seeded with LADM's Party/Administrative/Spatial Unit classes
+
+Confidence scoring
+
+MAPIE or crepes (open Python conformal prediction libraries)
+
+Spatial storage
+
+PostGIS
+
+A worked example for your demo
+
+Take a single property in a NAKSHA pilot ULB. The revenue department's record says Khasra_No: 142/2. The municipal GIS layer, for the same physical plot, says PropertyID: WD3-0891. The drone-ORI-derived footprint has no attribute at all, just a polygon. Your pipeline: Engine 1 matches the polygon to the nearest cadastral geometry using GNN embeddings (handling the case where this plot was actually split from a larger 2019 parcel) with, say, 0.94 confidence. Engine 2's LLM, grounded in the LADM ontology, proposes that Khasra_No and PropertyID both map to the same spatial_unit.id concept, with the knowledge graph confirming both fields' data types and contexts are consistent with that class — 0.89 confidence. Conformal prediction wraps both scores into a calibrated joint confidence for the merged record; if it clears your calibrated threshold, the unified record auto-publishes with a full audit trail of which source contributed which field; if not, it routes to a revenue officer's review queue with both candidate values shown side by side, not a blind auto-merge.
+
+That worked example, plus the three cited techniques, is a much stronger pitch than "we'll use AI for matching" — it's specific enough that a judge familiar with GIS will recognize you've actually engaged with why this is hard, not just proposed a black box.

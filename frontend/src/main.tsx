@@ -64,6 +64,11 @@ type Parcel = {
   review_status: string;
   conflict_type?: string;
   priority: number;
+  conflict_types?: string[];
+  conflict_severity?: string;
+  confidence_set_size?: number;
+  confidence_decision?: string;
+  confidence_region?: string;
 };
 
 type Dashboard = {
@@ -117,11 +122,17 @@ type Source = {
 
 type Detail = {
   parcel: any;
-  source_values: { source: string; attribute: string; value: string; score: number }[];
+  source_values: { source: string; attribute: string; value: string; score: number; detail?: string }[];
   evidence: { source: string; score: number; detail: string }[];
   recommendation: string;
   explanation: string;
   lineage: { version: number; sources: string[] };
+  engine?: {
+    spatial?: { algorithm?: string; matches?: any[]; many_to_many?: any[] };
+    semantic?: { ontology?: { standard?: string; node_count?: number; triple_count?: number }; mapped_field_count?: number; review_field_count?: number };
+    confidence?: { coverage?: number; decision?: string; prediction_set?: any[]; region?: string; quantile?: number; threshold?: number; method?: string };
+    joint?: { geometry?: number; semantic?: number; raw?: number; calibrated?: number; decision?: string; region?: string };
+  };
 };
 
 const navItems: { label: string; route: Route }[] = [
@@ -146,13 +157,13 @@ const sourceTypes: { name: string; descriptor: string; icon: LucideIcon }[] = [
 ];
 
 const capabilities: { number: string; name: string; description: string; icon: LucideIcon; metric: string }[] = [
-  { number: '01', name: 'Spatial matching', description: 'Links imperfect representations of the same real-world parcel using geometry, identifiers, adjacency, and temporal signals.', icon: Network, metric: 'IoU · centroid · shape' },
+  { number: '01', name: 'Graph spatial matching', description: 'Links imperfect representations through morphology, absolute position, neighbourhood relationships, and globally optimal many-to-many assignment.', icon: Network, metric: 'Graph · GNN · Hungarian' },
   { number: '02', name: 'Topology correction', description: 'Surfaces gaps, overlaps, slivers, duplicates, and invalid rings before they become part of a canonical record.', icon: ScanLine, metric: 'Validity · overlap · repair' },
-  { number: '03', name: 'Attribute mapping', description: 'Reconciles land use, area, identifiers, and building relationships using attribute-specific source reliability.', icon: Table2, metric: 'Value · provenance · score' },
+  { number: '03', name: 'LADM attribute mapping', description: 'Maps multilingual land-record fields to ISO 19152 concepts with retrieval, rollup/drilldown reranking, and graph validation.', icon: Table2, metric: 'LADM · KG · confidence' },
   { number: '04', name: 'CRS normalization', description: 'Brings mixed spatial reference systems into a common working frame with an explicit transformation trail.', icon: Globe2, metric: 'EPSG:4326 · transform' },
   { number: '05', name: 'Change detection', description: 'Separates genuine physical change from surveying and GIS error so teams can prioritize the records that moved.', icon: RefreshCw, metric: 'Temporal · footprint · delta' },
   { number: '06', name: 'Conflict resolution', description: 'Turns disagreement into a reviewable decision: conflicting sources, preferred evidence, and recommended action.', icon: CircleAlert, metric: 'Severity · impact · action' },
-  { number: '07', name: 'Confidence scoring', description: 'Makes automation measurable and safe with a confidence score for every geometry, attribute, and decision.', icon: BarChart3, metric: 'Evidence-weighted output' },
+  { number: '07', name: 'Conformal confidence', description: 'Wraps spatial matching and semantic evidence in a locally weighted 95% confidence set that can return null or route to review.', icon: BarChart3, metric: '95% set · spatial calibration' },
 ];
 
 const pipelineStages = [
@@ -166,22 +177,24 @@ const pipelineStages = [
 ];
 
 const techStack = [
-  ['AI / ML', 'scikit-learn · XGBoost'],
+  ['AI / ML', 'PyTorch Geometric · foundation adapters'],
   ['GeoAI', 'GeoPandas · Shapely'],
   ['Web GIS', 'React · MapLibre'],
   ['Spatial DB', 'PostgreSQL · PostGIS'],
+  ['Schema AI', 'Multilingual embeddings · LADM / RDF'],
   ['ETL', 'GDAL · Rasterio'],
   ['Computer vision', 'OpenCV · segmentation'],
   ['API', 'FastAPI · REST'],
+  ['Uncertainty', 'Spatial conformal prediction'],
   ['Runtime', 'Docker · cloud-ready'],
 ];
 
 const docs = [
   { slug: 'overview', label: 'Platform overview', kicker: 'FOUNDATION', title: 'A canonical record over imperfect sources', summary: 'UrbanLand Fusion AI preserves source identity while creating a reconciled, confidence-aware view for every parcel.' },
-  { slug: 'schemas', label: 'Data schema reference', kicker: 'DATA MODEL', title: 'The Canonical Urban Land Record', summary: 'Every record carries its geometry, attributes, evidence, confidence, review status, and source lineage.' },
-  { slug: 'api', label: 'API overview', kicker: 'INTEGRATION', title: 'Simple endpoints for operational workflows', summary: 'The current prototype exposes dashboard, layers, parcel evidence, decisions, jobs, and export endpoints.' },
+  { slug: 'schemas', label: 'Data schema reference', kicker: 'DATA MODEL', title: 'The Canonical Urban Land Record', summary: 'Every record carries its geometry, attributes, evidence, confidence set, review status, and source lineage.' },
+  { slug: 'api', label: 'API overview', kicker: 'INTEGRATION', title: 'Simple endpoints for operational workflows', summary: 'The prototype exposes graph runs, LADM schema matching, dashboard layers, parcel evidence, decisions, jobs, and export endpoints.' },
   { slug: 'integration', label: 'Integration guide', kicker: 'DEPLOYMENT', title: 'From ward pilot to city-scale service', summary: 'Asynchronous processing and PostGIS provide a straightforward path from a controlled demo to production operations.' },
-  { slug: 'confidence', label: 'Confidence methodology', kicker: 'EXPLAINABILITY', title: 'Evidence-weighted, attribute-specific decisions', summary: 'The system does not treat one source as universally authoritative. Reliability is evaluated for the attribute in question.' },
+  { slug: 'confidence', label: 'Confidence methodology', kicker: 'EXPLAINABILITY', title: 'Calibrated decisions with a safe review fork', summary: 'A spatially weighted conformal predictor turns evidence into a calibrated set, an automatic merge, or an explicit human-review case.' },
 ];
 
 const routeFromPath = (): Route => {
@@ -206,6 +219,11 @@ const toParcel = (properties: any): Parcel => ({
   review_status: String(properties.review_status ?? 'HUMAN_REVIEW'),
   conflict_type: properties.conflict_type || undefined,
   priority: Number(properties.priority ?? 0),
+  conflict_types: properties.conflict_types ?? (properties.conflict_type ? [properties.conflict_type] : []),
+  conflict_severity: properties.conflict_severity || undefined,
+  confidence_set_size: Number(properties.confidence_set_size ?? 0),
+  confidence_decision: properties.confidence_decision || undefined,
+  confidence_region: properties.confidence_region || undefined,
 });
 
 const sourceApi = {
@@ -391,9 +409,9 @@ function DocsPage() {
 }
 
 function DocsBody({ slug }: { slug: string }) {
-  if (slug === 'schemas') return <div className="docs-body"><h3 id="model">Core model</h3><p>The canonical record is a durable view over source entities, not a destructive merge. It keeps the geometry and attributes that are currently trusted, alongside the provenance needed to explain each field.</p><div className="schema-card"><code>canonical_parcels</code><div><span>canonical_parcel_id</span><b>CULR-56000064</b></div><div><span>geometry_confidence</span><b>0.94</b></div><div><span>overall_confidence</span><b>0.92</b></div><div><span>review_status</span><b>AI_ACCEPTED</b></div></div><h3 id="signals">Related evidence</h3><p>Source entities, matches, attribute evidence, conflicts, and review actions are connected by the canonical parcel id.</p></div>;
-  if (slug === 'api') return <div className="docs-body"><h3 id="model">Operational surface</h3><p>The prototype exposes the workflow in small, composable endpoints that can be replaced by a job queue and PostGIS-backed persistence as the system scales.</p><div className="endpoint-list"><div><span className="method get">GET</span><code>/api/v1/dashboard</code><small>Counts and priority-ranked review cases</small></div><div><span className="method get">GET</span><code>/api/v1/layers/:name</code><small>GeoJSON source and canonical layers</small></div><div><span className="method post">POST</span><code>/api/v1/harmonization/jobs</code><small>Start an explainable reconciliation job</small></div><div><span className="method post">POST</span><code>/api/v1/parcels/:id/decision</code><small>Record an officer decision</small></div></div><h3 id="signals">Response shape</h3><p>Parcel responses contain source values, evidence items, recommendation text, and lineage so a client can render a complete review without hidden state.</p></div>;
-  if (slug === 'confidence') return <div className="docs-body"><h3 id="model">Evidence-weighted scoring</h3><p>Confidence combines spatial agreement, source reliability for the requested attribute, temporal freshness, survey accuracy, and cross-source consistency.</p><div className="score-equation"><span>spatial agreement</span><b>+</b><span>source reliability</span><b>+</b><span>freshness</span><b>+</b><span>survey accuracy</span><strong>→</strong><em>evidence score</em></div><h3 id="signals">Safe thresholds</h3><p>High-confidence matches can be auto-resolved. Ambiguous or high-impact conflicts are routed to human review with the evidence that caused the escalation.</p></div>;
+  if (slug === 'confidence') return <div className="docs-body"><h3 id="model">Spatial conformal calibration</h3><p>Confidence combines graph agreement, LADM-validated attribute evidence, temporal freshness, survey accuracy, and cross-source consistency before a locally weighted split-conformal wrapper is applied.</p><div className="score-equation"><span>graph agreement</span><b>+</b><span>LADM evidence</span><b>+</b><span>spatial calibration</span><strong>-&gt;</strong><em>95% confidence set</em></div><h3 id="signals">Safe thresholds</h3><p>A singleton set can be auto-resolved when its calibrated confidence clears the merge threshold. Ambiguous, high-impact, or null predictions are routed to human review.</p></div>;
+  if (slug === 'schemas') return <div className="docs-body"><h3 id="model">Core model</h3><p>The canonical record is a durable view over source entities, not a destructive merge. It keeps the geometry and attributes that are currently trusted, alongside the provenance needed to explain each field.</p><div className="schema-card"><code>canonical_parcels</code><div><span>canonical_parcel_id</span><b>CULR-56000064</b></div><div><span>geometry_confidence</span><b>0.94</b></div><div><span>conformal_confidence</span><b>0.95 coverage</b></div><div><span>review_status</span><b>HUMAN_REVIEW</b></div></div><h3 id="signals">LADM relationships</h3><p>Spatial Unit, Party, Administrative Unit, and RRR concepts validate field mappings before they enter the canonical record.</p></div>;
+  if (slug === 'api') return <div className="docs-body"><h3 id="model">Operational surface</h3><p>The prototype exposes the workflow in small, composable endpoints that can be replaced by a job queue and PostGIS-backed persistence as the system scales.</p><div className="endpoint-list"><div><span className="method get">GET</span><code>/api/v1/engines/overview</code><small>Engine configuration and benchmark metrics</small></div><div><span className="method post">POST</span><code>/api/v1/engines/schema-match</code><small>Run LADM rollup/drilldown mapping</small></div><div><span className="method get">GET</span><code>/api/v1/layers/:name</code><small>GeoJSON source and canonical layers</small></div><div><span className="method post">POST</span><code>/api/v1/harmonization/jobs</code><small>Execute the explainable fusion pipeline</small></div></div><h3 id="signals">Response shape</h3><p>Parcel responses contain graph matches, source evidence, LADM validation, conformal decision sets, recommendation text, and lineage.</p></div>;
   if (slug === 'integration') return <div className="docs-body"><h3 id="model">Deployment path</h3><p>The demo runs as a small Docker Compose stack: a React/MapLibre web client, a FastAPI service, and a PostgreSQL/PostGIS foundation.</p><div className="integration-steps"><div><b>01</b><span>Upload</span><small>GeoJSON · CSV · raster</small></div><div><b>02</b><span>Audit</span><small>Quality + CRS checks</small></div><div><b>03</b><span>Harmonize</span><small>Async processing job</small></div><div><b>04</b><span>Review</span><small>Evidence-led decisions</small></div></div><h3 id="signals">Production increments</h3><p>Persist datasets and audit history in PostGIS, add role-based access, move processing to a queue, and train the matching model on labeled source pairs.</p></div>;
   return <div className="docs-body"><h3 id="model">One source of spatial truth</h3><p>Traditional GIS integration stops at aligning layers. UrbanLand Fusion AI goes further: it creates a persistent canonical record and preserves the relationship between each source entity, the evidence it contributes, and the decision made.</p><div className="quote-card"><Sparkles size={17} /><p>“Which representation is most reliable for this parcel—and how confident are we?”</p></div><h3 id="signals">The review loop</h3><p>Ingest, normalize, match, reconcile, score, and route. Every low-confidence or high-impact case stays visible to an authorized officer.</p><div className="docs-flow"><span>sources</span><ArrowRight size={15} /><span>evidence</span><ArrowRight size={15} /><span>canonical record</span><ArrowRight size={15} /><span>human review</span></div></div>;
 }
@@ -563,7 +581,14 @@ function Inspector({ selected, detail, queue, onSelect }: { selected: Parcel | n
 }
 
 function ReconciliationWorkspace({ selected, detail, onDecision }: { selected: Parcel; detail: Detail; onDecision: (action: string) => void }) {
-  return <section id="reconciliation" className="reconciliation-workspace"><div className="workspace-visual"><div className="workspace-heading"><div><span className="eyebrow">AI RECONCILIATION WORKSPACE</span><h2>Evidence-backed source comparison</h2></div><Pill tone="green">{formatConfidence(selected.overall_confidence)} confidence</Pill></div><div className="boundary-stage"><div className="boundary-grid" /><div className="source-shape shape-a"><span>revenue</span></div><div className="source-shape shape-b"><span>municipal</span></div><div className="source-shape shape-c"><span>drone / ORI</span></div><div className="source-shape shape-canonical"><BadgeCheck size={14} /><span>canonical output</span></div><div className="boundary-callout"><span>alignment delta</span><b>0.4 m</b></div></div><div className="workspace-legend"><span><i className="legend-blue" /> Cadastral</span><span><i className="legend-violet" /> Municipal</span><span><i className="legend-amber" /> Imagery</span><span><i className="legend-green" /> Canonical</span></div></div><div className="workspace-evidence"><span className="eyebrow">RECOMMENDATION</span><h3>{detail.recommendation}</h3><div className="evidence-score"><div><span>DECISION CONFIDENCE</span><strong>{formatConfidence(selected.overall_confidence)}</strong></div><div className="score-bar"><i style={{ width: `${selected.overall_confidence * 100}%` }} /></div><small>Weighted across geometry, freshness, and source agreement.</small></div><div className="source-values">{detail.source_values.map((item) => <div key={`${item.source}-${item.attribute}`}><span>{item.source}</span><b>{item.value}</b><em>{formatConfidence(item.score)}</em></div>)}</div><div className="evidence-list"><span className="eyebrow">WHY THIS DECISION</span>{detail.evidence.map((item) => <div key={item.source}><Check size={14} /><span>{item.detail}</span><b>{formatConfidence(item.score)}</b></div>)}</div><div className="decision-actions"><Button onClick={() => onDecision('approve')} icon={Check}>Approve recommendation</Button><Button onClick={() => onDecision('reject')} variant="secondary" icon={X}>Keep in review</Button><button className="text-action" onClick={() => onDecision('request_evidence')}>Request more evidence <ArrowRight size={14} /></button></div></div></section>;
+  return <section id="reconciliation" className="reconciliation-workspace"><div className="workspace-visual"><div className="workspace-heading"><div><span className="eyebrow">AI RECONCILIATION WORKSPACE</span><h2>Evidence-backed source comparison</h2></div><Pill tone="green">{formatConfidence(selected.overall_confidence)} confidence</Pill></div><div className="boundary-stage"><div className="boundary-grid" /><div className="source-shape shape-a"><span>revenue</span></div><div className="source-shape shape-b"><span>municipal</span></div><div className="source-shape shape-c"><span>drone / ORI</span></div><div className="source-shape shape-canonical"><BadgeCheck size={14} /><span>canonical output</span></div><div className="boundary-callout"><span>alignment delta</span><b>graph resolved</b></div></div><div className="workspace-legend"><span><i className="legend-blue" /> Cadastral</span><span><i className="legend-violet" /> Municipal</span><span><i className="legend-amber" /> Imagery</span><span><i className="legend-green" /> Canonical</span></div></div><div className="workspace-evidence"><span className="eyebrow">RECOMMENDATION</span><h3>{detail.recommendation}</h3><div className="evidence-score"><div><span>DECISION CONFIDENCE</span><strong>{formatConfidence(selected.overall_confidence)}</strong></div><div className="score-bar"><i style={{ width: `${selected.overall_confidence * 100}%` }} /></div><small>Joint score is wrapped by a locally weighted 95% conformal predictor.</small></div><EngineTrace engine={detail.engine} /><div className="source-values">{detail.source_values.map((item) => <div key={`${item.source}-${item.attribute}`}><span>{item.source}</span><b>{item.value}</b><em>{formatConfidence(item.score)}</em></div>)}</div><div className="evidence-list"><span className="eyebrow">WHY THIS DECISION</span>{detail.evidence.map((item, index) => <div key={`${item.source}-${index}`}><Check size={14} /><span>{item.detail}</span><b>{formatConfidence(item.score)}</b></div>)}</div><div className="decision-actions"><Button onClick={() => onDecision('approve')} icon={Check}>Approve recommendation</Button><Button onClick={() => onDecision('reject')} variant="secondary" icon={X}>Keep in review</Button><button className="text-action" onClick={() => onDecision('request_evidence')}>Request more evidence <ArrowRight size={14} /></button></div></div></section>;
+}
+
+function EngineTrace({ engine }: { engine?: Detail['engine'] }) {
+  const joint = engine?.joint;
+  const conformal = engine?.confidence;
+  const semantic = engine?.semantic;
+  return <div className="engine-trace"><div className="engine-trace-head"><span className="eyebrow">RESEARCH ENGINE TRACE</span><small>Signals retained with this record</small></div><div className="engine-trace-grid"><div><Network size={15} /><span><b>Graph matcher</b><small>{engine?.spatial?.many_to_many?.length ? `${engine.spatial.many_to_many.length} many-to-many relation(s)` : 'No ambiguous relations'} · Hungarian allocation</small></span><em>{formatConfidence(joint?.geometry)}</em></div><div><Table2 size={15} /><span><b>LADM schema validation</b><small>{semantic?.mapped_field_count ?? 0} fields mapped · {semantic?.ontology?.triple_count ?? 0} ontology triples</small></span><em>{formatConfidence(joint?.semantic)}</em></div><div><ShieldCheck size={15} /><span><b>Conformal decision set</b><small>{conformal?.coverage ? `${Math.round(conformal.coverage * 100)}% coverage` : '95% coverage'} · {conformal?.region ?? 'spatial'} calibration</small></span><em>{conformal?.decision === 'auto_merge' ? 'AUTO' : conformal?.decision === 'null' ? 'NULL' : 'REVIEW'}</em></div></div></div>;
 }
 
 function DemoPage({ dashboard, sources, changes, selectedSourceIds, refresh, notify }: { dashboard?: Dashboard; sources: Source[]; changes: any[]; selectedSourceIds: string[]; refresh: () => Promise<void>; notify: (message: string) => void }) {

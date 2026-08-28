@@ -14,8 +14,11 @@ OUT = ROOT / "data" / "generated"
 random.seed(56000123)
 
 def polygon(x, y, w, h):
-    return [[[round(x, 2), round(y, 2)], [round(x+w, 2), round(y, 2)],
-             [round(x+w, 2), round(y+h, 2)], [round(x, 2), round(y+h, 2)], [round(x, 2), round(y, 2)]]]
+    # Coordinates are WGS84 decimal degrees; two decimals collapse the entire
+    # synthetic ward into point geometries. Preserve enough precision for the
+    # metre-scale matching and topology checks in the fusion engine.
+    return [[[round(x, 6), round(y, 6)], [round(x+w, 6), round(y, 6)],
+             [round(x+w, 6), round(y+h, 6)], [round(x, 6), round(y+h, 6)], [round(x, 6), round(y, 6)]]]
 
 def feature(fid, geom, properties):
     return {"type": "Feature", "id": fid, "properties": properties, "geometry": {"type": "Polygon", "coordinates": geom}}
@@ -44,6 +47,9 @@ def main():
         cadastral.append(feature(f"CAD-{index+1:03d}", cadastral_geom, {**props, "source_record_id": f"CAD-{index+1:03d}", "source": "Cadastral", "positional_accuracy_m": 1.2}))
         dx, dy = .00003, -.00002
         if index == 5: dx, dy = .00022, -.00012
+        # Make the benchmark's topology case observable to a geometry engine:
+        # the municipal polygon crosses the next parcel's western edge.
+        if index == 43: dx, dy = .00040, -.00002
         municipal_use = "Commercial" if index == 11 else land_use
         municipal_survey = survey if index != 63 else f"{125+row}/{col+2}"
         municipal_geom = polygon(x+dx, y+dy, w*(1.08 if index == 34 else 1), h)
@@ -51,7 +57,8 @@ def main():
         if index == 19:
             municipal.append(feature("MUN-020-DUP", municipal_geom, {"source_record_id":"MUN-020-DUP", "source":"Municipal", "survey_number": survey, "land_use":land_use, "area_sq_m":area, "capture_date":"2026-06-10", "positional_accuracy_m":2.5}))
         bx, by = x + w*.23, y + h*.23
-        buildings.append(feature(f"BLD-{index+1:03d}", polygon(bx,by,w*.54,h*.50), {"building_id":f"BLD-{index+1:03d}", "parcel_hint":parcel_id, "source":"AI building extraction", "confidence":round(.84+(index%14)/100,2), "capture_date":"2026-07-15"}))
+        building_capture_date = "2024-01-15" if index == 51 else "2026-07-15"
+        buildings.append(feature(f"BLD-{index+1:03d}", polygon(bx,by,w*.54,h*.50), {"building_id":f"BLD-{index+1:03d}", "parcel_hint":parcel_id, "source":"AI building extraction", "confidence":round(.84+(index%14)/100,2), "capture_date":building_capture_date}))
         revenue.append({"source_record_id":f"REV-{index+1:03d}", "survey_number":survey, "land_use": land_use if index != 11 else "Residential", "owner_reference":f"OWNER-{1000+index}", "record_year":2024})
         if index in conflict_indices:
             conflicts.append({"canonical_parcel_id":parcel_id, "type":conflict_indices[index], "severity":"high" if index in {5,43,63} else "medium", "expected_detection":True})

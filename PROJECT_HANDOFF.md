@@ -37,6 +37,7 @@ Do not browse to `0.0.0.0`; it is a server binding address. Use `localhost`.
 | --- | --- | --- |
 | Web GIS | `frontend/src/main.tsx` | React, TypeScript, MapLibre GL |
 | UI styles | `frontend/src/styles.css` | Government/enterprise GIS layout |
+| Fusion engines | `backend/app/fusion_engine.py` | Graph matching, LADM schema mapping, spatial conformal confidence |
 | API | `backend/app/main.py` | FastAPI demo endpoints |
 | Synthetic data generator | `scripts/generate_synthetic_ward.py` | Deterministic 72-parcel ward |
 | Generated data | `data/generated/` | GeoJSON, CSV, benchmark manifest |
@@ -50,15 +51,16 @@ Do not browse to `0.0.0.0`; it is a server binding address. Use `localhost`.
 - Selected parcel inspector: survey number, land use, area, confidence, and review status.
 - Review queue opens parcel evidence and source-boundary comparison.
 - Source-layer visibility toggles.
-- Harmon'sation demo workflow: processing state, pipeline progression, completion notice.
+- Harmonization workflow: processing state, pipeline progression, completion notice, and an executing explainable fusion run.
 - AI reconciliation panel: source values, evidence list, confidence, before/after slider, approve/reject feedback.
+- Research engine trace: graph/Hungarian matching, LADM knowledge-graph validation, and 95% spatial conformal decision set.
 - Frontend production build verified successfully after the latest live-basemap update.
 
 ## Important current limitation
 
-The `Run Harmonization` control is a demo simulation. The API currently derives canonical results from generated ground-truth data and does **not** yet execute true PostGIS/GeoPandas reconciliation jobs.
+The `Run Harmonization` control now executes the dependency-light research pipeline against the deterministic GeoJSON/CSV fixture. It does not yet persist jobs, graphs, calibration sets, or canonical versions in PostGIS, and the foundation-model/LLM stages use explicit offline fallbacks until deployment adapters are configured.
 
-The database container is available but not yet used by the FastAPI code. This is the highest-priority backend implementation gap.
+The database container is available but not yet used by the FastAPI code. Persisting the engine artifacts and connecting Prithvi/Clay and an external LLM reranker are the next production increments.
 
 ## Recent map implementation
 
@@ -74,12 +76,11 @@ Never commit a provider API key to the repository.
 
 ## Suggested next priorities
 
-1. Persist datasets, source features, canonical records, evidence, conflicts, and review actions in PostGIS.
-2. Implement real backend job stages: CRS normalization, validation, geometry repair, candidate matching, attribute scoring, conflict creation, and confidence calculation.
-3. Add the actual UI controls for map modes: `Sources`, `AI Harmonized`, and `Before / After`. State exists in `main.tsx`, but the buttons still need to be added to the visible map header.
-4. Improve the live-map UX with a search input, zoom controls, measurement tool, and source-specific boundary visibility for the selected parcel.
-5. Replace synthetic workflow notifications with persisted asynchronous jobs and a real job-status API.
-6. Add authentication, role-based approval, immutable review audit logs, and dataset version history.
+1. Persist datasets, feature graphs, conformal calibration sets, canonical records, evidence, conflicts, and review actions in PostGIS.
+2. Connect a pretrained Prithvi-EO-2.0 or Clay adapter for raster-backed embeddings and a hosted LLM reranker for semantic mappings.
+3. Improve the live-map UX with a search input, zoom controls, measurement tool, and source-specific boundary visibility for the selected parcel.
+4. Replace synthetic workflow notifications with persisted asynchronous jobs and a real job-status API.
+5. Add authentication, role-based approval, immutable review audit logs, and dataset version history.
 ## Current Objective
 
 The immediate goal is to evolve the existing prototype into a polished SIH-ready demonstration without unnecessarily rewriting working components.
@@ -94,7 +95,7 @@ Current priority order:
    - Before / After
 4. Strengthen the AI Reconciliation Workspace and evidence visualization.
 5. Improve selected-parcel inspection and conflict visualization.
-6. Only after the frontend workflow is stable, implement the real PostGIS-backed reconciliation pipeline.
+6. Extend the vector proof-of-concept to PostGIS-backed city-scale reconciliation.
 
 Do not rebuild the application from scratch. Preserve the current working architecture and existing interactive functionality unless there is a concrete reason to change it.
 

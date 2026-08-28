@@ -12,11 +12,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel
 
-DATA = Path(os.getenv("DEMO_DATA_DIR", "../data/generated"))
+from .fusion_engine import LADMKnowledgeGraph, execute_fusion_pipeline, schema_candidates
+
+DATA = Path(os.getenv("DEMO_DATA_DIR", str(Path(__file__).resolve().parents[2] / "data" / "generated")))
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "/tmp/urbanland-uploads"))
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 SUPPORTED_UPLOADS = {".geojson": "GeoJSON", ".json": "GeoJSON", ".csv": "CSV"}
-app = FastAPI(title="UrbanLand Fusion AI", version="0.2.0")
+app = FastAPI(title="UrbanLand Fusion AI", version="0.3.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
@@ -124,13 +126,38 @@ def source_catalog():
 
 def fresh_state():
     features = deepcopy(read_json("ground_truth_parcels.geojson")["features"])
-    conflicts = {item["canonical_parcel_id"]: item for item in read_json("benchmark_manifest.json")["injected_conflicts"]}
-    for index, feature in enumerate(features):
-        conflict = conflicts.get(feature["id"])
-        confidence = round(0.96 - (0.27 if conflict else (index % 8) * .008), 2)
-        status = "HUMAN_REVIEW" if conflict and conflict["severity"] == "high" else "AI_ASSISTED" if conflict else "AI_ACCEPTED"
-        feature["properties"].update({"overall_confidence":confidence,"review_status":status,"conflict_type":conflict["type"] if conflict else None,"priority":round((100-confidence*100)*(2 if conflict and conflict["severity"] == "high" else 1),1),"canonical_version":1})
-    return {"features":features,"sources":source_catalog(),"source_previews":{},"jobs":[],"changes":[],"started":False,"sample_loaded":True}
+    engine_run = execute_fusion_pipeline(DATA)
+    apply_engine_results(features, engine_run)
+    return {"features":features,"sources":source_catalog(),"source_previews":{},"source_payloads":{},"jobs":[],"changes":[],"started":False,"sample_loaded":True,"engine_run":engine_run}
+
+
+def apply_engine_results(features, engine_run):
+    """Project explainable engine results onto the canonical GeoJSON properties."""
+    for feature in features:
+        parcel_id = feature["id"]
+        result = engine_run["parcels"].get(parcel_id, {})
+        conflict = result.get("conflict", {})
+        types = conflict.get("types", [])
+        severity = conflict.get("severity", "medium")
+        confidence = float(result.get("calibrated_confidence", 0.0))
+        status = "HUMAN_REVIEW" if types and severity == "high" else "AI_ASSISTED" if types else "AI_ACCEPTED"
+        feature["properties"].update({
+            "overall_confidence": round(confidence, 2),
+            "geometry_confidence": result.get("geometry_confidence", 0.0),
+            "semantic_confidence": result.get("semantic_confidence", 0.0),
+            "conformal_confidence": result.get("conformal", {}).get("calibrated_confidence", 0.0),
+            "confidence_set_size": len(result.get("conformal", {}).get("prediction_set", [])),
+            "confidence_decision": result.get("conformal", {}).get("decision", "null"),
+            "confidence_region": result.get("spatial_region", "unknown"),
+            "review_status": status,
+            "conflict_type": conflict.get("primary"),
+            "conflict_types": types,
+            "conflict_severity": severity if types else None,
+            "conflict_sources": sorted({item.get("source") for item in conflict.get("evidence", []) if item.get("source")}),
+            "priority": round((100 - confidence * 100) * (2 if types and severity == "high" else 1), 1),
+            "canonical_version": feature["properties"].get("canonical_version", 1),
+            "engine_run_id": engine_run.get("run_id"),
+        })
 
 
 STATE = fresh_state()
@@ -141,10 +168,28 @@ def parcel_feature(parcel_id):
     return item
 
 
+def engine_parcel(parcel_id):
+    return STATE.get("engine_run", {}).get("parcels", {}).get(parcel_id, {})
+
+
 def source_values(feature):
-    area, kind = feature["properties"]["area_sq_m"], feature["properties"].get("conflict_type")
-    offsets = {"area_error":(1.12,.94,1),"boundary_offset":(1.03,.96,1),"topology_overlap":(1.02,.98,1)}.get(kind,(1.01,.98,1.002))
-    return [{"source":"Revenue Department","attribute":"Area","value":f"{round(area*offsets[0]):,} m²","score":.81},{"source":"Municipal GIS","attribute":"Area","value":f"{round(area*offsets[1]):,} m²","score":.71},{"source":"Drone / ORI","attribute":"Area","value":f"{round(area*offsets[2]):,} m²","score":.93},{"source":"GNSS / verified cadastral","attribute":"Boundary","value":"Boundary aligned","score":.96}]
+    """Render source evidence from the graph run instead of invented constants."""
+    result = engine_parcel(feature["id"])
+    values = []
+    labels = {"cadastral": "Cadastral survey", "municipal": "Municipal GIS", "buildings": "AI building extraction"}
+    for match in result.get("matches", []):
+        source = labels.get(match.get("source"), match.get("source", "Source layer"))
+        signals = match.get("signals", {})
+        values.append({
+            "source": source,
+            "attribute": "Graph entity match",
+            "value": f"{match.get('score', 0):.0%} · {match.get('source_feature_id', 'source entity')}",
+            "score": match.get("score", 0),
+            "detail": f"Morphology {signals.get('morphology', 0):.0%}, position {signals.get('position', 0):.0%}, neighbourhood {signals.get('relative_neighbourhood', 0):.0%}.",
+        })
+    if not values:
+        values.append({"source": "Canonical Urban Land Record", "attribute": "Canonical area", "value": f"{feature['properties']['area_sq_m']:,} m²", "score": result.get("geometry_confidence", 0)})
+    return values
 
 
 class Decision(BaseModel):
@@ -171,7 +216,50 @@ def dashboard():
     features = STATE["features"]
     review = sorted((item["properties"] | {"canonical_parcel_id":item["id"]} for item in features if item["properties"]["review_status"] != "AI_ACCEPTED"),key=lambda item:item["priority"],reverse=True)
     conflicts = [item for item in features if item["properties"].get("conflict_type") and item["properties"]["review_status"] != "AI_ACCEPTED"]
-    return {"ward":"Demo Ward 14","started":STATE["started"],"summary":{"total_parcels":len(features),"harmonized":len(features)-len(conflicts),"conflicts":len(conflicts),"human_review":sum(item["review_status"] == "HUMAN_REVIEW" for item in review),"changes":len(STATE["changes"])},"review_queue":review,"latest_job":STATE["jobs"][-1] if STATE["jobs"] else None}
+    return {"ward":"Demo Ward 14","started":STATE["started"],"summary":{"total_parcels":len(features),"harmonized":len(features)-len(conflicts),"conflicts":len(conflicts),"human_review":sum(item["review_status"] == "HUMAN_REVIEW" for item in review),"changes":len(STATE["changes"])},"review_queue":review,"latest_job":STATE["jobs"][-1] if STATE["jobs"] else None,"engine_metrics":STATE.get("engine_run", {}).get("metrics", {})}
+
+
+@app.get("/api/v1/engines/overview")
+def engines_overview():
+    """Expose the active research-engine configuration without the full graph."""
+    run = STATE.get("engine_run", {})
+    spatial = run.get("spatial_engine", {})
+    semantic = run.get("semantic_engine", {})
+    confidence = run.get("confidence_engine", {})
+    return {
+        "run_id": run.get("run_id"),
+        "created_at": run.get("created_at"),
+        "spatial_engine": {"name": spatial.get("name"), "assignment": spatial.get("assignment"), "layers": sorted(spatial.get("matching", {}).keys())},
+        "semantic_engine": {"algorithm": semantic.get("algorithm"), "ontology": semantic.get("ontology"), "mapped_field_count": semantic.get("mapped_field_count"), "review_field_count": semantic.get("review_field_count"), "cross_lingual_ready": semantic.get("cross_lingual_ready")},
+        "confidence_engine": confidence,
+        "metrics": run.get("metrics", {}),
+    }
+
+
+class SchemaMatchRequest(BaseModel):
+    fields: list[dict] = []
+
+
+@app.post("/api/v1/engines/schema-match")
+def schema_match(request: SchemaMatchRequest):
+    """Run the LADM retrieval/reranking/validation stage on supplied fields."""
+    graph = LADMKnowledgeGraph()
+    return {"algorithm": "embedding retrieval -> rollup/drilldown reranking -> LADM graph validation", "ontology": graph.summary(), "mappings": schema_candidates(request.fields, graph)}
+
+
+@app.get("/api/v1/engines/graphs/{layer_name}")
+def engine_graph(layer_name: str):
+    """Return a constructed feature graph for audit/debug visualizations."""
+    run = STATE.get("engine_run", {})
+    if layer_name == "canonical":
+        matches = next(iter(run.get("spatial_engine", {}).get("matching", {}).values()), {})
+        graph = matches.get("target_graph")
+    else:
+        matches = run.get("spatial_engine", {}).get("matching", {}).get(layer_name, {})
+        graph = matches.get("source_graph")
+    if not graph:
+        raise HTTPException(404, "Feature graph not available for this layer")
+    return graph
 
 @app.get("/api/v1/sources")
 def sources(): return {"sources":STATE["sources"]}
@@ -231,6 +319,7 @@ async def upload_source(file: UploadFile = File(...), provider_type: str = Form(
         if missing_geometry:
             issues.append(f"{missing_geometry} feature(s) are missing geometry and require review.")
         preview = {**document, "features": document["features"][:500]}
+        source_payload = {"features": document["features"], "rows": []}
         crs = "EPSG:4326"
         source_type = "Vector"
     else:
@@ -245,6 +334,7 @@ async def upload_source(file: UploadFile = File(...), provider_type: str = Form(
         if not rows:
             issues.append("No records found in the uploaded CSV.")
         metadata = {"feature_count": len(rows), "geometry_type": "Tabular", "bbox": None, "attribute_fields": reader.fieldnames, "schema": [{"name": field, "type": "string"} for field in reader.fieldnames]}
+        source_payload = {"features": [], "rows": rows}
         crs = f"EPSG:{epsg_code.strip()}" if epsg_code.strip() else None
         source_type = "Tabular"
     target = UPLOAD_DIR / f"{source_id}{extension}"
@@ -254,6 +344,7 @@ async def upload_source(file: UploadFile = File(...), provider_type: str = Form(
         source["coverage"] = coverage.strip()
     source["validation_checks"] = validation_checks(source)
     STATE["sources"].append(source)
+    STATE.setdefault("source_payloads", {})[source_id] = source_payload
     if preview:
         STATE["source_previews"][source_id] = preview
     return source
@@ -278,8 +369,11 @@ def start_job(request: HarmonizationJobRequest | None = None):
         source = source_by_id(source_id)
         if not source.get("eligible_for_harmonization") or source.get("status") == "ARCHIVED":
             raise HTTPException(400, f"{source['name']} is not ready for harmonization.")
-    result = {"auto_harmonized":sum(item["properties"]["review_status"] == "AI_ACCEPTED" for item in STATE["features"]),"conflicts":sum(bool(item["properties"].get("conflict_type")) for item in STATE["features"]),"human_review":sum(item["properties"]["review_status"] == "HUMAN_REVIEW" for item in STATE["features"])}
-    job = {"id":f"JOB-{datetime.now():%Y%m%d}-{len(STATE['jobs'])+1:03d}","status":"COMPLETED","started_at":now(),"completed_at":now(),"records":len(STATE["features"]),"source_ids":selected_ids,"stages":["Ingestion","Validation","CRS normalization","Spatial matching","Conflict detection","Evidence reconciliation","Confidence scoring","Canonical dataset generated"],"result":result}
+    engine_run = execute_fusion_pipeline(DATA, selected_ids, STATE.get("source_payloads", {}))
+    apply_engine_results(STATE["features"], engine_run)
+    STATE["engine_run"] = engine_run
+    result = {"auto_harmonized":sum(item["properties"]["review_status"] == "AI_ACCEPTED" for item in STATE["features"]),"conflicts":sum(bool(item["properties"].get("conflict_type")) for item in STATE["features"]),"human_review":sum(item["properties"]["review_status"] == "HUMAN_REVIEW" for item in STATE["features"]),"engine_metrics":engine_run.get("metrics", {})}
+    job = {"id":f"JOB-{datetime.now():%Y%m%d}-{len(STATE['jobs'])+1:03d}","status":"COMPLETED","started_at":now(),"completed_at":now(),"records":len(STATE["features"]),"source_ids":selected_ids,"stages":["Ingestion","Validation","CRS normalization","Feature graph construction","Foundation embedding adapter","GNN-style relational matching","Hungarian / many-to-many assignment","LADM schema rollup / drilldown","Knowledge graph validation","Spatial conformal confidence","Canonical dataset generated"],"result":result,"engine_run_id":engine_run.get("run_id"),"engine_metrics":engine_run.get("metrics", {})}
     STATE["jobs"].append(job)
     for source in STATE["sources"]:
         if source["id"] in selected_ids:
@@ -292,7 +386,18 @@ def conflicts(): return [item["properties"] | {"canonical_parcel_id":item["id"]}
 @app.get("/api/v1/parcels/{parcel_id}")
 def parcel(parcel_id: str):
     item, props = parcel_feature(parcel_id), parcel_feature(parcel_id)["properties"]
-    return {"parcel":item,"source_values":source_values(item),"evidence":[{"source":"GNSS evidence","score":.96,"detail":"Survey control agrees with the proposed boundary."},{"source":"Drone / ORI","score":.93,"detail":"Recent imagery supports the canonical footprint."},{"source":"Cadastral survey","score":.88,"detail":"Survey identifiers and adjoining edges are consistent."}],"recommendation":f"Use canonical area of {props['area_sq_m']:,} m²","explanation":f"{props.get('conflict_type') or 'Cross-source agreement'} assessed at {props['overall_confidence']:.0%} confidence.","lineage":{"version":props["canonical_version"],"sources":["Revenue Department","Municipal GIS","Cadastral Survey","Drone / ORI","GNSS / CORS"]}}
+    result = engine_parcel(parcel_id)
+    conflict = result.get("conflict", {})
+    evidence = result.get("source_evidence", []) + conflict.get("evidence", [])
+    if not evidence:
+        evidence = [{"source":"Fusion engine","score":props.get("overall_confidence", 0),"detail":"No conflicting evidence was found across the selected source graph."}]
+    if props.get("review_status") == "AI_ACCEPTED" and props.get("canonical_version", 1) > 1:
+        recommendation = f"Canonical record published at version {props['canonical_version']}"
+    elif conflict.get("types"):
+        recommendation = f"Route {props['canonical_parcel_id']} to officer review"
+    else:
+        recommendation = f"Auto-publish canonical area of {props['area_sq_m']:,} m²"
+    return {"parcel":item,"source_values":source_values(item),"evidence":evidence,"recommendation":recommendation,"explanation":f"{', '.join(conflict.get('types', [])) or 'Cross-source agreement'} assessed at {props['overall_confidence']:.0%} calibrated confidence.","lineage":{"version":props["canonical_version"],"sources":["Revenue Department","Municipal GIS","Cadastral Survey","Drone / ORI","GNSS / CORS"]},"engine":{"spatial":{"algorithm":STATE.get("engine_run", {}).get("spatial_engine", {}).get("name"),"matches":result.get("matches", []),"many_to_many":result.get("many_to_many", [])},"semantic":{"ontology":STATE.get("engine_run", {}).get("semantic_engine", {}).get("ontology"),"mapped_field_count":STATE.get("engine_run", {}).get("semantic_engine", {}).get("mapped_field_count"),"review_field_count":STATE.get("engine_run", {}).get("semantic_engine", {}).get("review_field_count")},"confidence":result.get("conformal", {}),"joint":{"geometry":result.get("geometry_confidence"),"semantic":result.get("semantic_confidence"),"raw":result.get("raw_joint_confidence"),"calibrated":result.get("calibrated_confidence"),"decision":result.get("decision"),"region":result.get("spatial_region")}}}
 
 @app.post("/api/v1/parcels/{parcel_id}/decision")
 def decide(parcel_id: str, decision: Decision):
