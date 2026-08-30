@@ -1,0 +1,903 @@
+1. The biggest issue: too much information is competing for attention
+
+The screen has:
+
+title
+run status
+five KPI cards
+map-layer controls
+map
+parcel inspector
+confidence
+warning
+evidence workspace
+3D-ish geometry visualization
+research engine trace
+source confidence
+"why this decision"
+approval buttons
+review queue
+multiple tabs
+
+All of these are valuable individually.
+
+But together, they create high cognitive density.
+
+The operator has to constantly ask:
+
+"Where should I look first?"
+
+A production system should make the answer obvious.
+
+Recommended hierarchy
+
+The screen should visually prioritize:
+
+1. What needs my attention?
+        ↓
+2. Which parcel am I reviewing?
+        ↓
+3. What does the system recommend?
+        ↓
+4. Why?
+        ↓
+5. What evidence supports it?
+        ↓
+6. What action should I take?
+
+Right now, almost everything has similar visual weight.
+
+2. Make the Review Queue the operational center
+
+This is probably the most important UX change I'd make.
+
+Currently the Review Queue is pushed toward the bottom.
+
+For a real operator, the most important question is:
+
+"What do I need to review today?"
+
+So I'd redesign the top-level experience around work queues.
+
+Instead of:
+
+72 Parcels
+72 Harmonized
+0 Conflicts
+0 Human Review
+12 Changes
+
+make it something like:
+
+HARMONIZATION RUN
+
+72 records processed
+
+┌──────────────┬──────────────┬──────────────┬──────────────┐
+│ 64           │ 8            │ 3            │ 12           │
+│ Auto-approved│ Needs review │ Conflicts    │ Changed      │
+└──────────────┴──────────────┴──────────────┴──────────────┘
+
+Then:
+
+8 records need your attention
+
+That's an actionable statement.
+
+3. Fix the contradiction between the metrics and Review Queue
+
+This is not just a backend issue. It's a UX trust issue.
+
+Your screenshot says:
+
+Human Review: 0
+
+but the Review Queue contains records marked:
+
+HUMAN REVIEW
+
+That immediately makes the operator question whether the system is reliable.
+
+For a production product, every metric must reconcile with the underlying records.
+
+For example:
+
+Processed              72
+Auto-approved          64
+Human review             8
+Conflicts                3
+Published               61
+
+And clicking 8 Human review should filter the queue to those eight records.
+
+Make every KPI interactive.
+
+4. Reduce the use of tiny uppercase text
+
+This is one of the biggest visual weaknesses.
+
+You use a lot of:
+
+RESEARCH ENGINE TRACE
+
+DECISION CONFIDENCE
+
+SOURCE ENTITY
+
+PRIORITY QUEUE
+
+The aesthetic looks technical, but there is too much microtypography.
+
+At normal viewing distance, several labels are difficult to read.
+
+Better approach
+
+Use uppercase only for:
+
+section metadata
+very short labels
+system status
+
+Use normal sentence/title case for important content.
+
+For example:
+
+Instead of
+
+EVIDENCE-BACKED SOURCE COMPARISON
+
+Use:
+
+Source comparison
+
+And underneath:
+
+Compare geometry and attribute evidence across contributing datasets.
+
+This immediately feels more mature.
+
+5. Increase typography size and contrast
+
+Your UI appears optimized for visual density rather than readability.
+
+For an enterprise GIS system, users could be looking at this screen for hours.
+
+You want:
+
+Primary information
+16–20 px
+
+Secondary information
+13–14 px
+
+Metadata
+11–12 px
+
+Not everything needs to be tiny.
+
+Especially increase:
+
+parcel ID
+confidence
+conflict name
+recommendation
+action buttons
+table contents
+
+The user should be able to scan the page without zooming.
+
+6. Your confidence presentation needs redesign
+
+You have:
+
+84%
+
+with a circular gauge.
+
+It looks good, but the meaning isn't sufficiently clear.
+
+A GIS operator will immediately wonder:
+
+"84% confidence in what?"
+
+Instead:
+
+Better
+
+Canonical record confidence
+
+84% — High
+
+Then show:
+
+Geometry match             96%
+Attribute agreement        91%
+Source reliability         100%
+Temporal consistency       73%
+Entity resolution          98%
+
+Now the operator can understand the number.
+
+7. Don't make confidence look more precise than it really is
+
+This is particularly important.
+
+If your backend doesn't genuinely calculate probabilistic confidence, don't imply that:
+
+84%
+
+is mathematically equivalent to an 84% probability of correctness.
+
+Instead you can call it:
+
+Harmonization confidence
+
+and explain:
+
+Composite score based on source agreement, spatial alignment, temporal validity and entity matching.
+
+That's much more defensible.
+
+8. Replace some "AI magic" language with concrete system language
+
+This is one of the biggest changes I'd recommend.
+
+For example:
+
+Research Engine Trace
+
+sounds impressive, but it's vague.
+
+A government/enterprise operator wants to know:
+
+What actually happened?
+
+I'd rename it:
+
+Decision evidence
+
+Then:
+
+Parcel matching
+✓ Strong match
+
+Geometry alignment
+✓ 94% overlap
+
+Schema validation
+✓ Passed
+
+Source authority
+✓ Cadastral preferred
+
+Temporal consistency
+⚠ Building dataset older than canonical survey
+
+This is much more understandable.
+
+9. "Graph resolved" needs to become human-readable
+
+The phrase:
+
+graph resolved
+
+is technically interesting but not particularly useful to a normal GIS officer.
+
+What does it mean?
+
+Instead:
+
+Source relationships resolved
+
+And perhaps:
+
+3 source records matched to the same canonical parcel.
+
+That's actionable.
+
+You can still expose the technical graph in an expandable Technical details section.
+
+10. The 3D source comparison visualization is visually impressive but currently not very useful
+
+This section looks futuristic:
+
+Cadastral polygon
+Municipal polygon
+Imagery polygon
+Canonical polygon
+
+But the user can't easily determine:
+
+Which polygon belongs to which source?
+
+You have a small legend, but it isn't sufficiently prominent.
+
+I'd redesign it around explicit visual comparison.
+
+For example:
+
+SOURCE GEOMETRY COMPARISON
+
+Cadastral       ─────────────
+Municipal       ─────────────
+Imagery         ─────────────
+Canonical       ─────────────
+
+Alignment
+██████████████████░░  91%
+
+Or allow:
+
+Toggle source visibility
+
+☑ Cadastral
+☑ Municipal
+☑ Imagery
+☑ Canonical
+
+with hover/click highlighting.
+
+The visualization should help answer a question, not merely look sophisticated.
+
+11. The map should have a much stronger relationship with the evidence panel
+
+This is an important UX opportunity.
+
+Currently:
+
+MAP
+    +
+RIGHT INSPECTOR
+    +
+BOTTOM EVIDENCE
+
+feel somewhat like three separate widgets.
+
+Make them behave as one investigation workspace.
+
+For example:
+
+Click a source
+
+Click:
+
+Municipal
+
+Then:
+
+Map:
+Municipal geometry highlighted
+
+Inspector:
+Municipal source selected
+
+Evidence:
+Municipal → Canonical comparison
+
+Click:
+
+Canonical
+
+and everything switches to canonical.
+
+That creates a powerful interaction model.
+
+12. Add "focus mode" for parcel investigation
+
+The current page contains the dashboard and investigation workspace simultaneously.
+
+I'd add:
+
+Focus review
+
+When clicked:
+
+┌──────────────────────────────────────────────┐
+│ Parcel CLLR-56000052                         │
+│                                              │
+│              LARGE MAP                       │
+│                                              │
+│                                              │
+├───────────────────────┬──────────────────────┤
+│ Evidence              │ Recommendation       │
+│                       │                      │
+│ Source comparison     │ Confidence            │
+│                       │ Decision              │
+│                       │                      │
+│                       │ [Approve] [Review]   │
+└───────────────────────┴──────────────────────┘
+
+This would be much better for actual review work.
+
+13. Make the recommendation the strongest element
+
+The right panel should answer three questions immediately:
+
+What?
+
+Use cadastral boundary as canonical
+
+Why?
+
+Municipal boundary differs by 2.8%; cadastral source has higher authority and stronger spatial agreement.
+
+How confident?
+
+84% — High
+
+Then:
+
+Approve recommendation
+
+That is much more useful than:
+
+Canonical record published at version 2
+
+That wording is actually problematic.
+
+If the record is still awaiting approval, don't say:
+
+published
+
+before the user approves it.
+
+Use:
+
+Recommended canonical version 2
+
+Then after approval:
+
+Canonical version 2 published
+
+That distinction matters.
+
+14. Separate "Recommendation" from "Current state"
+
+I would structure the panel like:
+
+Current record
+Parcel ID       CLLR-56000052
+Land use        Residential
+Area            10,665.2 m²
+Status          Needs review
+System recommendation
+Recommended action
+
+Accept cadastral boundary
+Use municipal attributes
+Flag building footprint as outdated
+
+Confidence
+84% · High
+Evidence
+3 supporting signals
+1 warning
+Actions
+[ Approve recommendation ]
+
+[ Keep in review ]
+
+Request additional evidence
+
+This is significantly easier to understand.
+
+15. Your warning needs better severity hierarchy
+
+Currently:
+
+Outdated Building
+
+appears as a colored warning box.
+
+Good idea.
+
+But introduce a consistent severity system:
+
+Critical
+
+🔴 Requires intervention
+
+Warning
+
+🟠 Potential inconsistency
+
+Informational
+
+🔵 Informational discrepancy
+
+Resolved
+
+🟢 Automatically resolved
+
+Don't rely only on color. Add icons + text.
+
+This also improves accessibility.
+
+16. Improve the Review Queue dramatically
+
+The queue is currently essentially:
+
+Parcel ID | issue | status | confidence
+
+I'd add columns that actually help prioritization:
+
+Parcel	Issue	Severity	Confidence	Sources	Age	Action
+CLLR-...	Boundary drift	High	77%	3	2d	Review
+CLLR-...	Missing ID	Medium	83%	2	1d	Review
+CLLR-...	Area mismatch	Low	91%	3	3d	Review
+
+And add:
+
+Sort by
+
+severity
+confidence
+newest
+oldest
+source
+conflict type
+
+This turns the queue into an actual operational tool.
+
+17. Add filtering
+
+For production use, filtering will be essential.
+
+Something like:
+
+Filter:
+[All] [Human review] [Conflicts] [AI assisted]
+
+Issue:
+[Boundary] [Area] [Duplicate] [Land use] [Building]
+
+Confidence:
+[<70%] [70–85%] [>85%]
+
+Source:
+[Cadastral] [Municipal] [Imagery]
+
+The operator shouldn't have to manually search through hundreds or thousands of records.
+
+18. Add a clear status lifecycle
+
+Your statuses should have a strict state machine.
+
+For example:
+
+INGESTED
+   ↓
+VALIDATED
+   ↓
+MATCHED
+   ↓
+HARMONIZED
+   ↓
+RECOMMENDED
+   ↓
+ ┌──────────────┐
+ │              │
+ ▼              ▼
+APPROVED     IN REVIEW
+ │              │
+ ▼              ▼
+PUBLISHED   MORE EVIDENCE
+
+The UI should consistently reflect this.
+
+Avoid having:
+
+AI ACCEPTED
+
+in one place,
+
+AI ASSISTED
+
+somewhere else,
+
+Published
+
+somewhere else,
+
+without clearly explaining the lifecycle.
+
+19. Make versioning more visible
+
+You have:
+
+version 2
+
+but version history should be a first-class concept.
+
+A reviewer should be able to click:
+
+Version 2
+
+and see:
+
+Version history
+
+v2 · Current recommendation
+28 Aug 2026
+Changed:
+• Parcel boundary
+• Building status
+
+v1 · Published
+15 Aug 2026
+Original canonical record
+
+Then optionally:
+
+Compare v1 ↔ v2
+
+This is especially valuable for land records because auditability and provenance are critical.
+
+20. Provenance should be much more explicit
+
+Every canonical attribute should ideally have provenance.
+
+For example:
+
+Land use
+Residential
+Source: Municipal GIS
+Confidence: 97%
+Updated: 2026-08-27
+
+And:
+
+Parcel boundary
+Cadastral Survey
+Confidence: 100%
+Survey date: 2026-07-18
+
+This is much more valuable than a generic:
+
+AI confidence = 84%
+
+The reviewer should be able to answer:
+
+"Where exactly did this value come from?"
+
+21. Your "Data Sources" tab should integrate directly with this experience
+
+When the reviewer sees:
+
+Cadastral — 100%
+
+they should be able to click it and see:
+
+CADASTRAL SURVEY
+
+Provider
+Survey Department
+
+Dataset
+Urban Cadastral 2026
+
+Last ingestion
+28 Aug 2026
+
+Records
+12,482
+
+CRS
+EPSG:4326
+
+Quality
+98.7%
+
+Authority
+Primary
+
+Coverage
+Bengaluru
+
+This creates a complete provenance chain:
+
+Canonical attribute
+       ↓
+Evidence
+       ↓
+Source record
+       ↓
+Dataset
+       ↓
+Data provider
+
+That's an excellent production-grade UX pattern.
+
+22. Be careful with the dark theme
+
+The dark theme itself is good for a GIS/technical application.
+
+I would keep it.
+
+But currently it is almost entirely black.
+
+I'd introduce stronger tonal separation:
+
+Background
+   ↓
+Workspace
+   ↓
+Card
+   ↓
+Elevated card
+   ↓
+Interactive element
+
+Without needing lots of borders.
+
+The current UI uses many thin borders, which creates visual noise.
+
+Use surface elevation + spacing more heavily.
+
+23. Your green/blue accent system is good — but make it semantic
+
+Currently colors appear somewhat decorative.
+
+Instead establish:
+
+Blue     = interaction / selection
+
+Green    = validated / approved / healthy
+
+Amber    = warning / uncertainty
+
+Red      = blocking conflict / error
+
+Gray     = neutral / metadata
+
+Then use the same semantic meaning everywhere.
+
+This creates a visual language users learn quickly.
+
+24. The map controls need simplification
+
+The current controls are compact and technical.
+
+I'd make the map toolbar something like:
+
+Search parcel
+
+[Layers] [Compare] [Measure] [Basemap]
+
+                         [+]
+                         [-]
+
+And when clicking Layers:
+
+MAP LAYERS
+
+Source layers
+☑ Cadastral
+☑ Municipal
+☑ Building footprints
+
+Canonical
+☑ Harmonized boundary
+
+Context
+☐ Satellite
+☐ Roads
+
+Much clearer.
+
+25. Add a global search
+
+For a land-record platform, this is almost mandatory.
+
+At the top:
+
+Search parcel ID, survey number, address, owner reference...
+
+Then:
+
+CLLR-56000052
+Survey No. 129/4
+Address...
+
+This is much faster than navigating the map when an operator already knows the record.
+
+26. Add keyboard-oriented workflows
+
+If this will be used by professional reviewers, consider:
+
+J / K     Next / previous record
+A         Approve
+R         Keep in review
+E         Evidence
+M         Focus map
+/
+          Search
+
+You don't need to expose all shortcuts prominently.
+
+But a small:
+
+Keyboard shortcuts
+
+help panel would make the product feel substantially more mature.
+
+27. The UI should distinguish "information" from "action"
+
+Right now both look similar.
+
+I'd use a simple rule:
+
+Information
+
+Neutral cards, subdued typography.
+
+Warnings
+
+Amber.
+
+Actions
+
+Strong buttons.
+
+Destructive/rejection actions
+
+Clearly separated.
+
+For example:
+
+                 Recommendation
+                     84%
+
+             [ Approve recommendation ]
+
+             Keep in review
+
+             Request more evidence
+
+There should be no ambiguity about the primary action.
+
+28. Add a proper empty state
+
+When there are:
+
+0 open conflicts
+
+don't simply show:
+
+0
+
+Make it useful:
+
+✓ No unresolved conflicts
+
+All 72 records have been reconciled.
+Last run: 28 Aug 2026 · 18:02
+
+Likewise:
+
+Human Review: 0
+
+could say:
+
+No records require human review
+
+This makes the dashboard feel alive and trustworthy.
+
+29. Add loading/progress states
+
+When harmonization is running, don't just show:
+
+RUNNING
+
+Show:
+
+Harmonization in progress
+
+Matching records          72 / 72
+Geometry validation       68 / 72
+Conflict detection        64 / 72
+Canonical generation      61 / 72
+
+Estimated remaining       —
+
+For long GIS operations, this matters enormously.

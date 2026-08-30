@@ -48,6 +48,7 @@ import {
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './styles.css';
+import { ModernDemoPage } from './DemoWorkspace';
 
 const API = '/api/v1';
 
@@ -129,10 +130,54 @@ type Detail = {
   lineage: { version: number; sources: string[] };
   engine?: {
     spatial?: { algorithm?: string; matches?: any[]; many_to_many?: any[] };
-    semantic?: { ontology?: { standard?: string; node_count?: number; triple_count?: number }; mapped_field_count?: number; review_field_count?: number };
+    semantic?: { algorithm?: string; ontology?: { standard?: string; node_count?: number; triple_count?: number }; semantic_backend?: { semantic_backend?: string; status?: string; model?: string | null; embedding_dimension?: number | null; fallback_active?: boolean; error?: string | null }; mapped_field_count?: number; review_field_count?: number };
     confidence?: { coverage?: number; decision?: string; prediction_set?: any[]; region?: string; quantile?: number; threshold?: number; method?: string };
     joint?: { geometry?: number; semantic?: number; raw?: number; calibrated?: number; decision?: string; region?: string };
   };
+};
+
+type SemanticBackend = {
+  semantic_backend?: string;
+  status?: string;
+  model?: string | null;
+  embedding_dimension?: number | null;
+  cache_entries?: number;
+  fallback_active?: boolean;
+  error?: string | null;
+};
+
+type SemanticCandidate = {
+  concept: string;
+  label: string;
+  rollup?: string;
+  semantic_similarity?: number | null;
+  deterministic_similarity?: number | null;
+  rerank_score?: number;
+  datatype_compatible?: boolean;
+  sample_value_compatible?: boolean;
+};
+
+type SemanticMapping = {
+  field: string;
+  field_type?: string;
+  language?: string;
+  target_concept?: string | null;
+  target_label?: string;
+  confidence?: number;
+  confidence_label?: string;
+  semantic_similarity?: number | null;
+  semantic_margin?: number | null;
+  evidence?: string[];
+  retrieved_candidates?: SemanticCandidate[];
+  knowledge_graph_validation?: { valid?: boolean; reason?: string };
+  semantic_backend?: string;
+  semantic_backend_status?: string;
+};
+
+type SemanticMatchResponse = {
+  algorithm?: string;
+  semantic_backend?: SemanticBackend;
+  mappings: SemanticMapping[];
 };
 
 const navItems: { label: string; route: Route }[] = [
@@ -237,7 +282,8 @@ const sourceApi = {
   sample: async () => {
     const response = await fetch(`${API}/sources/sample`, { method: 'POST' });
     if (!response.ok) throw new Error('The demo source bundle could not be loaded.');
-    return response.json() as Promise<{ sources: Source[]; source_ids: string[]; dataset_name: string }>;
+    const result = await response.json() as { sources: Source[]; source_ids: string[]; dataset_name: string };
+    return { ...result, source_ids: result.source_ids.filter((id) => result.sources.some((source) => source.id === id && sourceIsEligible(source))) };
   },
   archive: async (sourceId: string) => {
     const response = await fetch(`${API}/sources/${sourceId}/archive`, { method: 'POST' });
@@ -519,6 +565,10 @@ function DataSourcesPage({ sources, selectedSourceIds, setSelectedSourceIds, ref
   const readyCount = sources.filter(sourceIsEligible).length;
   const processingCount = sources.filter((source) => ['PROCESSING', 'VALIDATING', 'INDEXING'].includes(source.processing_status || source.status)).length;
   const attentionCount = sources.filter((source) => source.validation_status === 'WARNING' || source.validation_status === 'FAILED' || !sourceIsEligible(source)).length;
+  useEffect(() => {
+    const validIds = selectedSourceIds.filter((id) => sources.some((source) => source.id === id && sourceIsEligible(source)));
+    if (validIds.length !== selectedSourceIds.length) setSelectedSourceIds(validIds);
+  }, [selectedSourceIds, setSelectedSourceIds, sources]);
   const coverageCompatible = selectedSources.length > 1 && selectedSources.every((source) => source.coverage && source.coverage === selectedSources[0].coverage);
   const crsCompatible = selectedSources.length > 1 && selectedSources.every((source) => Boolean(source.crs) && source.crs === selectedSources[0].crs);
   const geometrySupported = selectedSources.length > 1 && selectedSources.every((source) => Boolean(source.source_type));
@@ -580,6 +630,111 @@ function Inspector({ selected, detail, queue, onSelect }: { selected: Parcel | n
   return <aside className="inspector-panel"><div className="inspector-head"><div><span className="eyebrow">PARCEL INSPECTOR</span><h2>{selected ? selected.canonical_parcel_id : 'Select a parcel'}</h2></div><Pill tone={selected?.review_status === 'AI_ACCEPTED' ? 'green' : 'amber'}>{selected ? 'ACTIVE' : 'AWAITING INPUT'}</Pill></div>{selected ? <><div className="inspector-confidence"><div><span>OVERALL CONFIDENCE</span><strong>{formatConfidence(selected.overall_confidence)}</strong></div><div className="confidence-ring" style={{ '--progress': `${selected.overall_confidence * 100}%` } as React.CSSProperties}><span>{Math.round(selected.overall_confidence * 100)}</span></div></div><div className={`inspector-status ${selected.conflict_type ? 'has-conflict' : 'is-clear'}`}><CircleAlert size={15} /><div><strong>{titleCase(selected.conflict_type)}</strong><span>{detail?.explanation ?? 'Cross-source agreement is ready for review.'}</span></div></div><dl className="inspector-details"><div><dt>Survey number</dt><dd>{selected.survey_number}</dd></div><div><dt>Land use</dt><dd>{selected.land_use}</dd></div><div><dt>Canonical area</dt><dd>{formatNumber(selected.area_sq_m)} m²</dd></div><div><dt>Review status</dt><dd>{titleCase(selected.review_status)}</dd></div></dl><button className="inspector-link" onClick={() => document.getElementById('reconciliation')?.scrollIntoView({ behavior: 'smooth' })}>Open evidence workspace <ArrowDown size={14} /></button></> : <div className="inspector-empty"><MapPinned size={29} /><strong>Click a canonical parcel</strong><p>Evidence, recommendation, and source lineage will appear here.</p></div>}<div className="queue-preview"><div className="queue-preview-head"><span>PRIORITY QUEUE</span><b>{queue.length} open</b></div>{queue.slice(0, 4).map((parcel, index) => <button className={selected?.canonical_parcel_id === parcel.canonical_parcel_id ? 'selected' : ''} key={parcel.canonical_parcel_id} onClick={() => onSelect(parcel)}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{parcel.canonical_parcel_id}</strong><small>{titleCase(parcel.conflict_type)}</small></div><em>{formatConfidence(parcel.overall_confidence)}</em></button>)}</div></aside>;
 }
 
+const semanticDemoFields = [
+  { name: 'Khata Number', description: 'Land-record account or parcel identifier', type: 'string', sample_values: ['142/2'], source_context: 'Revenue Department' },
+  { name: 'खाता संख्या', description: 'Land-record account or parcel identifier', type: 'string', sample_values: ['142/2'], source_context: 'Revenue Department' },
+  { name: 'ಖಾತಾ ಸಂಖ್ಯೆ', description: 'Land-record account or parcel identifier', type: 'string', sample_values: ['142/2'], source_context: 'Revenue Department' },
+  { name: 'கணக்கு எண்', description: 'Land-record account or parcel identifier', type: 'string', sample_values: ['142/2'], source_context: 'Revenue Department' },
+  { name: 'ఖాతా నంబర్', description: 'Land-record account or parcel identifier', type: 'string', sample_values: ['142/2'], source_context: 'Revenue Department' },
+  { name: 'Owner Name', description: 'Person or organization who owns the parcel', type: 'string', sample_values: ['Asha Rao'], source_context: 'Revenue Department' },
+  { name: 'Parcel Area', description: 'Measured plot area in square metres', type: 'number', sample_values: [120.5], source_context: 'Municipal GIS' },
+  { name: 'Ward Number', description: 'Administrative ward identifier', type: 'number', sample_values: [14], source_context: 'Municipal GIS' },
+];
+
+const formatSimilarity = (value?: number | null) => value === undefined || value === null ? '—' : value.toFixed(2);
+
+function SemanticSchemaPanel({ notify }: { notify: (message: string) => void }) {
+  const [result, setResult] = useState<SemanticMatchResponse>();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [expanded, setExpanded] = useState<string>();
+  const [open, setOpen] = useState(false);
+
+  const run = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch(`${API}/engines/schema-match`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: semanticDemoFields }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.detail || 'The semantic matching service is unavailable.');
+      setResult(payload as SemanticMatchResponse);
+       notify(`Semantic check complete: ${payload.mappings.filter((mapping: SemanticMapping) => mapping.target_concept).length} fields mapped.`);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'The semantic matching service is unavailable.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const backend = result?.semantic_backend;
+  const backendStatus = backend?.status;
+  const backendLabel = backend?.semantic_backend === 'multilingual_embedding' ? 'Multilingual embedding' : backend?.semantic_backend === 'deterministic_fallback' ? 'Deterministic fallback' : 'Not detected';
+  const backendTone = backendStatus === 'active' && !backend?.fallback_active ? 'green' : 'amber';
+  const mappedCount = result?.mappings.filter((mapping) => mapping.target_concept).length ?? 0;
+  const togglePanel = () => {
+    const nextOpen = !open;
+    setOpen(nextOpen);
+    if (nextOpen && !result && !loading) void run();
+  };
+
+  return <div className="semantic-panel-shell">
+    <button className={`semantic-disclosure ${open ? 'is-open' : ''}`} type="button" aria-expanded={open} aria-controls="semantic-schema-panel" onClick={togglePanel}>
+      <span className="semantic-disclosure-main">
+        <span className="semantic-disclosure-icon"><Layers3 size={15} /></span>
+        <span className="semantic-disclosure-text">
+          <span className="semantic-disclosure-kicker">OPTIONAL MODEL INSPECTION</span>
+          <strong>View field meaning layer</strong>
+          <small>Inspect multilingual schema mappings and LADM evidence</small>
+        </span>
+      </span>
+      <span className="semantic-disclosure-action"><span>{open ? 'Hide details' : 'Show details'}</span><ChevronDown size={15} /></span>
+    </button>
+    {open && <section id="semantic-schema-panel" className="semantic-schema-panel" aria-labelledby="semantic-schema-title">
+    <div className="semantic-panel-head">
+      <div>
+        <span className="eyebrow">MULTILINGUAL SEMANTIC MATCHING</span>
+        <h2 id="semantic-schema-title">See the field meaning layer</h2>
+        <p>These examples run through the same LADM schema-matching endpoint used by the backend. Names, descriptions, types, samples, and department context are compared together.</p>
+      </div>
+      <div className="semantic-panel-actions">
+        <Pill tone={backendTone}>{backendLabel}</Pill>
+        <Button onClick={run} disabled={loading} variant="secondary" icon={loading ? LoaderCircle : RefreshCw}>{loading ? 'Checking model' : 'Run semantic check'}</Button>
+      </div>
+    </div>
+    {backendStatus === 'unavailable' && <div className="semantic-alert"><CircleAlert size={16} /><div><strong>Multilingual model is not active</strong><span>The API reported an unavailable embedding backend. Results are not being silently replaced with alias matching. Install the backend requirements and make the model weights available, or explicitly configure the deterministic fallback.</span></div></div>}
+    {error && <div className="semantic-alert"><CircleAlert size={16} /><div><strong>Semantic check could not be completed</strong><span>{error}</span></div></div>}
+    {loading && !result ? <div className="semantic-loading"><LoaderCircle size={17} className="spin" /> Loading the configured semantic backend…</div> : <>
+      <div className="semantic-metrics">
+        <div><span>BACKEND</span><strong>{backendLabel}</strong><small>{backendStatus || 'Waiting for API'}</small></div>
+        <div><span>MODEL</span><strong>{backend?.model || 'Offline evidence matcher'}</strong><small>{backend?.embedding_dimension ? `${backend.embedding_dimension}-dimension vectors` : 'No embedding vector active'}</small></div>
+        <div><span>MAPPED FIELDS</span><strong>{mappedCount} / {result?.mappings.length ?? 0}</strong><small>Validated against LADM</small></div>
+        <div><span>CACHE</span><strong>{backend?.cache_entries ?? '—'}</strong><small>Reusable embeddings</small></div>
+      </div>
+      <div className="semantic-map-table">
+        <div className="semantic-table-head"><span>Source field</span><span>Selected LADM concept</span><span>Similarity</span><span>Evidence</span></div>
+        {(result?.mappings ?? []).map((mapping, index) => {
+          const key = `${mapping.field}-${index}`;
+          const candidates = mapping.retrieved_candidates ?? [];
+          const isOpen = expanded === key;
+          return <div className={`semantic-map-row ${mapping.target_concept ? '' : 'semantic-map-unmapped'}`} key={key}>
+            <div className="semantic-field"><code>{mapping.field}</code><small>{mapping.language || mapping.field_type || 'Unknown language'}</small></div>
+            <div className="semantic-target"><ArrowRight size={14} /><div><strong>{mapping.target_concept ? mapping.target_label : 'Needs review'}</strong><small>{mapping.target_concept || 'No candidate passed the configured threshold'}</small></div></div>
+            <div className="semantic-score"><strong>{formatSimilarity(mapping.semantic_similarity)}</strong><small>{mapping.semantic_similarity === null || mapping.semantic_similarity === undefined ? 'not an embedding score' : 'cosine similarity'}</small></div>
+            <div className="semantic-evidence"><div>{(mapping.evidence ?? []).slice(0, 3).map((item) => <span key={item}>{item}</span>)}</div><button className="semantic-candidate-toggle" onClick={() => setExpanded(isOpen ? undefined : key)}>{isOpen ? 'Hide candidates' : `${candidates.length} candidates`} <ChevronDown size={13} className={isOpen ? 'rotate' : ''} /></button></div>
+            {isOpen && <div className="semantic-candidates"><span className="semantic-candidates-label">TOP-K RETRIEVAL</span>{candidates.slice(0, 5).map((candidate) => <div key={candidate.concept}><code>{candidate.concept}</code><span>{candidate.label}</span><b>{formatSimilarity(candidate.semantic_similarity ?? candidate.deterministic_similarity)}</b><small>{candidate.datatype_compatible ? 'type ✓' : 'type mismatch'} · {candidate.sample_value_compatible ? 'samples ✓' : 'sample mismatch'}</small></div>)}</div>}
+          </div>;
+        })}
+        {!result?.mappings.length && <div className="semantic-loading">No mapping data returned.</div>}
+      </div>
+      <div className="semantic-panel-foot"><span><Globe2 size={14} /> English · Hindi · Kannada · Tamil · Telugu test fields</span><span><ShieldCheck size={14} /> Similarity is a score, not a probability</span></div>
+    </>}</section>}
+  </div>;
+}
+
 function ReconciliationWorkspace({ selected, detail, onDecision }: { selected: Parcel; detail: Detail; onDecision: (action: string) => void }) {
   return <section id="reconciliation" className="reconciliation-workspace"><div className="workspace-visual"><div className="workspace-heading"><div><span className="eyebrow">AI RECONCILIATION WORKSPACE</span><h2>Evidence-backed source comparison</h2></div><Pill tone="green">{formatConfidence(selected.overall_confidence)} confidence</Pill></div><div className="boundary-stage"><div className="boundary-grid" /><div className="source-shape shape-a"><span>revenue</span></div><div className="source-shape shape-b"><span>municipal</span></div><div className="source-shape shape-c"><span>drone / ORI</span></div><div className="source-shape shape-canonical"><BadgeCheck size={14} /><span>canonical output</span></div><div className="boundary-callout"><span>alignment delta</span><b>graph resolved</b></div></div><div className="workspace-legend"><span><i className="legend-blue" /> Cadastral</span><span><i className="legend-violet" /> Municipal</span><span><i className="legend-amber" /> Imagery</span><span><i className="legend-green" /> Canonical</span></div></div><div className="workspace-evidence"><span className="eyebrow">RECOMMENDATION</span><h3>{detail.recommendation}</h3><div className="evidence-score"><div><span>DECISION CONFIDENCE</span><strong>{formatConfidence(selected.overall_confidence)}</strong></div><div className="score-bar"><i style={{ width: `${selected.overall_confidence * 100}%` }} /></div><small>Joint score is wrapped by a locally weighted 95% conformal predictor.</small></div><EngineTrace engine={detail.engine} /><div className="source-values">{detail.source_values.map((item) => <div key={`${item.source}-${item.attribute}`}><span>{item.source}</span><b>{item.value}</b><em>{formatConfidence(item.score)}</em></div>)}</div><div className="evidence-list"><span className="eyebrow">WHY THIS DECISION</span>{detail.evidence.map((item, index) => <div key={`${item.source}-${index}`}><Check size={14} /><span>{item.detail}</span><b>{formatConfidence(item.score)}</b></div>)}</div><div className="decision-actions"><Button onClick={() => onDecision('approve')} icon={Check}>Approve recommendation</Button><Button onClick={() => onDecision('reject')} variant="secondary" icon={X}>Keep in review</Button><button className="text-action" onClick={() => onDecision('request_evidence')}>Request more evidence <ArrowRight size={14} /></button></div></div></section>;
 }
@@ -591,7 +746,7 @@ function EngineTrace({ engine }: { engine?: Detail['engine'] }) {
   return <div className="engine-trace"><div className="engine-trace-head"><span className="eyebrow">RESEARCH ENGINE TRACE</span><small>Signals retained with this record</small></div><div className="engine-trace-grid"><div><Network size={15} /><span><b>Graph matcher</b><small>{engine?.spatial?.many_to_many?.length ? `${engine.spatial.many_to_many.length} many-to-many relation(s)` : 'No ambiguous relations'} · Hungarian allocation</small></span><em>{formatConfidence(joint?.geometry)}</em></div><div><Table2 size={15} /><span><b>LADM schema validation</b><small>{semantic?.mapped_field_count ?? 0} fields mapped · {semantic?.ontology?.triple_count ?? 0} ontology triples</small></span><em>{formatConfidence(joint?.semantic)}</em></div><div><ShieldCheck size={15} /><span><b>Conformal decision set</b><small>{conformal?.coverage ? `${Math.round(conformal.coverage * 100)}% coverage` : '95% coverage'} · {conformal?.region ?? 'spatial'} calibration</small></span><em>{conformal?.decision === 'auto_merge' ? 'AUTO' : conformal?.decision === 'null' ? 'NULL' : 'REVIEW'}</em></div></div></div>;
 }
 
-function DemoPage({ dashboard, sources, changes, selectedSourceIds, refresh, notify }: { dashboard?: Dashboard; sources: Source[]; changes: any[]; selectedSourceIds: string[]; refresh: () => Promise<void>; notify: (message: string) => void }) {
+function LegacyDemoPage({ dashboard, sources, changes, selectedSourceIds, refresh, notify }: { dashboard?: Dashboard; sources: Source[]; changes: any[]; selectedSourceIds: string[]; refresh: () => Promise<void>; notify: (message: string) => void }) {
   const [mode, setMode] = useState<DemoMode>('sources');
   const [compare, setCompare] = useState(55);
   const [selected, setSelected] = useState<Parcel | null>(null);
@@ -606,7 +761,11 @@ function DemoPage({ dashboard, sources, changes, selectedSourceIds, refresh, not
   const decide = async (action: string) => { if (!selected) return; try { const response = await fetch(`${API}/parcels/${selected.canonical_parcel_id}/decision`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action }) }); const result = await response.json(); setSelected(toParcel(result.parcel.properties)); setDetail(await fetch(`${API}/parcels/${selected.canonical_parcel_id}`).then((item) => item.json())); await refresh(); notify(result.event.detail); } catch { notify('Decision could not be recorded.'); } };
   const rows = queue;
   const summary = dashboard?.summary;
-  return <main className="demo-shell"><div className="page-container"><div className="demo-topline"><div><Pill tone="green">LIVE DEMO · DEMO WARD 14</Pill><span className="demo-updated"><i className="live-dot" /> Synthetic benchmark · 72 canonical parcels</span></div><Button onClick={run} disabled={job} icon={job ? RefreshCw : Play}>{job ? 'Running harmonization…' : 'Run harmonization'}</Button></div><div className="demo-heading"><div><span className="eyebrow">OPERATIONAL WORKSPACE</span><h1>Review the record, <em>not the raw layers.</em></h1><p>Inspect the map, open a conflict, and see the evidence behind every canonical recommendation.</p></div><div className="job-status"><span>LAST PIPELINE RUN</span><strong>{dashboard?.latest_job ? 'COMPLETED' : 'READY'}</strong><small>{dashboard?.latest_job ? dashboard.latest_job.id : 'Awaiting a first run'}</small></div></div><div className="demo-metrics"><div><span>PARCELS</span><strong>{summary?.total_parcels ?? '—'}</strong><small>Ward 14 scope</small></div><div><span>HARMONIZED</span><strong>{summary?.harmonized ?? '—'}</strong><small>Canonical output</small></div><div className="metric-alert"><span>OPEN CONFLICTS</span><strong>{summary?.conflicts ?? '—'}</strong><small>Prioritized for review</small></div><div><span>HUMAN REVIEW</span><strong>{summary?.human_review ?? '—'}</strong><small>Officer decision needed</small></div><div><span>CHANGES</span><strong>{summary?.changes ?? '—'}</strong><small>Audit events</small></div></div><div className="map-workspace"><div><span className="eyebrow">MAP LAYERS</span><strong>Spatial context</strong></div><div className="map-modes">{(['sources', 'harmonized', 'compare'] as DemoMode[]).map((item) => <button key={item} className={mode === item ? 'active' : ''} onClick={() => setMode(item)}>{item === 'sources' ? 'Sources' : item === 'harmonized' ? 'AI harmonized' : 'Before / after'}</button>)}</div>{mode === 'compare' && <label className="compare-slider"><span>source</span><input type="range" min="10" max="100" value={compare} onChange={(event) => setCompare(Number(event.target.value))} /><span>canonical</span></label>}<div className="layer-toggles">{[['cadastral', 'Cadastral'], ['municipal', 'Municipal'], ['buildings', 'AI buildings']].map(([id, label]) => <label key={id}><input type="checkbox" checked={layerVisibility[id as keyof typeof layerVisibility]} onChange={() => setLayerVisibility((current) => ({ ...current, [id]: !current[id as keyof typeof current] }))} /><span>{label}</span></label>)}</div></div><div className="demo-map-grid"><div className="map-panel"><div className="map-panel-head"><div><span className="eyebrow">DEMO WARD 14 / BENGALURU</span><strong>Canonical parcel map</strong></div><div className="map-tools"><button title="Search parcels"><Search size={15} /></button><button title="Map settings"><SlidersHorizontal size={15} /></button></div></div><MapView mode={mode} compare={compare} layerVisibility={layerVisibility} selected={selected} onSelect={inspect} /><div className="map-legend"><span><i className="status-dot success" /> Trusted</span><span><i className="status-dot warning" /> AI assisted</span><span><i className="status-dot danger" /> Conflict</span></div><div className="map-note"><MapPinned size={13} /> Click a canonical boundary to inspect evidence</div></div><Inspector selected={selected} detail={detail} queue={queue} onSelect={inspect} /></div>{selected && detail && <ReconciliationWorkspace selected={selected} detail={detail} onDecision={decide} />}<section className="demo-operations"><div className="operation-tabs">{(['Review Queue', 'Data Sources', 'Changes', 'Export'] as DemoTab[]).map((item) => <button key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{item}{item === 'Review Queue' && <span>{queue.length}</span>}</button>)}</div>{tab === 'Data Sources' ? <div className="source-table">{sources.map((source) => <div className="source-row" key={source.id}><span className="source-status"><i /><b>{source.status}</b></span><div><strong>{source.name}</strong><small>{source.file} · {source.format} · {source.crs}</small></div><b>{source.records}</b><span>{source.issues.length ? source.issues[0] : 'No validation issues'}</span></div>)}</div> : tab === 'Changes' ? <div className="change-table">{changes.length ? changes.map((change) => <div key={change.id}><span>{change.parcel_id}</span><span>{change.old_value} <ArrowRight size={13} /> {change.new_value}</span><span>{change.officer}</span><code>v{change.version}</code></div>) : <div className="empty-table"><Clock3 size={18} /> Decisions will appear here after review.</div>}</div> : tab === 'Export' ? <div className="export-panel"><div><span className="icon-box"><Download size={20} /></span><div><h3>Canonical Urban Land Record</h3><p>Current confidence, review status, source lineage, and geometry for every parcel in the ward.</p></div></div><a className="button button-primary" href={`${API}/export/canonical.geojson`}><Download size={16} /> Download GeoJSON</a></div> : <div className="review-table">{rows.map((parcel) => <button key={parcel.canonical_parcel_id} onClick={() => inspect(parcel)}><span className="review-rank">{String(Math.round(parcel.priority)).padStart(2, '0')}</span><div><strong>{parcel.canonical_parcel_id}</strong><small>{titleCase(parcel.conflict_type)} · {titleCase(parcel.review_status)}</small></div><span className="review-impact">{parcel.conflict_type ? 'Review' : 'Assisted'}</span><em>{formatConfidence(parcel.overall_confidence)}</em><ArrowRight size={15} /></button>)}{!rows.length && <div className="empty-table"><BadgeCheck size={18} /> No open reconciliation cases.</div>}</div>}</section></div></main>;
+  return <main className="demo-shell"><div className="page-container"><div className="demo-topline"><div><Pill tone="green">LIVE DEMO · DEMO WARD 14</Pill><span className="demo-updated"><i className="live-dot" /> Synthetic benchmark · 72 canonical parcels</span></div><Button onClick={run} disabled={job} icon={job ? RefreshCw : Play}>{job ? 'Running harmonization…' : 'Run harmonization'}</Button></div><div className="demo-heading"><div><span className="eyebrow">OPERATIONAL WORKSPACE</span><h1>Review the record, <em>not the raw layers.</em></h1><p>Inspect the map, open a conflict, and see the evidence behind every canonical recommendation.</p></div><div className="job-status"><span>LAST PIPELINE RUN</span><strong>{dashboard?.latest_job ? 'COMPLETED' : 'READY'}</strong><small>{dashboard?.latest_job ? dashboard.latest_job.id : 'Awaiting a first run'}</small></div></div><div className="demo-metrics"><div><span>PARCELS</span><strong>{summary?.total_parcels ?? '—'}</strong><small>Ward 14 scope</small></div><div><span>HARMONIZED</span><strong>{summary?.harmonized ?? '—'}</strong><small>Canonical output</small></div><div className="metric-alert"><span>OPEN CONFLICTS</span><strong>{summary?.conflicts ?? '—'}</strong><small>Prioritized for review</small></div><div><span>HUMAN REVIEW</span><strong>{summary?.human_review ?? '—'}</strong><small>Officer decision needed</small></div><div><span>CHANGES</span><strong>{summary?.changes ?? '—'}</strong><small>Audit events</small></div></div><div className="map-workspace"><div><span className="eyebrow">MAP LAYERS</span><strong>Spatial context</strong></div><div className="map-modes">{(['sources', 'harmonized', 'compare'] as DemoMode[]).map((item) => <button key={item} className={mode === item ? 'active' : ''} onClick={() => setMode(item)}>{item === 'sources' ? 'Sources' : item === 'harmonized' ? 'AI harmonized' : 'Before / after'}</button>)}</div>{mode === 'compare' && <label className="compare-slider"><span>source</span><input type="range" min="10" max="100" value={compare} onChange={(event) => setCompare(Number(event.target.value))} /><span>canonical</span></label>}<div className="layer-toggles">{[['cadastral', 'Cadastral'], ['municipal', 'Municipal'], ['buildings', 'AI buildings']].map(([id, label]) => <label key={id}><input type="checkbox" checked={layerVisibility[id as keyof typeof layerVisibility]} onChange={() => setLayerVisibility((current) => ({ ...current, [id]: !current[id as keyof typeof current] }))} /><span>{label}</span></label>)}</div></div><div className="demo-map-grid"><div className="map-panel"><div className="map-panel-head"><div><span className="eyebrow">DEMO WARD 14 / BENGALURU</span><strong>Canonical parcel map</strong></div><div className="map-tools"><button title="Search parcels"><Search size={15} /></button><button title="Map settings"><SlidersHorizontal size={15} /></button></div></div><MapView mode={mode} compare={compare} layerVisibility={layerVisibility} selected={selected} onSelect={inspect} /><div className="map-legend"><span><i className="status-dot success" /> Trusted</span><span><i className="status-dot warning" /> AI assisted</span><span><i className="status-dot danger" /> Conflict</span></div><div className="map-note"><MapPinned size={13} /> Click a canonical boundary to inspect evidence</div></div><Inspector selected={selected} detail={detail} queue={queue} onSelect={inspect} /></div><SemanticSchemaPanel notify={notify} />{selected && detail && <ReconciliationWorkspace selected={selected} detail={detail} onDecision={decide} />}<section className="demo-operations"><div className="operation-tabs">{(['Review Queue', 'Data Sources', 'Changes', 'Export'] as DemoTab[]).map((item) => <button key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{item}{item === 'Review Queue' && <span>{queue.length}</span>}</button>)}</div>{tab === 'Data Sources' ? <div className="source-table">{sources.map((source) => <div className="source-row" key={source.id}><span className="source-status"><i /><b>{source.status}</b></span><div><strong>{source.name}</strong><small>{source.file} · {source.format} · {source.crs}</small></div><b>{source.records}</b><span>{source.issues.length ? source.issues[0] : 'No validation issues'}</span></div>)}</div> : tab === 'Changes' ? <div className="change-table">{changes.length ? changes.map((change) => <div key={change.id}><span>{change.parcel_id}</span><span>{change.old_value} <ArrowRight size={13} /> {change.new_value}</span><span>{change.officer}</span><code>v{change.version}</code></div>) : <div className="empty-table"><Clock3 size={18} /> Decisions will appear here after review.</div>}</div> : tab === 'Export' ? <div className="export-panel"><div><span className="icon-box"><Download size={20} /></span><div><h3>Canonical Urban Land Record</h3><p>Current confidence, review status, source lineage, and geometry for every parcel in the ward.</p></div></div><a className="button button-primary" href={`${API}/export/canonical.geojson`}><Download size={16} /> Download GeoJSON</a></div> : <div className="review-table">{rows.map((parcel) => <button key={parcel.canonical_parcel_id} onClick={() => inspect(parcel)}><span className="review-rank">{String(Math.round(parcel.priority)).padStart(2, '0')}</span><div><strong>{parcel.canonical_parcel_id}</strong><small>{titleCase(parcel.conflict_type)} · {titleCase(parcel.review_status)}</small></div><span className="review-impact">{parcel.conflict_type ? 'Review' : 'Assisted'}</span><em>{formatConfidence(parcel.overall_confidence)}</em><ArrowRight size={15} /></button>)}{!rows.length && <div className="empty-table"><BadgeCheck size={18} /> No open reconciliation cases.</div>}</div>}</section></div></main>;
+}
+
+function DemoPage(props: { dashboard?: Dashboard; sources: Source[]; changes: any[]; selectedSourceIds: string[]; refresh: () => Promise<void>; notify: (message: string) => void }) {
+  return <ModernDemoPage {...props} />;
 }
 
 function App() {
