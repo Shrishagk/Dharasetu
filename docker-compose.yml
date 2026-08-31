@@ -1,30 +1,88 @@
+version: '3.9'
+
 services:
   db:
-    image: postgis/postgis:16-3.4
+    image: postgis/postgis:16-3.4-alpine
+    container_name: urbanland-db
     environment:
       POSTGRES_DB: urbanland
       POSTGRES_USER: urbanland
       POSTGRES_PASSWORD: urbanland_dev
-    ports: ["5432:5432"]
-    volumes: ["postgis_data:/var/lib/postgresql/data"]
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U urbanland -d urbanland"]
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - urbanland
+    labels:
+      - "com.example.description=PostgreSQL with PostGIS"
+
   api:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: urbanland-api
     environment:
       DATABASE_URL: postgresql+psycopg://urbanland:urbanland_dev@db:5432/urbanland
       DEMO_DATA_DIR: /app/data/generated
-    ports: ["8000:8000"]
-    volumes: ["./data/generated:/app/data/generated:ro"]
+      ENVIRONMENT: production
+      UVICORN_HOST: 0.0.0.0
+      UVICORN_PORT: 8000
+      UVICORN_WORKERS: 2
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/generated:/app/data/generated:ro
+      - /tmp/urbanland-uploads:/tmp/urbanland-uploads
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - urbanland
+    labels:
+      - "com.example.description=FastAPI Backend"
+
   web:
-    build: ./frontend
-    ports: ["5173:80"]
-    depends_on: [api]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: urbanland-frontend
+    environment:
+      VITE_API_BASE: http://localhost:8000/api/v1
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - urbanland
+    labels:
+      - "com.example.description=React + MapLibre Frontend"
+
 volumes:
   postgis_data:
+    driver: local
+
+networks:
+  urbanland:
+    driver: bridge
