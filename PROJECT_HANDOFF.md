@@ -1,6 +1,6 @@
 # UrbanLand Fusion AI — Project Handoff
 
-Last updated: 2026-08-26
+Last updated: 2026-08-31
 
 ## Purpose
 
@@ -56,11 +56,21 @@ Do not browse to `0.0.0.0`; it is a server binding address. Use `localhost`.
 - Research engine trace: graph/Hungarian matching, LADM knowledge-graph validation, and 95% spatial conformal decision set.
 - Frontend production build verified successfully after the latest live-basemap update.
 
-## Important current limitation
+## Production-demo status
 
-The `Run Harmonization` control now executes the dependency-light research pipeline against the deterministic GeoJSON/CSV fixture. It does not yet persist jobs, graphs, calibration sets, or canonical versions in PostGIS, and the foundation-model/LLM stages use explicit offline fallbacks until deployment adapters are configured.
+The service now persists source metadata, uploaded payloads, canonical versions,
+jobs, matches, evidence, conflicts, review actions, and hash-chained audit
+events. Docker requires PostgreSQL/PostGIS; local and CI runs use a durable
+SQLite store when no DATABASE_URL is configured. Harmonization is a real asynchronous
+job with status polling and retry budget. GeoJSON is normalized to EPSG:4326
+from declared EPSG/GeoJSON CRS metadata, raster uploads are inspected and
+embedded contextually, and the pipeline exposes attribute provenance, topology
+repair proposals, temporal change detection, and a fitted lightweight
+scikit-learn matcher when available.
 
-The database container is available but not yet used by the FastAPI code. Persisting the engine artifacts and connecting Prithvi/Clay and an external LLM reranker are the next production increments.
+Foundation-model and hosted-LLM adapters remain explicit deployment extension
+points: the offline demo never labels deterministic features as a trained
+Prithvi/Clay model or an LLM decision.
 
 ## Recent map implementation
 
@@ -74,30 +84,25 @@ For a production deployment, move to a licensed provider and store its key in en
 
 Never commit a provider API key to the repository.
 
-## Suggested next priorities
+## Deployment configuration
 
-1. Persist datasets, feature graphs, conformal calibration sets, canonical records, evidence, conflicts, and review actions in PostGIS.
-2. Connect a pretrained Prithvi-EO-2.0 or Clay adapter for raster-backed embeddings and a hosted LLM reranker for semantic mappings.
-3. Improve the live-map UX with a search input, zoom controls, measurement tool, and source-specific boundary visibility for the selected parcel.
-4. Replace synthetic workflow notifications with persisted asynchronous jobs and a real job-status API.
-5. Add authentication, role-based approval, immutable review audit logs, and dataset version history.
-## Current Objective
+- `AUTH_ENABLED=true` enables signed bearer tokens from `POST /api/v1/auth/token`.
+- `AUTH_SECRET`, `DEMO_ADMIN_USERNAME`, and `DEMO_ADMIN_PASSWORD` must be
+  supplied by the deployment secret manager.
+- `DATABASE_URL` points to PostGIS in Docker; `STATE_DB_PATH` controls the
+  local SQLite store. `ALLOW_SQLITE_FALLBACK=false` prevents silent data
+  splitting when production Postgres is unavailable.
+- `CORS_ORIGINS`, `RATE_LIMIT_PER_MINUTE`, `JOB_WORKERS`, and `MAX_UPLOAD_BYTES`
+  are configurable operational controls.
+## Delivery status
 
-The immediate goal is to evolve the existing prototype into a polished SIH-ready demonstration without unnecessarily rewriting working components.
-
-Current priority order:
-
-1. Improve the Web GIS UI/UX and visual hierarchy.
-2. Make the map the primary visual focus with realistic parcel/building/road visualization.
-3. Add visible map modes:
-   - Sources
-   - AI Harmonized
-   - Before / After
-4. Strengthen the AI Reconciliation Workspace and evidence visualization.
-5. Improve selected-parcel inspection and conflict visualization.
-6. Extend the vector proof-of-concept to PostGIS-backed city-scale reconciliation.
-
-Do not rebuild the application from scratch. Preserve the current working architecture and existing interactive functionality unless there is a concrete reason to change it.
+The SIH production-oriented demo scope is implemented end to end: controlled
+source ingestion, CRS/raster inspection, source-driven canonical construction,
+spatial and attribute reconciliation, topology repair proposals, temporal
+change detection, async jobs, durable persistence, role-aware access, and
+immutable audit events. The remaining deployment work is operational rather
+than a missing demo workflow: connect a managed model registry, queue service,
+object store, observability stack, and licensed basemap for a city deployment.
 
 ## UI/UX Direction
 

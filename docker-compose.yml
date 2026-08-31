@@ -1,6 +1,7 @@
 services:
   db:
     image: postgis/postgis:16-3.4
+    restart: unless-stopped
     environment:
       POSTGRES_DB: urbanland
       POSTGRES_USER: urbanland
@@ -14,17 +15,36 @@ services:
       retries: 10
   api:
     build: ./backend
+    restart: unless-stopped
     environment:
       DATABASE_URL: postgresql+psycopg://urbanland:urbanland_dev@db:5432/urbanland
+      ALLOW_SQLITE_FALLBACK: "false"
       DEMO_DATA_DIR: /app/data/generated
+      UPLOAD_DIR: /app/runtime/uploads
+      AUTH_ENABLED: "false"
+      CORS_ORIGINS: http://localhost:5173
     ports: ["8000:8000"]
-    volumes: ["./data/generated:/app/data/generated:ro"]
+    volumes: ["./data/generated:/app/data/generated:ro", "urbanland_uploads:/app/runtime/uploads"]
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   web:
     build: ./frontend
+    restart: unless-stopped
     ports: ["5173:80"]
-    depends_on: [api]
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
   postgis_data:
+  urbanland_uploads:

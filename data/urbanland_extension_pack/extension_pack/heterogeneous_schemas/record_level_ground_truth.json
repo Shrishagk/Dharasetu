@@ -1,0 +1,425 @@
+{
+  "usage_note": "Ground truth for khata_number -> canonical_parcel_id linkage. This is a DIFFERENT thing from crosswalk_answer_key.json: that file scores field/column mapping (schema matching); this file scores row/record matching (entity resolution) once the schema mapping tells you khata_number and survey_number are 'the same kind of identifier'. Do not feed this to the matcher.",
+  "links": [
+    {
+      "khata_number": "BBMP/W14/KH/00001",
+      "true_canonical_parcel_id": "CULR-56000001",
+      "true_survey_number": "125/1"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00002",
+      "true_canonical_parcel_id": "CULR-56000002",
+      "true_survey_number": "125/2"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00003",
+      "true_canonical_parcel_id": "CULR-56000003",
+      "true_survey_number": "125/3"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00004",
+      "true_canonical_parcel_id": "CULR-56000004",
+      "true_survey_number": "125/4"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00005",
+      "true_canonical_parcel_id": "CULR-56000005",
+      "true_survey_number": "125/5"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00006",
+      "true_canonical_parcel_id": "CULR-56000006",
+      "true_survey_number": "125/6"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00007",
+      "true_canonical_parcel_id": "CULR-56000007",
+      "true_survey_number": "125/7"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00008",
+      "true_canonical_parcel_id": "CULR-56000008",
+      "true_survey_number": "125/8"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00009",
+      "true_canonical_parcel_id": "CULR-56000009",
+      "true_survey_number": "125/9"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00010",
+      "true_canonical_parcel_id": "CULR-56000010",
+      "true_survey_number": "125/10"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00011",
+      "true_canonical_parcel_id": "CULR-56000011",
+      "true_survey_number": "125/11"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00012",
+      "true_canonical_parcel_id": "CULR-56000012",
+      "true_survey_number": "125/12"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00013",
+      "true_canonical_parcel_id": "CULR-56000013",
+      "true_survey_number": "126/1"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00014",
+      "true_canonical_parcel_id": "CULR-56000014",
+      "true_survey_number": "126/2"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00015",
+      "true_canonical_parcel_id": "CULR-56000015",
+      "true_survey_number": "126/3"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00016",
+      "true_canonical_parcel_id": "CULR-56000016",
+      "true_survey_number": "126/4"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00017",
+      "true_canonical_parcel_id": "CULR-56000017",
+      "true_survey_number": "126/5"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00018",
+      "true_canonical_parcel_id": "CULR-56000018",
+      "true_survey_number": "126/6"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00019",
+      "true_canonical_parcel_id": "CULR-56000019",
+      "true_survey_number": "126/7"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00020",
+      "true_canonical_parcel_id": "CULR-56000020",
+      "true_survey_number": "126/8"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00021",
+      "true_canonical_parcel_id": "CULR-56000021",
+      "true_survey_number": "126/9"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00022",
+      "true_canonical_parcel_id": "CULR-56000022",
+      "true_survey_number": "126/10"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00023",
+      "true_canonical_parcel_id": "CULR-56000023",
+      "true_survey_number": "126/11"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00024",
+      "true_canonical_parcel_id": "CULR-56000024",
+      "true_survey_number": "126/12"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00025",
+      "true_canonical_parcel_id": "CULR-56000025",
+      "true_survey_number": "127/1"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00026",
+      "true_canonical_parcel_id": "CULR-56000026",
+      "true_survey_number": "127/2"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00027",
+      "true_canonical_parcel_id": "CULR-56000027",
+      "true_survey_number": "127/3"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00028",
+      "true_canonical_parcel_id": "CULR-56000028",
+      "true_survey_number": "127/4"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00029",
+      "true_canonical_parcel_id": "CULR-56000029",
+      "true_survey_number": "127/5"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00030",
+      "true_canonical_parcel_id": "CULR-56000030",
+      "true_survey_number": "127/6"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00031",
+      "true_canonical_parcel_id": "CULR-56000031",
+      "true_survey_number": "127/7"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00032",
+      "true_canonical_parcel_id": "CULR-56000032",
+      "true_survey_number": "127/8"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00033",
+      "true_canonical_parcel_id": "CULR-56000033",
+      "true_survey_number": "127/9"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00034",
+      "true_canonical_parcel_id": "CULR-56000034",
+      "true_survey_number": "127/10"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00035",
+      "true_canonical_parcel_id": "CULR-56000035",
+      "true_survey_number": "127/11"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00036",
+      "true_canonical_parcel_id": "CULR-56000036",
+      "true_survey_number": "127/12"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00037",
+      "true_canonical_parcel_id": "CULR-56000037",
+      "true_survey_number": "128/1"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00038",
+      "true_canonical_parcel_id": "CULR-56000038",
+      "true_survey_number": "128/2"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00039",
+      "true_canonical_parcel_id": "CULR-56000039",
+      "true_survey_number": "128/3"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00040",
+      "true_canonical_parcel_id": "CULR-56000040",
+      "true_survey_number": "128/4"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00041",
+      "true_canonical_parcel_id": "CULR-56000041",
+      "true_survey_number": "128/5"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00042",
+      "true_canonical_parcel_id": "CULR-56000042",
+      "true_survey_number": "128/6"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00043",
+      "true_canonical_parcel_id": "CULR-56000043",
+      "true_survey_number": "128/7"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00044",
+      "true_canonical_parcel_id": "CULR-56000044",
+      "true_survey_number": "128/8"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00045",
+      "true_canonical_parcel_id": "CULR-56000045",
+      "true_survey_number": "128/9"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00046",
+      "true_canonical_parcel_id": "CULR-56000046",
+      "true_survey_number": "128/10"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00047",
+      "true_canonical_parcel_id": "CULR-56000047",
+      "true_survey_number": "128/11"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00048",
+      "true_canonical_parcel_id": "CULR-56000048",
+      "true_survey_number": "128/12"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00049",
+      "true_canonical_parcel_id": "CULR-56000049",
+      "true_survey_number": "129/1"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00050",
+      "true_canonical_parcel_id": "CULR-56000050",
+      "true_survey_number": "129/2"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00051",
+      "true_canonical_parcel_id": "CULR-56000051",
+      "true_survey_number": "129/3"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00052",
+      "true_canonical_parcel_id": "CULR-56000052",
+      "true_survey_number": "129/4"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00053",
+      "true_canonical_parcel_id": "CULR-56000053",
+      "true_survey_number": "129/5"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00054",
+      "true_canonical_parcel_id": "CULR-56000054",
+      "true_survey_number": "129/6"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00055",
+      "true_canonical_parcel_id": "CULR-56000055",
+      "true_survey_number": "129/7"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00056",
+      "true_canonical_parcel_id": "CULR-56000056",
+      "true_survey_number": "129/8"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00057",
+      "true_canonical_parcel_id": "CULR-56000057",
+      "true_survey_number": "129/9"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00058",
+      "true_canonical_parcel_id": "CULR-56000058",
+      "true_survey_number": "129/10"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00059",
+      "true_canonical_parcel_id": "CULR-56000059",
+      "true_survey_number": "129/11"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00060",
+      "true_canonical_parcel_id": "CULR-56000060",
+      "true_survey_number": "129/12"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00061",
+      "true_canonical_parcel_id": "CULR-56000061",
+      "true_survey_number": "130/1"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00062",
+      "true_canonical_parcel_id": "CULR-56000062",
+      "true_survey_number": "130/2"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00063",
+      "true_canonical_parcel_id": "CULR-56000063",
+      "true_survey_number": "130/3"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00064",
+      "true_canonical_parcel_id": "CULR-56000064",
+      "true_survey_number": "130/4"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00065",
+      "true_canonical_parcel_id": "CULR-56000065",
+      "true_survey_number": "130/5"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00066",
+      "true_canonical_parcel_id": "CULR-56000066",
+      "true_survey_number": "130/6"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00067",
+      "true_canonical_parcel_id": "CULR-56000067",
+      "true_survey_number": "130/7"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00068",
+      "true_canonical_parcel_id": "CULR-56000068",
+      "true_survey_number": "130/8"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00069",
+      "true_canonical_parcel_id": "CULR-56000069",
+      "true_survey_number": "130/9"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00070",
+      "true_canonical_parcel_id": "CULR-56000070",
+      "true_survey_number": "130/10"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00071",
+      "true_canonical_parcel_id": "CULR-56000071",
+      "true_survey_number": "130/11"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00072",
+      "true_canonical_parcel_id": "CULR-56000072",
+      "true_survey_number": "130/12"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00073",
+      "true_canonical_parcel_id": "CULR-56000101",
+      "true_survey_number": "131/1"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00074",
+      "true_canonical_parcel_id": "CULR-56000102",
+      "true_survey_number": "131/2"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00075",
+      "true_canonical_parcel_id": "CULR-56000103",
+      "true_survey_number": "131/3"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00076",
+      "true_canonical_parcel_id": "CULR-56000104",
+      "true_survey_number": "131/4"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00077",
+      "true_canonical_parcel_id": "CULR-56000105",
+      "true_survey_number": "131/5"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00078",
+      "true_canonical_parcel_id": "CULR-56000106",
+      "true_survey_number": "131/6"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00079",
+      "true_canonical_parcel_id": "CULR-56000107",
+      "true_survey_number": "132/1"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00080",
+      "true_canonical_parcel_id": "CULR-56000108",
+      "true_survey_number": "132/2"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00081",
+      "true_canonical_parcel_id": "CULR-56000109",
+      "true_survey_number": "132/3"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00082",
+      "true_canonical_parcel_id": "CULR-56000110",
+      "true_survey_number": "132/4"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00083",
+      "true_canonical_parcel_id": "CULR-56000111",
+      "true_survey_number": "132/5"
+    },
+    {
+      "khata_number": "BBMP/W14/KH/00084",
+      "true_canonical_parcel_id": "CULR-56000112",
+      "true_survey_number": "132/6"
+    }
+  ]
+}

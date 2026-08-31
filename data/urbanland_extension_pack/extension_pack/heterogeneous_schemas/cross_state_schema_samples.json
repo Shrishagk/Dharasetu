@@ -1,0 +1,38 @@
+{
+  "maharashtra_712_sample": {
+    "गट क्रमांक": "142/2अ",
+    "खातेदाराचे नाव": "Ganesh Patil",
+    "क्षेत्र (हे.आर.)": "0.12",
+    "गाव": "Demo Village"
+  },
+  "up_khasra_sample": {
+    "खसरा नंबर": "88/3",
+    "खाता नंबर": "K-0451",
+    "काश्तकार का नाम": "Suresh Kumar",
+    "क्षेत्रफल": "0.09 हेक्टेयर"
+  },
+  "tamil_nadu_patta_sample": {
+    "பட்டா எண்": "221/4",
+    "சர்வே எண்": "221/4",
+    "உரிமையாளர் பெயர்": "Meenakshi Sundaram",
+    "பரப்பளவு": "540 சதுர அடி"
+  },
+  "telangana_dharani_sample": {
+    "సర్వే నంబర్": "76/1",
+    "ఖాతా నంబర్": "TG-0982",
+    "యజమాని పేరు": "Lakshmi Narayana",
+    "విస్తీర్ణం": "0.08 ఎకరాలు"
+  },
+  "kerala_thandaper_sample": {
+    "Thandaper Number": "TDP-3312",
+    "Survey No": "19/2",
+    "Owner": "Anitha Menon",
+    "Extent (Cents)": "4.5"
+  },
+  "punjab_jamabandi_sample": {
+    "Khewat No": "45",
+    "Khasra No": "112/9",
+    "Owner Name": "Harpreet Singh",
+    "Area (Kanal-Marla)": "0-8"
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "records": [
+    {
+      "connection_id": "BWSSB-CONN-0001",
+      "survey_number": "5/7",
+      "consumer_name": "Kavya Shetty",
+      "connection_type": "Domestic",
+      "meter_number": "MTR-824899",
+      "connection_date": "2021-06-16",
+      "ward": "Demo Ward 14"
+    },
+    {
+      "connection_id": "BWSSB-CONN-0002",
+      "survey_number": "6/4",
+      "consumer_name": "Kiran Gowda",
+      "connection_type": "Commercial",
+      "meter_number": "MTR-637139",
+      "connection_date": "2024-05-10",
+      "ward": "Demo Ward 14"
+    },
+    {
+      "connection_id": "BWSSB-CONN-0003",
+      "survey_number": "4/1",
+      "consumer_name": "Srinivas Shetty",
+      "connection_type": "Domestic",
+      "meter_number": "MTR-888894",
+      "connection_date": "2020-07-17",
+      "ward": "Demo Ward 14"
+    },
+    {
+      "connection_id": "BWSSB-CONN-0004",
+      "survey_number": "3/1",
+      "consumer_name": "Priya Shetty",
+      "connection_type": "Commercial",
+      "meter_number": "MTR-849812",
+      "connection_date": "2025-05-17",
+      "ward": "Demo Ward 14"
+    },
+    {
+      "connection_id": "BWSSB-CONN-0005",
+      "survey_number": "3/1",
+      "consumer_name": "Sunita Bhat",
+      "connection_type": "Industrial",
+      "meter_number": "MTR-752414",
+      "connection_date": "2017-09-11",
+      "ward": "Demo Ward 14"
+    },
+    {
+      "connection_id": "BWSSB-CONN-0006",
+      "survey_number": "3/1",
+      "consumer_name": "Shwetha Shetty",
+      "connection_type": "Domestic",
+      "meter_number": "MTR-447402",
+      "connection_date": "2025-02-15",
+      "ward": "Demo Ward 14"
+    },
+    {
+      "connection_id": "BWSSB-CONN-0007",
+      "survey_number": "4/5",
+      "consumer_name": "Sunita Patil",
+      "connection_type": "Domestic",
+      "meter_number": "MTR-606099",
+      "connection_date": "2015-06-18",
+      "ward": "Demo Ward 14"
+    },
+    {
+      "connection_id": "BWSSB-CONN-0008",
+      "survey_number": "3/4",
+      "consumer_name": "Pooja Prasad",
+      "connection_type": "Industrial",
+      "meter_number": "MTR-789169",
+      "connection_date": "2018-02-12",
+      "ward": "Demo Ward 14"
+    },
+    {
+      "connection_id": "BWSSB-CONN-0009",
+      "survey_number": "6/1",
+      "consumer_name": "Rekha Chandra",
+      "connection_type": "Commercial",
+      "meter_number": "MTR-540169",
+      "connection_date": "2020-03-18",
+      "ward": "Demo Ward 14"
+    },
+    {
+      "connection_id": "BWSSB-CONN-0010",
+      "survey_number": "3/5",
+      "consumer_name": "Divya Kumar",
+      "connection_type": "Commercial",
+      "meter_number": "MTR-191432",
+      "connection_date": "2022-05-12",
+      "ward": "Demo Ward 14"
+    },
+    {
+      "connection_id": "BWSSB-CONN-0011",
+      "survey_number": "5/6",
+      "consumer_name": "Divya Murthy",
+      "connection_type": "Industrial",
+      "meter_number": "MTR-376129",
+      "connection_date": "2019-04-19",
+      "ward": "Demo Ward 14"
+    },
+    {
+      "connection_id": "BWSSB-CONN-0012",
+      "survey_number": "3/3",
+      "consumer_name": "Kiran Bhat",
+      "connection_type": "Commercial",
+      "meter_number": "MTR-151303",
+      "connection_date": "2025-06-10",
+      "ward": "Demo Ward 14"
+    }
+  ]
+}

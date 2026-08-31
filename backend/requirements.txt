@@ -4,3 +4,12 @@ pydantic==2.10.6
 python-multipart==0.0.20
 sqlalchemy==2.0.38
 psycopg[binary]==3.2.4
+
+# Optional geospatial production adapters.  The Python implementation keeps
+# deterministic fallbacks for CI, while the container uses these libraries
+# for authoritative CRS, GEOS validity/repair, and raster processing.
+numpy==2.2.3
+pyproj==3.7.1
+shapely==2.0.7
+rasterio==1.4.3
+scikit-learn==1.6.1

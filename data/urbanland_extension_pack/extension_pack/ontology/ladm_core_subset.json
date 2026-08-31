@@ -1,0 +1,12 @@
+{
+  "standard": "ISO 19152 / LADM (Land Administration Domain Model)",
+  "version_reference": "ISO 19152:2012, core package subset",
+  "classes_covered": [
+    "LA_SpatialUnit",
+    "LA_Party",
+    "LA_AdministrativeUnit",
+    "LA_RRR",
+    "LA_Source"
+  ],
+  "note": "Minimal subset used to label semantic mapping targets in this demo; not a full LADM implementation."
+}

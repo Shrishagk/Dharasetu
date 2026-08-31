@@ -1,0 +1,423 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "MUN-14-EXT-M1",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59726411,
+              12.97197424
+            ],
+            [
+              77.59735629,
+              12.97197424
+            ],
+            [
+              77.59735629,
+              12.97222576
+            ],
+            [
+              77.59726411,
+              12.97222576
+            ],
+            [
+              77.59726411,
+              12.97197424
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "MUN-14-EXT-M1",
+        "survey_number": "48/9",
+        "area_sq_m": 280.0,
+        "land_use": "Residential",
+        "ward": "Demo Ward 14"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-14-EXT-M2",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59737473,
+              12.97197424
+            ],
+            [
+              77.59746691,
+              12.97197424
+            ],
+            [
+              77.59746691,
+              12.97222576
+            ],
+            [
+              77.59737473,
+              12.97222576
+            ],
+            [
+              77.59737473,
+              12.97197424
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "MUN-14-EXT-M2",
+        "survey_number": "48/10",
+        "area_sq_m": 280.0,
+        "land_use": "Residential",
+        "ward": "Demo Ward 14"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-14-EXT-M3",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59754988,
+              12.97197424
+            ],
+            [
+              77.59836109,
+              12.97197424
+            ],
+            [
+              77.59836109,
+              12.97222576
+            ],
+            [
+              77.59754988,
+              12.97222576
+            ],
+            [
+              77.59754988,
+              12.97197424
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "MUN-14-EXT-M3",
+        "survey_number": "48/11",
+        "area_sq_m": 2464.0,
+        "land_use": "Residential",
+        "ward": "Demo Ward 14"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-14-EXT-05",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59726309,
+              12.97229007
+            ],
+            [
+              77.59746702,
+              12.97229043
+            ],
+            [
+              77.59746849,
+              12.97255869
+            ],
+            [
+              77.59726571,
+              12.97255886
+            ],
+            [
+              77.59726309,
+              12.97229007
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "MUN-14-EXT-05",
+        "survey_number": "51/1",
+        "area_sq_m": 659.4,
+        "land_use": "Residential",
+        "ward": "Demo Ward 14"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-14-EXT-06",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59755361,
+              12.97231172
+            ],
+            [
+              77.59776949,
+              12.97230909
+            ],
+            [
+              77.59776508,
+              12.97253475
+            ],
+            [
+              77.59755256,
+              12.9725368
+            ],
+            [
+              77.59755361,
+              12.97231172
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "MUN-14-EXT-06",
+        "survey_number": "51/2",
+        "area_sq_m": 582.88,
+        "land_use": "Mixed Use",
+        "ward": "Demo Ward 14"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-14-EXT-07",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59786085,
+              12.97229296
+            ],
+            [
+              77.5980493,
+              12.97229393
+            ],
+            [
+              77.59804869,
+              12.97255313
+            ],
+            [
+              77.59786065,
+              12.97255041
+            ],
+            [
+              77.59786085,
+              12.97229296
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "MUN-14-EXT-07",
+        "survey_number": "51/3",
+        "area_sq_m": 587.24,
+        "land_use": "Mixed Use",
+        "ward": "Demo Ward 14"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-14-EXT-08",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.5981515,
+              12.97229952
+            ],
+            [
+              77.59834725,
+              12.97229645
+            ],
+            [
+              77.59834818,
+              12.97255113
+            ],
+            [
+              77.59815306,
+              12.97255059
+            ],
+            [
+              77.5981515,
+              12.97229952
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "MUN-14-EXT-08",
+        "survey_number": "51/4",
+        "area_sq_m": 596.82,
+        "land_use": "Residential",
+        "ward": "Demo Ward 14"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-14-EXT-09",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59727016,
+              12.97261478
+            ],
+            [
+              77.59746493,
+              12.97261078
+            ],
+            [
+              77.59746296,
+              12.97288007
+            ],
+            [
+              77.59726837,
+              12.97288239
+            ],
+            [
+              77.59727016,
+              12.97261478
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "MUN-14-EXT-09",
+        "survey_number": "52/1",
+        "area_sq_m": 631.03,
+        "land_use": "Institutional",
+        "ward": "Demo Ward 14"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-14-EXT-10",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59755352,
+              12.97263118
+            ],
+            [
+              77.59776718,
+              12.97262699
+            ],
+            [
+              77.59776512,
+              12.97286367
+            ],
+            [
+              77.59755603,
+              12.97286751
+            ],
+            [
+              77.59755352,
+              12.97263118
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "MUN-14-EXT-10",
+        "survey_number": "52/2",
+        "area_sq_m": 603.69,
+        "land_use": "Institutional",
+        "ward": "Demo Ward 14"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-14-EXT-11",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59785625,
+              12.97262406
+            ],
+            [
+              77.59805237,
+              12.97262389
+            ],
+            [
+              77.59805598,
+              12.97287172
+            ],
+            [
+              77.59785636,
+              12.97286968
+            ],
+            [
+              77.59785625,
+              12.97262406
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "MUN-14-EXT-11",
+        "survey_number": "52/3",
+        "area_sq_m": 589.5,
+        "land_use": "Residential",
+        "ward": "Demo Ward 14"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "MUN-14-EXT-12",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59814435,
+              12.97261525
+            ],
+            [
+              77.59835721,
+              12.97261587
+            ],
+            [
+              77.59835679,
+              12.97288147
+            ],
+            [
+              77.59814043,
+              12.97287704
+            ],
+            [
+              77.59814435,
+              12.97261525
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "MUN-14-EXT-12",
+        "survey_number": "52/4",
+        "area_sq_m": 683.48,
+        "land_use": "Institutional",
+        "ward": "Demo Ward 14"
+      }
+    }
+  ]
+}

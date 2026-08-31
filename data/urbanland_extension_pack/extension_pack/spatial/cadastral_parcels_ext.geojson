@@ -1,0 +1,461 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-01",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59725789,
+              12.97197726
+            ],
+            [
+              77.59747414,
+              12.97197222
+            ],
+            [
+              77.59747863,
+              12.97222593
+            ],
+            [
+              77.59725439,
+              12.97222869
+            ],
+            [
+              77.59725789,
+              12.97197726
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-01",
+        "survey_number": "",
+        "area_sq_m": 671.77,
+        "land_use": "Residential",
+        "acquisition_date": "2026-07-15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-02",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59754867,
+              12.97197681
+            ],
+            [
+              77.59777342,
+              12.97197144
+            ],
+            [
+              77.59777036,
+              12.97222376
+            ],
+            [
+              77.59755068,
+              12.97222584
+            ],
+            [
+              77.59754867,
+              12.97197681
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-02",
+        "survey_number": "",
+        "area_sq_m": 672.66,
+        "land_use": "Residential",
+        "acquisition_date": "2026-07-15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-03",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59784378,
+              12.97197119
+            ],
+            [
+              77.59806314,
+              12.97197437
+            ],
+            [
+              77.5980663,
+              12.97222465
+            ],
+            [
+              77.59784422,
+              12.97222343
+            ],
+            [
+              77.59784378,
+              12.97197119
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-03",
+        "survey_number": "",
+        "area_sq_m": 669.66,
+        "land_use": "Residential",
+        "acquisition_date": "2026-07-15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-04",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59814083,
+              12.97197529
+            ],
+            [
+              77.59836047,
+              12.97197435
+            ],
+            [
+              77.59836216,
+              12.97222746
+            ],
+            [
+              77.59814093,
+              12.97222526
+            ],
+            [
+              77.59814083,
+              12.97197529
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-04",
+        "survey_number": "",
+        "area_sq_m": 669.57,
+        "land_use": "Residential",
+        "acquisition_date": "2026-07-15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-05",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59726313,
+              12.97229061
+            ],
+            [
+              77.59746699,
+              12.97228831
+            ],
+            [
+              77.59746685,
+              12.97255499
+            ],
+            [
+              77.59726008,
+              12.97255968
+            ],
+            [
+              77.59726313,
+              12.97229061
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-05",
+        "survey_number": "51/1",
+        "area_sq_m": 664.11,
+        "land_use": "Residential",
+        "acquisition_date": "2026-07-15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-06",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59755618,
+              12.97230771
+            ],
+            [
+              77.59776692,
+              12.97230773
+            ],
+            [
+              77.59776598,
+              12.97253791
+            ],
+            [
+              77.59755054,
+              12.97253948
+            ],
+            [
+              77.59755618,
+              12.97230771
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-06",
+        "survey_number": "51/2",
+        "area_sq_m": 594.32,
+        "land_use": "Mixed Use",
+        "acquisition_date": "2026-07-15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-07",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.5978641,
+              12.97229596
+            ],
+            [
+              77.59804762,
+              12.97229441
+            ],
+            [
+              77.59804985,
+              12.97255606
+            ],
+            [
+              77.59785914,
+              12.97255513
+            ],
+            [
+              77.5978641,
+              12.97229596
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-07",
+        "survey_number": "51/3",
+        "area_sq_m": 588.41,
+        "land_use": "Mixed Use",
+        "acquisition_date": "2026-07-15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-08",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59815465,
+              12.97229416
+            ],
+            [
+              77.59834885,
+              12.97229553
+            ],
+            [
+              77.59834746,
+              12.97254896
+            ],
+            [
+              77.5981555,
+              12.9725532
+            ],
+            [
+              77.59815465,
+              12.97229416
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-08",
+        "survey_number": "51/4",
+        "area_sq_m": 597.44,
+        "land_use": "Residential",
+        "acquisition_date": "2026-07-15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-09",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59726843,
+              12.97261114
+            ],
+            [
+              77.5974609,
+              12.97261432
+            ],
+            [
+              77.59746283,
+              12.9728827
+            ],
+            [
+              77.59726533,
+              12.97287821
+            ],
+            [
+              77.59726843,
+              12.97261114
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-09",
+        "survey_number": "52/1",
+        "area_sq_m": 630.42,
+        "land_use": "Institutional",
+        "acquisition_date": "2026-07-15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-10",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59755423,
+              12.97262697
+            ],
+            [
+              77.59776894,
+              12.97262793
+            ],
+            [
+              77.5977654,
+              12.97286799
+            ],
+            [
+              77.59755618,
+              12.9728653
+            ],
+            [
+              77.59755423,
+              12.97262697
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-10",
+        "survey_number": "52/2",
+        "area_sq_m": 612.28,
+        "land_use": "Institutional",
+        "acquisition_date": "2026-07-15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-11",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59785907,
+              12.97262172
+            ],
+            [
+              77.5980518,
+              12.97262491
+            ],
+            [
+              77.59805184,
+              12.97286818
+            ],
+            [
+              77.59785555,
+              12.97286719
+            ],
+            [
+              77.59785907,
+              12.97262172
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-11",
+        "survey_number": "52/3",
+        "area_sq_m": 574.04,
+        "land_use": "Residential",
+        "acquisition_date": "2026-07-15"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "CAD-14-EXT-12",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.59814424,
+              12.97261393
+            ],
+            [
+              77.59836014,
+              12.97261697
+            ],
+            [
+              77.59835992,
+              12.97288044
+            ],
+            [
+              77.5981448,
+              12.97287559
+            ],
+            [
+              77.59814424,
+              12.97261393
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "source_record_id": "CAD-14-EXT-12",
+        "survey_number": "52/4",
+        "area_sq_m": 683.31,
+        "land_use": "Institutional",
+        "acquisition_date": "2026-07-15"
+      }
+    }
+  ]
+}

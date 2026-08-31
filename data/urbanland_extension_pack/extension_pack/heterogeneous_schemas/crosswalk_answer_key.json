@@ -1,0 +1,107 @@
+{
+  "usage_note": "This is the EVALUATION target for Engine 2's schema matcher, analogous to benchmark_manifest.json for Engine 1. Do not feed this file to the matcher -- only use it to score the matcher's proposed field-to-concept mappings.",
+  "ladm_grounding_reference": "ontology/ladm_core_subset.json (compact subset of the real ISO 19152-1:2024 LADM core -- 4 base classes only, not the full standard)",
+  "fields": [
+    {
+      "source_file": "data/generated/revenue_records.csv (and ground_truth/cadastral/municipal parcels)",
+      "field_name": "survey_number",
+      "canonical_concept": "parcel_spatial_identifier",
+      "ladm_grounding": "LA_SpatialUnit.suID / .label",
+      "notes": "Revenue Dept's spatial identifier."
+    },
+    {
+      "source_file": "heterogeneous_schemas/khata_extract_karnataka.csv",
+      "field_name": "khata_number",
+      "canonical_concept": "parcel_administrative_identifier",
+      "ladm_grounding": "LA_BAUnit.uID",
+      "notes": "Khata is an ADMINISTRATIVE/fiscal unit (the tax account), not a spatial identifier -- it is a genuinely different LADM concept from survey_number, not just a renamed field. A real property in Karnataka carries both simultaneously."
+    },
+    {
+      "source_file": "heterogeneous_schemas/water_connection_register.json",
+      "field_name": "connection_id",
+      "canonical_concept": "utility_account_identifier",
+      "ladm_grounding": null,
+      "notes": "No clean home in core LADM (4 base classes) -- utility billing accounts are not a land-administration concept. Intentional: a correct matcher should be able to flag 'no confident LADM mapping' here rather than force one onto LA_BAUnit or LA_SpatialUnit."
+    },
+    {
+      "source_file": "revenue_records.csv / municipal_parcels / cadastral_parcels",
+      "field_name": "land_use",
+      "canonical_concept": "land_use_classification",
+      "ladm_grounding": null,
+      "notes": "Not in core LADM's 4 base classes. Lives in the Land-Use extension package added in LADM Edition II -- ground against that package if you go beyond the core 4, don't force it into LA_SpatialUnit."
+    },
+    {
+      "source_file": "khata_extract_karnataka.csv",
+      "field_name": "property_classification",
+      "canonical_concept": "land_use_classification",
+      "ladm_grounding": null,
+      "value_vocabulary_mapping": {
+        "Residential": "Residential",
+        "Non-Residential (Commercial)": "Commercial",
+        "Mixed (Res + Comm)": "Mixed use",
+        "Non-Residential (Institutional)": "Institutional"
+      },
+      "notes": "Same concept as land_use, different vocabulary AND different granularity -- a straight string-similarity match will not catch 'Non-Residential (Institutional)' -> 'Institutional' without also using the sample values, not just the field name."
+    },
+    {
+      "source_file": "water_connection_register.json",
+      "field_name": "premises_type",
+      "canonical_concept": "land_use_classification",
+      "ladm_grounding": null,
+      "value_vocabulary_mapping": {
+        "Domestic": [
+          "Residential"
+        ],
+        "Non-Domestic": [
+          "Commercial",
+          "Institutional"
+        ],
+        "Mixed": [
+          "Mixed use"
+        ]
+      },
+      "notes": "MANY-TO-ONE, not 1:1 -- both Commercial and Institutional land_use values collapse to the single 'Non-Domestic' utility tariff bucket. This is a coarser vocabulary, not a renamed one; a matcher that assumes bijective value mappings will get this wrong."
+    },
+    {
+      "source_file": "revenue_records.csv",
+      "field_name": "owner_reference",
+      "canonical_concept": "party_identifier",
+      "ladm_grounding": "LA_Party.partyID / .name"
+    },
+    {
+      "source_file": "khata_extract_karnataka.csv / water_connection_register.json",
+      "field_name": "registered_owner / registered_occupant",
+      "canonical_concept": "party_identifier",
+      "ladm_grounding": "LA_Party.partyID / .name",
+      "notes": "'Occupant' and 'owner' are not guaranteed to be the same LA_Party role in reality (tenant vs owner) -- this demo data treats them as identical for simplicity; flag this simplification if you present it, since a real matcher grounded in LADM's LA_PartyRoleType should NOT assume occupant==owner."
+    },
+    {
+      "source_file": "ground_truth/cadastral/municipal parcels",
+      "field_name": "area_sq_m",
+      "canonical_concept": "area",
+      "ladm_grounding": "LA_SpatialUnit.area (LA_AreaValue)",
+      "notes": "Unit is square metres."
+    },
+    {
+      "source_file": "khata_extract_karnataka.csv / water_connection_register.json",
+      "field_name": "built_up_area_sq_ft / plot_area_sqft",
+      "canonical_concept": "area",
+      "ladm_grounding": "LA_SpatialUnit.area (LA_AreaValue)",
+      "notes": "Same concept as area_sq_m but in SQUARE FEET -- standard for Indian municipal/property-tax records. Needs unit-aware reconciliation (x10.7639), not just a field-name match; a naive numeric-similarity check across sources will otherwise look like a mismatch."
+    },
+    {
+      "source_file": "cross_state_schema_samples.json (Tamil Nadu)",
+      "field_name": "town_survey_no",
+      "canonical_concept": "parcel_spatial_identifier",
+      "ladm_grounding": "LA_SpatialUnit.suID / .label",
+      "notes": "Same concept as survey_number, different numbering scheme (TSLR is urban-only in TN; rural TN uses Patta/Chitta survey numbers instead)."
+    },
+    {
+      "source_file": "cross_state_schema_samples.json (Hindi/NGDRS-style)",
+      "field_name": "खाता संख्या (khata_sankhya)",
+      "canonical_concept": "parcel_administrative_identifier",
+      "ladm_grounding": "LA_BAUnit.uID",
+      "notes": "Devanagari label for the same Khata concept as Karnataka's khata_number -- cross-script match, not just cross-field-name."
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "new_canonical_parcel_count": 12,
+  "many_to_many_cases": [
+    "merge: MUN-14-EXT-M1 + MUN-14-EXT-M2 -> CULR-14-EXT-01 (two legacy plots consolidated into one new-survey parcel)",
+    "split: MUN-14-EXT-M3 -> CULR-14-EXT-02, CULR-14-EXT-03, CULR-14-EXT-04 (one legacy plot subdivided into three new-survey parcels)"
+  ],
+  "zone_noise_summary_m": {
+    "cadastral_jitter_max_m": 0.35,
+    "municipal_jitter_max_m": 0.35
+  },
+  "correspondence": [
+    {
+      "municipal_source_record_id": "MUN-14-EXT-M1",
+      "true_canonical_parcel_ids": [
+        "CULR-14-EXT-01"
+      ]
+    },
+    {
+      "municipal_source_record_id": "MUN-14-EXT-M2",
+      "true_canonical_parcel_ids": [
+        "CULR-14-EXT-01"
+      ]
+    },
+    {
+      "municipal_source_record_id": "MUN-14-EXT-M3",
+      "true_canonical_parcel_ids": [
+        "CULR-14-EXT-02",
+        "CULR-14-EXT-03",
+        "CULR-14-EXT-04"
+      ]
+    },
+    {
+      "municipal_source_record_id": "MUN-14-EXT-05",
+      "true_canonical_parcel_ids": [
+        "CULR-14-EXT-05"
+      ]
+    },
+    {
+      "municipal_source_record_id": "MUN-14-EXT-06",
+      "true_canonical_parcel_ids": [
+        "CULR-14-EXT-06"
+      ]
+    },
+    {
+      "municipal_source_record_id": "MUN-14-EXT-07",
+      "true_canonical_parcel_ids": [
+        "CULR-14-EXT-07"
+      ]
+    },
+    {
+      "municipal_source_record_id": "MUN-14-EXT-08",
+      "true_canonical_parcel_ids": [
+        "CULR-14-EXT-08"
+      ]
+    },
+    {
+      "municipal_source_record_id": "MUN-14-EXT-09",
+      "true_canonical_parcel_ids": [
+        "CULR-14-EXT-09"
+      ]
+    },
+    {
+      "municipal_source_record_id": "MUN-14-EXT-10",
+      "true_canonical_parcel_ids": [
+        "CULR-14-EXT-10"
+      ]
+    },
+    {
+      "municipal_source_record_id": "MUN-14-EXT-11",
+      "true_canonical_parcel_ids": [
+        "CULR-14-EXT-11"
+      ]
+    },
+    {
+      "municipal_source_record_id": "MUN-14-EXT-12",
+      "true_canonical_parcel_ids": [
+        "CULR-14-EXT-12"
+      ]
+    }
+  ]
+}

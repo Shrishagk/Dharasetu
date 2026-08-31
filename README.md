@@ -71,15 +71,17 @@ Ground truth, conflict metadata, and success targets are saved in [data/generate
 | --- | --- |
 | `GET /health` | API readiness check |
 | `GET /api/v1/dashboard` | Counts and priority-ranked review cases |
-| `GET /api/v1/layers/{canonical|cadastral|municipal|buildings}` | GeoJSON map layers |
+| `GET /api/v1/layers/{canonical|cadastral|municipal|buildings|gnss|ground_truth}` | GeoJSON map layers |
 | `GET /api/v1/parcels/{canonical_parcel_id}` | Parcel geometry, evidence, and AI recommendation |
 | `GET /api/v1/sources` | Data source catalog with readiness, validation, provenance, and harmonization metadata |
 | `GET /api/v1/sources/{source_id}` | Source detail, schema, validation checks, and preview link |
-| `GET /api/v1/sources/{source_id}/preview` | GeoJSON preview for spatial sources |
-| `POST /api/v1/sources/upload` | Multipart GeoJSON, JSON, or CSV upload with metadata extraction and validation |
+| `GET /api/v1/sources/{source_id}/preview` | GeoJSON preview or raster metadata/embedding preview |
+| `POST /api/v1/sources/upload` | Multipart GeoJSON, JSON, CSV, GeoTIFF, PNG, or JPEG upload with metadata extraction, CRS normalization, and validation |
 | `POST /api/v1/sources/sample` | Load the deterministic Demo Ward 14 source bundle |
 | `POST /api/v1/sources/{source_id}/archive` | Archive a source while retaining its audit metadata |
 | `POST /api/v1/harmonization/jobs` | Start a harmonization run for two or more compatible sources |
+| `GET /api/v1/harmonization/jobs/{job_id}` | Poll an asynchronous job and inspect stage, retry, and result metadata |
+| `POST /api/v1/harmonization/jobs/{job_id}/retry` | Retry a failed job within its configured retry budget |
 | `GET /api/v1/engines/overview` | Active graph, LADM, and conformal engine configuration plus benchmark metrics |
 | `GET /api/v1/engines/graphs/{layer}` | Constructed feature graph nodes, embeddings, neighbourhoods, and edges for audit/debug views |
 | `POST /api/v1/engines/schema-match` | Map supplied fields to LADM concepts with candidates, rollup/drilldown reasoning, and validation |
@@ -103,9 +105,12 @@ The demo now executes an explainable fusion pipeline instead of returning precom
 2. **Semantic engine:** retrieves field-to-concept candidates from an ISO 19152/LADM vocabulary, applies rollup/drilldown reranking using field names and samples, and validates the result against an RDF-compatible LADM knowledge graph. The deterministic reranker is the offline demo fallback for a configured LLM provider.
 3. **Confidence engine:** applies a locally weighted split-conformal predictor at 95% coverage, accounting for geographic neighbourhood so the output can be a calibrated singleton, a human-review set, or a null result.
 
-The Data Sources workspace supports real multipart parsing and validation for GeoJSON/CSV uploads, while the local registry is intentionally held in API memory for fast demo reset. The geometry encoder is a dependency-light morphology fallback; production deployment should connect the adapter to Prithvi-EO-2.0 or Clay weights and persist the artifacts in PostGIS. Additional production increments are:
-
-1. Persist uploaded source layers, feature graphs, conformal calibration sets, and canonical records in PostGIS.
-2. Connect a hosted LLM reranker and a pretrained raster foundation-model adapter; keep the deterministic fallback for offline operation.
-3. Add authentication, role-based review permissions, immutable audit history, and dataset versioning.
-4. Add asynchronous raster processing and building segmentation for drone/ORI imagery.
+The Data Sources workspace supports GeoJSON, CSV, GeoTIFF, PNG, and JPEG
+ingestion. Uploaded vectors are CRS-normalized, geometrically audited, and
+area-backfilled when necessary; rasters receive metadata, contextual
+embeddings, and an explicit segmentation-adapter status. The service persists
+the complete reconciliation lineage in PostGIS (or SQLite for local/CI), runs
+jobs asynchronously, signs bearer tokens when enabled, applies a request rate
+limit, and writes immutable hash-chained audit records. Foundation-model and
+hosted-LLM integrations remain explicit adapters with honest offline fallback
+metadata.

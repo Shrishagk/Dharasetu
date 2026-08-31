@@ -1,0 +1,5 @@
+# Only needed to run backend/tests/test_api_integration.py locally / in CI.
+# Deliberately kept separate from requirements.txt so the production image
+# doesn't carry test-only dependencies.
+pytest>=8.0
+requests>=2.31
