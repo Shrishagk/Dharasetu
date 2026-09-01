@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import {
+  Activity,
   ArrowDown,
   ArrowRight,
   ArrowUpRight,
   BadgeCheck,
+  BarChart3,
   Check,
   ChevronDown,
   CircleAlert,
@@ -41,12 +43,13 @@ import {
   X,
 } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
+import { FusionLabs } from './FusionLabs';
 
 const API = '/api/v1';
 type DemoMode = 'sources' | 'harmonized' | 'compare';
 type DemoTab = 'Review Queue' | 'Data Sources' | 'Changes' | 'Export';
 type ControlTab = 'Inputs' | 'Processing' | 'Governance';
-type SourceKey = 'cadastral' | 'municipal' | 'buildings' | 'canonical';
+type SourceKey = 'cadastral' | 'municipal' | 'buildings' | 'gnss' | 'ground_truth' | 'canonical';
 type StatusFilter = 'needs-review' | 'all' | 'human' | 'conflicts' | 'assisted' | 'published';
 type IssueFilter = 'all' | 'boundary' | 'area' | 'duplicate' | 'land_use' | 'building';
 type ConfidenceFilter = 'all' | 'low' | 'medium' | 'high';
@@ -118,6 +121,9 @@ type Detail = {
   recommendation: string;
   explanation: string;
   lineage: { version: number; sources: string[] };
+  attributes?: { provenance?: any; confidence?: number };
+  topology?: { issue_count?: number; issues?: any[] };
+  changes?: any[];
   engine?: {
     spatial?: { algorithm?: string; matches?: any[]; many_to_many?: any[] };
     semantic?: { ontology?: { triple_count?: number }; semantic_backend?: { semantic_backend?: string; status?: string; fallback_active?: boolean }; mapped_field_count?: number };
@@ -130,6 +136,8 @@ const sourceOptions: { key: SourceKey; label: string; color: string }[] = [
   { key: 'cadastral', label: 'Cadastral', color: 'blue' },
   { key: 'municipal', label: 'Municipal', color: 'violet' },
   { key: 'buildings', label: 'Building footprints', color: 'amber' },
+  { key: 'gnss', label: 'GNSS / CORS', color: 'cyan' },
+  { key: 'ground_truth', label: 'Ground truth', color: 'rose' },
   { key: 'canonical', label: 'Harmonized boundary', color: 'green' },
 ];
 
@@ -183,6 +191,8 @@ function SeverityBadge({ parcel }: { parcel?: Parcel }) {
 function sourceKeyFromName(value: string) {
   const normalized = value.toLowerCase();
   if (normalized.includes('municipal')) return 'municipal' as SourceKey;
+  if (normalized.includes('gnss') || normalized.includes('cors')) return 'gnss' as SourceKey;
+  if (normalized.includes('ground')) return 'ground_truth' as SourceKey;
   if (normalized.includes('building') || normalized.includes('drone') || normalized.includes('imagery')) return 'buildings' as SourceKey;
   if (normalized.includes('canonical')) return 'canonical' as SourceKey;
   return 'cadastral' as SourceKey;
@@ -196,6 +206,9 @@ function mapSourceMatches(parcel: Parcel, filter: string) {
   if (filter === 'all') return true;
   const sources = (parcel.conflict_sources ?? []).join(' ').toLowerCase();
   if (filter === 'imagery') return sources.includes('imagery') || sources.includes('building') || sources.includes('drone');
+  if (filter === 'gnss') return sources.includes('gnss') || sources.includes('cors') || sources.includes('survey');
+  if (filter === 'utility') return sources.includes('utility') || sources.includes('water');
+  if (filter === 'revenue') return sources.includes('revenue') || sources.includes('khata');
   return sources.includes(filter);
 }
 
@@ -205,11 +218,12 @@ function matchesIssue(parcel: Parcel, issue: IssueFilter) {
   return text.includes(issue === 'land_use' ? 'land' : issue);
 }
 
-function MapView({ mode, compare, layerVisibility, selected, activeSource, basemapVisible, harmonizationReady, onSelect, onSourceSelect }: { mode: DemoMode; compare: number; layerVisibility: Record<SourceKey, boolean>; selected: Parcel | null; activeSource: SourceKey; basemapVisible: boolean; harmonizationReady: boolean; onSelect: (parcel: Parcel) => void; onSourceSelect: (source: SourceKey) => void }) {
+function MapView({ mode, compare, layerVisibility, selected, activeSource, basemapVisible, harmonizationReady, measureActive, onSelect, onSourceSelect, onMeasure }: { mode: DemoMode; compare: number; layerVisibility: Record<SourceKey, boolean>; selected: Parcel | null; activeSource: SourceKey; basemapVisible: boolean; harmonizationReady: boolean; measureActive: boolean; onSelect: (parcel: Parcel) => void; onSourceSelect: (source: SourceKey) => void; onMeasure: (metres: number | null) => void }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const onSelectRef = useRef(onSelect);
   const onSourceSelectRef = useRef(onSourceSelect);
+  const measurePointsRef = useRef<[number, number][]>([]);
   const [mapReady, setMapReady] = useState(false);
   const mapHarmonizationReady = harmonizationReady;
   const [mapError, setMapError] = useState('');
@@ -221,6 +235,8 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
       container: containerRef.current,
       center: [77.597, 12.971],
       zoom: 15.6,
+      pitch: 38,
+      bearing: -14,
       attributionControl: false,
       style: { version: 8, sources: { satellite: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 } }, layers: [{ id: 'satellite', type: 'raster', source: 'satellite' }] } as any,
     });
@@ -229,30 +245,32 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
     instance.on('load', async () => {
       try {
         setMapError('');
-        for (const name of ['canonical', 'cadastral', 'municipal', 'buildings'] as SourceKey[]) {
-          const data = name === 'canonical' ? { type: 'FeatureCollection', features: [] } : await fetch(`${API}/layers/${name}`).then((response) => response.json());
-          instance.addSource(name, { type: 'geojson', data });
-          instance.addLayer({
-            id: name,
-            type: name === 'buildings' ? 'fill' : 'line',
-            source: name,
-            paint: name === 'canonical'
-              ? { 'line-color': ['case', ['==', ['get', 'review_status'], 'HUMAN_REVIEW'], '#ef4444', ['==', ['get', 'review_status'], 'AI_ASSISTED'], '#f59e0b', '#3b82f6'], 'line-width': 2.5, 'line-opacity': 0.95 }
-              : name === 'buildings'
-                ? { 'fill-color': '#f59e0b', 'fill-opacity': 0.24, 'fill-outline-color': '#fcd34d' }
-                : { 'line-color': name === 'cadastral' ? '#60a5fa' : '#c4b5fd', 'line-width': 1.4, 'line-opacity': 0.72 },
-          } as any);
-          instance.on('click', name, (event) => {
-            if (name === 'canonical') {
+        const vectorLayers: { name: SourceKey; paint: any; type: 'line' | 'fill-extrusion' | 'circle' }[] = [
+          { name: 'canonical', type: 'line', paint: { 'line-color': ['case', ['==', ['get', 'review_status'], 'HUMAN_REVIEW'], '#ef4444', ['==', ['get', 'review_status'], 'AI_ASSISTED'], '#f59e0b', '#3b82f6'], 'line-width': 2.5, 'line-opacity': 0.95 } },
+          { name: 'cadastral', type: 'line', paint: { 'line-color': '#60a5fa', 'line-width': 1.4, 'line-opacity': 0.72 } },
+          { name: 'municipal', type: 'line', paint: { 'line-color': '#c4b5fd', 'line-width': 1.4, 'line-opacity': 0.72 } },
+          { name: 'buildings', type: 'fill-extrusion', paint: { 'fill-extrusion-color': '#f59e0b', 'fill-extrusion-height': ['coalesce', ['get', 'height_m'], ['get', 'height'], 8], 'fill-extrusion-base': 0, 'fill-extrusion-opacity': 0.48, 'fill-extrusion-vertical-gradient': true } },
+          { name: 'ground_truth', type: 'line', paint: { 'line-color': '#fb7185', 'line-width': 1.2, 'line-dasharray': [2, 1], 'line-opacity': 0.7 } },
+          { name: 'gnss', type: 'circle', paint: { 'circle-color': '#22d3ee', 'circle-radius': 5, 'circle-stroke-color': '#ecfeff', 'circle-stroke-width': 1.2, 'circle-opacity': 0.92 } },
+        ];
+        for (const layer of vectorLayers) {
+          const data = layer.name === 'canonical' ? { type: 'FeatureCollection', features: [] } : await fetch(`${API}/layers/${layer.name}`).then((response) => response.ok ? response.json() : { type: 'FeatureCollection', features: [] });
+          instance.addSource(layer.name, { type: 'geojson', data });
+          instance.addLayer({ id: layer.name, type: layer.type, source: layer.name, paint: layer.paint } as any);
+          instance.on('click', layer.name, (event) => {
+            if (layer.name === 'canonical') {
               const properties = event.features?.[0]?.properties;
               if (properties) onSelectRef.current(toParcel(properties));
-            } else onSourceSelectRef.current(name);
+            } else onSourceSelectRef.current(layer.name);
           });
-          instance.on('mouseenter', name, () => { instance.getCanvas().style.cursor = 'pointer'; });
-          instance.on('mouseleave', name, () => { instance.getCanvas().style.cursor = ''; });
+          instance.on('mouseenter', layer.name, () => { instance.getCanvas().style.cursor = 'pointer'; });
+          instance.on('mouseleave', layer.name, () => { instance.getCanvas().style.cursor = ''; });
         }
         instance.addSource('selected', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         instance.addLayer({ id: 'selected', type: 'line', source: 'selected', paint: { 'line-color': '#f5f5f7', 'line-width': 4, 'line-opacity': 0.98 } });
+        instance.addSource('measure', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        instance.addLayer({ id: 'measure-line', type: 'line', source: 'measure', paint: { 'line-color': '#fbbf24', 'line-width': 2, 'line-dasharray': [1.4, 1.2] } });
+        instance.addLayer({ id: 'measure-points', type: 'circle', source: 'measure', paint: { 'circle-color': '#fbbf24', 'circle-radius': 4 } });
         setMapReady(true);
       } catch { setMapError('Map layers are temporarily unavailable. The review queue remains available above.'); }
     });
@@ -262,12 +280,13 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
   useEffect(() => {
     if (!mapRef.current || !mapReady) return;
     const instance = mapRef.current;
-    const sources: SourceKey[] = ['cadastral', 'municipal', 'buildings'];
+    const sources: SourceKey[] = ['cadastral', 'municipal', 'buildings', 'gnss', 'ground_truth'];
     sources.forEach((id) => {
       if (!instance.getLayer(id)) return;
       const visible = mode === 'harmonized' ? false : layerVisibility[id];
       instance.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
-      if (id === 'buildings') instance.setPaintProperty(id, 'fill-opacity', id === activeSource ? 0.42 : 0.18);
+      if (id === 'buildings') instance.setPaintProperty(id, 'fill-extrusion-opacity', id === activeSource ? 0.82 : 0.38);
+      else if (id === 'gnss') instance.setPaintProperty(id, 'circle-opacity', id === activeSource ? 1 : 0.72);
       else {
         instance.setPaintProperty(id, 'line-opacity', id === activeSource ? 1 : mode === 'compare' ? Math.max(.2, 1 - compare / 100) : .62);
         instance.setPaintProperty(id, 'line-width', id === activeSource ? 3.2 : 1.35);
@@ -305,7 +324,91 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
     if (source) fetch(`${API}/parcels/${selected.canonical_parcel_id}`).then((response) => response.json()).then((data) => source.setData(data.parcel)).catch(() => undefined);
   }, [mapReady, selected]);
 
+  useEffect(() => {
+    const instance = mapRef.current;
+    if (!instance || !mapReady) return;
+    const haversine = (from: [number, number], to: [number, number]) => {
+      const toRad = (value: number) => value * Math.PI / 180;
+      const dLat = toRad(to[1] - from[1]);
+      const dLng = toRad(to[0] - from[0]);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(from[1])) * Math.cos(toRad(to[1])) * Math.sin(dLng / 2) ** 2;
+      return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    };
+    const onClick = (event: maplibregl.MapMouseEvent) => {
+      if (!measureActive) return;
+      const point: [number, number] = [event.lngLat.lng, event.lngLat.lat];
+      const points = [...measurePointsRef.current, point].slice(-2);
+      measurePointsRef.current = points;
+      const features: any[] = points.map((coordinate) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: coordinate }, properties: {} }));
+      if (points.length === 2) features.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: points }, properties: {} });
+      (instance.getSource('measure') as maplibregl.GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features });
+      onMeasure(points.length === 2 ? Math.round(haversine(points[0], points[1])) : null);
+    };
+    if (!measureActive) {
+      measurePointsRef.current = [];
+      (instance.getSource('measure') as maplibregl.GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: [] });
+      onMeasure(null);
+    }
+    instance.on('click', onClick);
+    return () => { instance.off('click', onClick); };
+  }, [mapReady, measureActive, onMeasure]);
+
   return <div ref={containerRef} className="map-canvas" role="application" aria-label="Interactive map of Demo Ward 14. Select a canonical parcel to inspect its evidence.">{mapError && <div className="map-error" role="alert"><CircleAlert size={18} aria-hidden="true" /><span>{mapError}</span></div>}</div>;
+}
+
+type SummaryCounts = {
+  processed: number;
+  autoApproved: number;
+  needsReview: number;
+  conflicts: number;
+  changes: number;
+};
+
+function AnalyticsPulse({ total, summaryCounts, reviewQueue, stagedRecordCount, hasHarmonizedRun, engineOverview, onOpenQueue }: { total: number; summaryCounts: SummaryCounts; reviewQueue: Parcel[]; stagedRecordCount: number; hasHarmonizedRun: boolean; engineOverview?: EngineOverview; onOpenQueue: () => void }) {
+  const approvalRate = total ? summaryCounts.autoApproved / total : 0;
+  const avgConfidence = reviewQueue.length ? reviewQueue.reduce((sum, parcel) => sum + parcel.overall_confidence, 0) / reviewQueue.length : 0;
+  const confidenceValues = reviewQueue.length
+    ? reviewQueue.slice(0, 8).map((parcel) => Math.round(parcel.overall_confidence * 100)).reverse()
+    : [0, 0, 0, 0, 0, 0, 0, 0];
+  const chartPoints = confidenceValues.map((value, index) => ({ x: 28 + index * 62, y: 154 - value * 1.1 }));
+  const linePath = chartPoints.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
+  const areaPath = `${linePath} L ${chartPoints[chartPoints.length - 1].x} 166 L ${chartPoints[0].x} 166 Z`;
+  const issueBuckets = [
+    ['Boundary', reviewQueue.filter((parcel) => (parcel.conflict_type || '').toLowerCase().includes('boundary')).length],
+    ['Area', reviewQueue.filter((parcel) => (parcel.conflict_type || '').toLowerCase().includes('area')).length],
+    ['Land use', reviewQueue.filter((parcel) => (parcel.conflict_type || '').toLowerCase().includes('land')).length],
+    ['Building', reviewQueue.filter((parcel) => (parcel.conflict_type || '').toLowerCase().includes('building')).length],
+  ] as [string, number][];
+  const maxIssue = Math.max(...issueBuckets.map(([, value]) => value), 1);
+
+  return <section className="analytics-pulse" aria-label="Ward 14 fusion analytics">
+    <div className="pulse-intro"><div><span className="section-label">Signal overview</span><h2>See the city resolve in real time.</h2><p>One live view of source alignment, review risk, and the evidence behind every canonical parcel.</p></div><button type="button" className="pulse-link" onClick={onOpenQueue}>Open priority queue <ArrowUpRight size={15} aria-hidden="true" /></button></div>
+    <div className="pulse-layout">
+      <div className="fusion-3d-card">
+        <div className="pulse-card-head"><div><span className="pulse-kicker"><Activity size={13} aria-hidden="true" /> SYSTEM STATE</span><strong>{hasHarmonizedRun ? 'Fusion engine online' : 'Fusion engine ready'}</strong></div><span className="pulse-live"><i /> LIVE</span></div>
+        <div className="fusion-3d-stage" aria-label={`3D fusion core showing ${hasHarmonizedRun ? `${Math.round(approvalRate * 100)} percent automated resolution` : 'ready for harmonization'}`}>
+          <div className="fusion-grid-plane" />
+          <div className="fusion-orbit fusion-orbit-one" />
+          <div className="fusion-orbit fusion-orbit-two" />
+          <div className="fusion-orbit fusion-orbit-three" />
+          <span className="fusion-node fusion-node-one">IMAGERY</span><span className="fusion-node fusion-node-two">CADASTRAL</span><span className="fusion-node fusion-node-three">MUNICIPAL</span><span className="fusion-node fusion-node-four">GNSS</span>
+          <div className="fusion-core"><span>FUSION CORE</span><strong>{hasHarmonizedRun ? `${Math.round(approvalRate * 100)}%` : 'READY'}</strong><small>{hasHarmonizedRun ? 'auto-resolved' : `${stagedRecordCount || '4'} source groups staged`}</small></div>
+          <div className="fusion-base"><span>CANONICAL URBAN LAND RECORD</span><strong>{hasHarmonizedRun ? formatNumber(total) : '—'}</strong></div>
+        </div>
+        <div className="pulse-foot"><span><i className="pulse-dot pulse-dot-green" /> {hasHarmonizedRun ? `${summaryCounts.autoApproved} auto-approved` : 'Awaiting first run'}</span><span><i className="pulse-dot pulse-dot-amber" /> {summaryCounts.conflicts} conflict signals</span></div>
+      </div>
+      <div className="trend-card">
+        <div className="pulse-card-head"><div><span className="pulse-kicker"><BarChart3 size={13} aria-hidden="true" /> REVIEW QUALITY</span><strong>Confidence across priority records</strong></div><span className="trend-value">{hasHarmonizedRun ? `${Math.round(avgConfidence * 100)}%` : '—'}<small> avg. signal</small></span></div>
+        <div className="trend-chart-wrap"><svg className="trend-chart" viewBox="0 0 520 190" role="img" aria-label="Line chart of confidence across the eight highest priority records"><defs><linearGradient id="confidence-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity=".26" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs><g className="chart-grid"><line x1="28" y1="44" x2="500" y2="44" /><line x1="28" y1="88" x2="500" y2="88" /><line x1="28" y1="132" x2="500" y2="132" /></g><path className="chart-area" d={areaPath} /><path className="chart-line" d={linePath} /><g className="chart-points">{chartPoints.map((point, index) => <circle key={index} cx={point.x} cy={point.y} r="4" />)}</g><text x="28" y="182" className="chart-axis-label">01</text><text x="248" y="182" className="chart-axis-label">04</text><text x="480" y="182" className="chart-axis-label">08</text><text x="5" y="48" className="chart-axis-label">100</text><text x="12" y="136" className="chart-axis-label">25</text></svg></div>
+        <div className="trend-caption"><span>Lowest confidence: <b>{hasHarmonizedRun && confidenceValues.length ? `${Math.min(...confidenceValues)}%` : '—'}</b></span><span><i className="pulse-dot pulse-dot-blue" /> Priority records · indexed by review risk</span></div>
+      </div>
+      <div className="issue-card">
+        <div className="pulse-card-head"><div><span className="pulse-kicker">ATTENTION MIX</span><strong>What needs a decision?</strong></div><span className="issue-total">{summaryCounts.needsReview}</span></div>
+        <div className="issue-bars">{issueBuckets.map(([label, value]) => <div className="issue-bar-row" key={label}><span>{label}</span><div><i style={{ width: `${(value / maxIssue) * 100}%` }} /></div><b>{value}</b></div>)}</div>
+        <div className="issue-card-note"><span><i className="pulse-dot pulse-dot-red" /> {summaryCounts.conflicts} open conflicts</span><span>{engineOverview?.confidence_engine?.coverage ? `${Math.round(engineOverview.confidence_engine.coverage * 100)}% calibrated` : 'Evidence-led review'}</span></div>
+      </div>
+    </div>
+  </section>;
 }
 
 function QueueTable({ rows, onSelect, emptyLabel, emptyDescription }: { rows: Parcel[]; onSelect: (parcel: Parcel) => void; emptyLabel: string; emptyDescription?: string }) {
@@ -356,7 +459,7 @@ function Lifecycle({ status }: { status: string }) {
 
 function TechnicalDetails({ detail }: { detail: Detail }) {
   const engine = detail.engine;
-  return <details className="technical-details"><summary>Technical details <ChevronDown size={14} /></summary><div className="technical-grid"><div><Network size={15} /><span><b>Graph matching</b><small>{engine?.spatial?.many_to_many?.length ? `${engine.spatial.many_to_many.length} many-to-many relation(s)` : 'No ambiguous relations'} · global allocation retained</small></span></div><div><Table2 size={15} /><span><b>LADM schema validation</b><small>{engine?.semantic?.mapped_field_count ?? 0} fields mapped · {engine?.semantic?.ontology?.triple_count ?? 0} ontology triples</small></span></div><div><ShieldCheck size={15} /><span><b>Semantic backend</b><small>{engine?.semantic?.semantic_backend?.semantic_backend || 'Not reported'} · {engine?.semantic?.semantic_backend?.status || 'status unavailable'}{engine?.semantic?.semantic_backend?.fallback_active ? ' · fallback active' : ''}</small></span></div><div><ShieldCheck size={15} /><span><b>Spatial conformal calibration</b><small>{engine?.confidence?.coverage ? `${Math.round(engine.confidence.coverage * 100)}% coverage` : '95% coverage'} · {engine?.confidence?.region ?? 'spatial'} region</small></span></div></div></details>;
+  return <details className="technical-details"><summary>Technical details <ChevronDown size={14} /></summary><div className="technical-grid"><div><Network size={15} /><span><b>Graph matching</b><small>{engine?.spatial?.matches?.length ?? 0} candidate match(es) · {engine?.spatial?.many_to_many?.length ? `${engine.spatial.many_to_many.length} many-to-many` : 'no ambiguous relations'} · {engine?.spatial?.algorithm || 'graph matcher'}</small></span></div><div><Table2 size={15} /><span><b>LADM schema validation</b><small>{engine?.semantic?.mapped_field_count ?? 0} fields mapped · {engine?.semantic?.ontology?.triple_count ?? 0} ontology triples</small></span></div><div><ShieldCheck size={15} /><span><b>Semantic backend</b><small>{engine?.semantic?.semantic_backend?.semantic_backend || 'Not reported'} · {engine?.semantic?.semantic_backend?.status || 'status unavailable'}{engine?.semantic?.semantic_backend?.fallback_active ? ' · fallback active' : ''}</small></span></div><div><ShieldCheck size={15} /><span><b>Spatial conformal calibration</b><small>{engine?.confidence?.coverage ? `${Math.round(engine.confidence.coverage * 100)}% coverage` : '95% coverage'} · {engine?.confidence?.region ?? 'spatial'} region</small></span></div><div><ScanLine size={15} /><span><b>Topology on this parcel</b><small>{detail.topology?.issue_count ? `${detail.topology.issue_count} repair signal(s)` : 'No local topology issue recorded'}</small></span></div><div><RefreshCw size={15} /><span><b>Change events</b><small>{detail.changes?.length ? `${detail.changes.length} temporal signal(s)` : 'No building/date change on this record'}</small></span></div></div></details>;
 }
 
 function VersionHistory({ selected, detail, changes }: { selected: Parcel; detail: Detail; changes: any[] }) {
@@ -377,16 +480,17 @@ function Inspector({ selected, detail, queue, activeSource, onSelect, onSourceSe
   return <aside className="inspector-panel modern-inspector" aria-labelledby="parcel-inspector-title"><div className="inspector-head"><div><span className="section-label">Parcel inspector</span><h2 id="parcel-inspector-title">{selected ? selected.canonical_parcel_id : 'Select a parcel'}</h2></div><span className={`record-status status-${selected ? selected.review_status.toLowerCase() : 'idle'}`}>{selected ? statusLabel(selected.review_status) : 'Awaiting input'}</span></div>{selected ? <><div className="record-summary"><div><span>Current record</span><strong>{selected.canonical_parcel_id}</strong><small>{selected.survey_number} · {titleCase(selected.land_use)}</small></div><SeverityBadge parcel={selected} /></div><div className="inspector-confidence"><div><span>Harmonization confidence</span><strong>{formatConfidence(selected.overall_confidence)} <small>{titleCase(confidenceBand(selected.overall_confidence))}</small></strong></div><div className="confidence-ring" style={{ '--progress': `${selected.overall_confidence * 100}%` } as CSSProperties} aria-label={`${formatConfidence(selected.overall_confidence)} harmonization confidence`}><span>{Math.round(selected.overall_confidence * 100)}</span></div></div><div className="inspector-status"><div><strong>{detail ? (selected.conflict_type ? titleCase(selected.conflict_type) : 'No unresolved conflicts') : 'Loading evidence'}</strong><span>{detail?.explanation ?? 'Fetching source evidence and recommendation for this parcel…'}</span></div></div><dl className="inspector-details"><div><dt>Land use</dt><dd>{selected.land_use}</dd></div><div><dt>Area</dt><dd>{formatNumber(selected.area_sq_m)} m²</dd></div><div><dt>Version</dt><dd>v{selected.canonical_version ?? 1}</dd></div></dl><Lifecycle status={selected.review_status} /><button type="button" className="selected-source-link" onClick={() => onSourceSelect(activeSource)}><span>Map highlight</span><b>{sourceOptions.find((source) => source.key === activeSource)?.label}</b></button><button type="button" className="inspector-link" onClick={() => document.getElementById('reconciliation')?.scrollIntoView({ behavior: 'smooth' })}>Open evidence workspace <ArrowDown size={14} aria-hidden="true" /></button></> : <div className="inspector-empty"><MapPinned size={29} aria-hidden="true" /><strong>Click a canonical parcel</strong><p>Evidence, recommendation, and source lineage will appear here.</p></div>}<div className="queue-preview"><div className="queue-preview-head"><span>Next records</span><b>{queue.length} need attention</b></div>{queue.slice(0, 4).map((parcel, index) => <button type="button" className={selected?.canonical_parcel_id === parcel.canonical_parcel_id ? 'selected' : ''} key={parcel.canonical_parcel_id} onClick={() => onSelect(parcel)}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{parcel.canonical_parcel_id}</strong><small>{titleCase(parcel.conflict_type)}</small></div><em>{formatConfidence(parcel.overall_confidence)}</em></button>)}</div></aside>;
 }
 
-function HarmonizationProgress({ total, job }: { total: number; job: boolean }) {
+function HarmonizationProgress({ total, job }: { total: number; job: any }) {
   if (!job) return null;
-  const stages = [['Matching records', total, total], ['Geometry validation', Math.max(0, total - 4), total], ['Conflict detection', Math.max(0, total - 8), total], ['Canonical generation', Math.max(0, total - 11), total]];
-  return <section className="harmonization-progress" aria-live="polite"><div><LoaderCircle size={18} className="spin" /><div><span>Harmonization in progress</span><small>Evidence is being validated before the next review queue refresh.</small></div><b>Estimated remaining —</b></div><div className="progress-stages">{stages.map(([label, value, max]) => <div key={label as string}><span>{label as string}</span><strong>{value as number} / {max as number}</strong><progress value={value as number} max={max as number} /></div>)}</div></section>;
+  const pipeline = job.stages?.length ? job.stages as string[] : ['Ingestion', 'CRS normalization', 'Spatial matching', 'Topology QA', 'Change detection', 'Confidence calibration', 'Canonical dataset generated'];
+  const currentIndex = Math.max(0, pipeline.findIndex((stage) => stage === job.stage));
+  return <section className="harmonization-progress" aria-live="polite"><div><LoaderCircle size={18} className="spin" /><div><span>{job.status === 'COMPLETED' ? 'Harmonization complete' : job.stage || 'Harmonization in progress'}</span><small>{job.id ? `${job.id} · ETL, CRS, matching, topology, change detection, and scoring.` : 'Evidence is being validated before the next review queue refresh.'}</small></div><b>{job.status || 'RUNNING'}</b></div><div className="progress-stages">{pipeline.map((label, index) => <div key={label}><span>{label}</span><strong>{index <= currentIndex ? total || '—' : 'queued'}</strong><progress value={index <= currentIndex ? 1 : 0} max={1} /></div>)}</div></section>;
 }
 
 function QueueFilters({ statusFilter, setStatusFilter, issueFilter, setIssueFilter, confidenceFilter, setConfidenceFilter, sourceFilter, setSourceFilter, sortMode, setSortMode, query, setQuery, onSubmit, onClear }: { statusFilter: StatusFilter; setStatusFilter: (value: StatusFilter) => void; issueFilter: IssueFilter; setIssueFilter: (value: IssueFilter) => void; confidenceFilter: ConfidenceFilter; setConfidenceFilter: (value: ConfidenceFilter) => void; sourceFilter: string; setSourceFilter: (value: string) => void; sortMode: SortMode; setSortMode: (value: SortMode) => void; query: string; setQuery: (value: string) => void; onSubmit?: () => void; onClear?: () => void }) {
   const statuses: [StatusFilter, string][] = [['needs-review', 'Needs attention'], ['human', 'Human review'], ['conflicts', 'Conflicts'], ['assisted', 'AI assisted'], ['published', 'Published']];
   const activeFilterCount = [statusFilter !== 'needs-review', issueFilter !== 'all', confidenceFilter !== 'all', sourceFilter !== 'all', Boolean(query.trim())].filter(Boolean).length;
-  return <div className="queue-filter-wrap"><label className="global-search queue-search"><Search size={16} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') onSubmit?.(); }} placeholder="Search parcel ID, survey number, or land use…" aria-label="Search parcel records" /><kbd>/</kbd></label><div className="filter-row"><span className="filter-label">Filter</span>{statuses.map(([value, label]) => <button type="button" key={value} className={statusFilter === value ? 'active' : ''} aria-pressed={statusFilter === value} onClick={() => setStatusFilter(value)}>{label}</button>)}<select aria-label="Issue filter" value={issueFilter} onChange={(event) => setIssueFilter(event.target.value as IssueFilter)}><option value="all">All issues</option><option value="boundary">Boundary</option><option value="area">Area</option><option value="duplicate">Duplicate</option><option value="land_use">Land use</option><option value="building">Building</option></select><select aria-label="Confidence filter" value={confidenceFilter} onChange={(event) => setConfidenceFilter(event.target.value as ConfidenceFilter)}><option value="all">All confidence</option><option value="low">Below 70%</option><option value="medium">70–85%</option><option value="high">Above 85%</option></select><select aria-label="Source filter" value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}><option value="all">All sources</option><option value="cadastral">Cadastral</option><option value="municipal">Municipal</option><option value="imagery">Imagery</option></select><label className="sort-control"><SlidersHorizontal size={14} aria-hidden="true" /><span>Sort by</span><select aria-label="Sort queue" value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)}><option value="priority">Priority</option><option value="severity">Severity</option><option value="confidence-low">Lowest confidence</option><option value="source">Source count</option><option value="conflict">Conflict type</option></select></label>{onClear && <button type="button" className="clear-queue-filters" onClick={onClear} disabled={!activeFilterCount}>Clear filters{activeFilterCount ? ` (${activeFilterCount})` : ''}</button>}</div></div>;
+  return <div className="queue-filter-wrap"><label className="global-search queue-search"><Search size={16} aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') onSubmit?.(); }} placeholder="Search parcel ID, survey number, or land use…" aria-label="Search parcel records" /><kbd>/</kbd></label><div className="filter-row"><span className="filter-label">Filter</span>{statuses.map(([value, label]) => <button type="button" key={value} className={statusFilter === value ? 'active' : ''} aria-pressed={statusFilter === value} onClick={() => setStatusFilter(value)}>{label}</button>)}<select aria-label="Issue filter" value={issueFilter} onChange={(event) => setIssueFilter(event.target.value as IssueFilter)}><option value="all">All issues</option><option value="boundary">Boundary</option><option value="area">Area</option><option value="duplicate">Duplicate</option><option value="land_use">Land use</option><option value="building">Building</option></select><select aria-label="Confidence filter" value={confidenceFilter} onChange={(event) => setConfidenceFilter(event.target.value as ConfidenceFilter)}><option value="all">All confidence</option><option value="low">Below 70%</option><option value="medium">70–85%</option><option value="high">Above 85%</option></select><select aria-label="Source filter" value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)}><option value="all">All sources</option><option value="cadastral">Cadastral</option><option value="municipal">Municipal</option><option value="imagery">Drone / ORI / buildings</option><option value="revenue">Revenue</option><option value="utility">Utility</option><option value="gnss">GNSS / CORS</option></select><label className="sort-control"><SlidersHorizontal size={14} aria-hidden="true" /><span>Sort by</span><select aria-label="Sort queue" value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)}><option value="priority">Priority</option><option value="severity">Severity</option><option value="confidence-low">Lowest confidence</option><option value="source">Source count</option><option value="conflict">Conflict type</option></select></label>{onClear && <button type="button" className="clear-queue-filters" onClick={onClear} disabled={!activeFilterCount}>Clear filters{activeFilterCount ? ` (${activeFilterCount})` : ''}</button>}</div></div>;
 }
 
 function SourceTab({ sources, onSelect }: { sources: Source[]; onSelect: (source: Source) => void }) {
@@ -445,6 +549,7 @@ export function CapabilityCenter({ sources, jobActive, lastRun, onRun, onOpenSou
     if (item.key === 'jobs') { if (!jobActive) onRun(); else notify('The harmonization run is already being tracked in live progress.'); return; }
     if (item.key === 'canonical') { document.getElementById('operations')?.scrollIntoView({ behavior: 'smooth' }); notify('Canonical output controls are available in the Export workspace.'); return; }
     if (item.key === 'review') { document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); return; }
+    if (['crs', 'geoai', 'topology', 'attributes', 'changes', 'audit'].includes(item.key)) { document.getElementById('fusion-labs')?.scrollIntoView({ behavior: 'smooth' }); return; }
     notify(`${item.title}: ${item.meta}`);
   };
   return <section className="capability-control-plane" aria-labelledby="capability-plane-title">
@@ -463,12 +568,14 @@ export function ModernDemoPage({ dashboard, sources, changes, selectedSourceIds,
   const [detailLoading, setDetailLoading] = useState(false);
   const [decisionLoading, setDecisionLoading] = useState(false);
   const [tab, setTab] = useState<DemoTab>('Review Queue');
-  const [job, setJob] = useState(false);
+  const [job, setJob] = useState<any>(null);
   const [focusMode, setFocusMode] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
   const [basemapVisible, setBasemapVisible] = useState(true);
+  const [measureActive, setMeasureActive] = useState(false);
+  const [measureMetres, setMeasureMetres] = useState<number | null>(null);
   const [activeSource, setActiveSource] = useState<SourceKey>('canonical');
-  const [layerVisibility, setLayerVisibility] = useState<Record<SourceKey, boolean>>({ cadastral: true, municipal: true, buildings: true, canonical: true });
+  const [layerVisibility, setLayerVisibility] = useState<Record<SourceKey, boolean>>({ cadastral: true, municipal: true, buildings: true, gnss: true, ground_truth: false, canonical: true });
   const [allParcels, setAllParcels] = useState<Parcel[]>([]);
   const [hasHarmonizedRun, setHasHarmonizedRun] = useState(runUnlocked);
   const [engineOverview, setEngineOverview] = useState<EngineOverview>();
@@ -563,18 +670,21 @@ export function ModernDemoPage({ dashboard, sources, changes, selectedSourceIds,
   };
   const run = async () => {
     if (job) return;
-    setJob(true); notify('Harmonization job started. The review queue will refresh when evidence validation completes.');
+    setJob({ status: 'PENDING', stage: 'Queued', stages: ['Ingestion', 'Validation', 'CRS normalization', 'Spatial matching', 'Topology QA and repair proposal', 'Change detection', 'Confidence calibration', 'Canonical dataset generated'] });
+    notify('Harmonization job started. The review queue will refresh when evidence validation completes.');
     try {
       const request: RequestInit = { method: 'POST' };
       if (selectedSourceIds.length >= 2) { request.headers = { 'Content-Type': 'application/json' }; request.body = JSON.stringify({ source_ids: selectedSourceIds }); }
       const response = await fetch(`${API}/harmonization/jobs`, request); const result = await response.json();
       if (!response.ok) throw new Error(result.detail || 'The harmonization job could not start.');
+      setJob(result);
       notify(`${result.id} queued. Processing ingestion, CRS, matching, topology, and evidence stages.`);
       let completed = result;
       for (let attempt = 0; attempt < 90; attempt += 1) {
         await new Promise((resolve) => window.setTimeout(resolve, 500));
         const statusResponse = await fetch(`${API}/harmonization/jobs/${result.id}`);
         completed = await statusResponse.json();
+        setJob(completed);
         if (completed.status === 'COMPLETED' || completed.status === 'FAILED') break;
       }
       if (completed.status !== 'COMPLETED') throw new Error(completed.error || 'The harmonization job did not complete.');
@@ -584,7 +694,7 @@ export function ModernDemoPage({ dashboard, sources, changes, selectedSourceIds,
       await refresh();
       notify(`${completed.id} completed: ${completed.result.auto_harmonized} records auto-harmonized, ${completed.result.conflicts} conflicts detected.`);
     } catch (error) { notify(error instanceof Error ? error.message : 'The harmonization API is unavailable.'); }
-    finally { setJob(false); }
+    finally { setJob(null); }
   };
   const decide = async (action: string) => {
     if (!selected || decisionLoading) return;
@@ -616,10 +726,12 @@ export function ModernDemoPage({ dashboard, sources, changes, selectedSourceIds,
   const statusText = !hasHarmonizedRun ? 'Run harmonization to populate results' : statusFilter === 'published' ? `${rows.length} published records` : statusFilter === 'all' ? `${rows.length} records in the current view` : `${rows.length} records need your attention`;
   const lastRun = hasHarmonizedRun ? dashboard?.latest_job : undefined;
   return <main className={`demo-shell modern-demo-shell ${focusMode ? 'demo-focus' : ''}`}><div className="page-container">
-    {!focusMode && <><div className="demo-topline"><div><span className="pill pill-green"><i /> LIVE DEMO · DEMO WARD 14</span><span className="demo-updated"><i className="live-dot" /> {hasHarmonizedRun ? `Synthetic benchmark · ${total} canonical parcels` : `${stagedRecordCount || 'Demo'} source records staged · results locked`}</span></div><div className="demo-top-actions"><ActionButton onClick={activateFocus} variant="secondary" icon={Focus}>Focus review</ActionButton><ActionButton onClick={run} disabled={job} icon={job ? RefreshCwIcon : Play}>{job ? 'Running harmonization…' : 'Run harmonization'}</ActionButton></div></div><div className="demo-heading"><div><span className="section-label">Operational workspace</span><h1>Review the record, <em>not the raw layers.</em></h1><p>Start with what needs attention, then inspect the map, recommendation, and evidence as one review workflow.</p></div><div className="job-status"><span>LAST PIPELINE RUN</span><strong>{job ? 'RUNNING' : lastRun?.status === 'COMPLETED' ? 'COMPLETED' : lastRun ? statusLabel(lastRun.status) : 'READY'}</strong><small>{lastRun ? lastRun.id : 'Awaiting a first run'}</small>{engineOverview?.run_id && <small className="engine-run-label">Engine {engineOverview.run_id}</small>}</div></div><div className="demo-metrics modern-metrics"><MetricButton label="Processed" value={summaryCounts.processed} caption="Records in Ward 14" active={statusFilter === 'all'} onClick={() => { setStatusFilter('all'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Auto-approved" value={summaryCounts.autoApproved} caption="Published canonical records" active={statusFilter === 'published'} onClick={() => { setStatusFilter('published'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Needs review" value={summaryCounts.needsReview} caption="Officer decision needed" active={statusFilter === 'needs-review'} onClick={() => { setStatusFilter('needs-review'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Conflicts" value={summaryCounts.conflicts} caption="Prioritized inconsistencies" active={statusFilter === 'conflicts'} onClick={() => { setStatusFilter('conflicts'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} tone="alert" /><MetricButton label="Changed" value={summaryCounts.changes} caption="Audit events" active={tab === 'Changes'} onClick={() => { setTab('Changes'); document.getElementById('operations')?.scrollIntoView({ behavior: 'smooth' }); }} /></div><HarmonizationProgress total={total} job={job} /><section id="review-queue" className="queue-overview" aria-labelledby="review-queue-title"><div className="queue-overview-head"><div><span className="section-label">Review queue</span><h2 id="review-queue-title">What needs my attention?</h2><p>{statusText}. Every KPI above filters this queue.</p></div><div className="queue-head-meta"><span><CircleAlert size={15} aria-hidden="true" /> {summaryCounts.conflicts} open conflicts</span><span><Clock3 size={15} aria-hidden="true" /> Updated after each run</span></div></div><QueueFilters statusFilter={statusFilter} setStatusFilter={setStatusFilter} issueFilter={issueFilter} setIssueFilter={setIssueFilter} confidenceFilter={confidenceFilter} setConfidenceFilter={setConfidenceFilter} sourceFilter={sourceFilter} setSourceFilter={setSourceFilter} sortMode={sortMode} setSortMode={setSortMode} query={query} setQuery={setQuery} onSubmit={submitSearch} onClear={clearFilters} />{dataError && <div className="workspace-alert" role="alert"><CircleAlert size={16} aria-hidden="true" /><span>{dataError} Refresh the page after the API is available.</span></div>}{parcelsLoading ? <QueueSkeleton /> : <QueueTable rows={rows} onSelect={inspect} emptyLabel={statusFilter === 'conflicts' ? 'No unresolved conflicts' : statusFilter === 'human' ? 'No records require human review' : statusFilter === 'published' ? 'No published records match these filters' : 'No records need your attention'} />}</section><section className="engine-snapshot" aria-label="Active fusion engine"><div><span>Fusion run</span><strong>{engineOverview?.run_id || 'Not available'}</strong></div><div><span>Spatial matcher</span><strong>{engineOverview?.spatial_engine?.name || 'Not reported'}</strong></div><div><span>Semantic backend</span><strong>{engineOverview?.semantic_engine?.semantic_backend?.semantic_backend || 'Not reported'}</strong></div><div><span>Confidence calibration</span><strong>{engineOverview?.confidence_engine?.coverage ? `${Math.round(engineOverview.confidence_engine.coverage * 100)}% coverage` : 'Not reported'}</strong></div></section></>}
+    {!focusMode && <><div className="demo-topline"><div><span className="pill pill-green"><i /> LIVE DEMO · DEMO WARD 14</span><span className="demo-updated"><i className="live-dot" /> {hasHarmonizedRun ? `Synthetic benchmark · ${total} canonical parcels` : `${stagedRecordCount || 'Demo'} source records staged · results locked`}</span></div><div className="demo-top-actions"><ActionButton onClick={activateFocus} variant="secondary" icon={Focus}>Focus review</ActionButton><ActionButton onClick={run} disabled={job} icon={job ? RefreshCwIcon : Play}>{job ? 'Running harmonization…' : 'Run harmonization'}</ActionButton></div></div><div className="demo-heading"><div><span className="section-label">Operational workspace</span><h1>Review the record, <em>not the raw layers.</em></h1><p>Start with what needs attention, then inspect the map, recommendation, and evidence as one review workflow.</p></div><div className="job-status"><span>LAST PIPELINE RUN</span><strong>{job ? 'RUNNING' : lastRun?.status === 'COMPLETED' ? 'COMPLETED' : lastRun ? statusLabel(lastRun.status) : 'READY'}</strong><small>{lastRun ? lastRun.id : 'Awaiting a first run'}</small>{engineOverview?.run_id && <small className="engine-run-label">Engine {engineOverview.run_id}</small>}</div></div><div className="demo-metrics modern-metrics"><MetricButton label="Processed" value={summaryCounts.processed} caption="Records in Ward 14" active={statusFilter === 'all'} onClick={() => { setStatusFilter('all'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Auto-approved" value={summaryCounts.autoApproved} caption="Published canonical records" active={statusFilter === 'published'} onClick={() => { setStatusFilter('published'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Needs review" value={summaryCounts.needsReview} caption="Officer decision needed" active={statusFilter === 'needs-review'} onClick={() => { setStatusFilter('needs-review'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Conflicts" value={summaryCounts.conflicts} caption="Prioritized inconsistencies" active={statusFilter === 'conflicts'} onClick={() => { setStatusFilter('conflicts'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} tone="alert" /><MetricButton label="Changed" value={summaryCounts.changes} caption="Audit events" active={tab === 'Changes'} onClick={() => { setTab('Changes'); document.getElementById('operations')?.scrollIntoView({ behavior: 'smooth' }); }} /></div><HarmonizationProgress total={total} job={job} /><section id="review-queue" className="queue-overview" aria-labelledby="review-queue-title"><div className="queue-overview-head"><div><span className="section-label">Review queue</span><h2 id="review-queue-title">What needs my attention?</h2><p>{statusText}. Every KPI above filters this queue.</p></div><div className="queue-head-meta"><span><CircleAlert size={15} aria-hidden="true" /> {summaryCounts.conflicts} open conflicts</span><span><Clock3 size={15} aria-hidden="true" /> Updated after each run</span></div></div><QueueFilters statusFilter={statusFilter} setStatusFilter={setStatusFilter} issueFilter={issueFilter} setIssueFilter={setIssueFilter} confidenceFilter={confidenceFilter} setConfidenceFilter={setConfidenceFilter} sourceFilter={sourceFilter} setSourceFilter={setSourceFilter} sortMode={sortMode} setSortMode={setSortMode} query={query} setQuery={setQuery} onSubmit={submitSearch} onClear={clearFilters} />{dataError && <div className="workspace-alert" role="alert"><CircleAlert size={16} aria-hidden="true" /><span>{dataError} Refresh the page after the API is available.</span></div>}{parcelsLoading ? <QueueSkeleton /> : <QueueTable rows={rows} onSelect={inspect} emptyLabel={statusFilter === 'conflicts' ? 'No unresolved conflicts' : statusFilter === 'human' ? 'No records require human review' : statusFilter === 'published' ? 'No published records match these filters' : 'No records need your attention'} />}</section><section className="engine-snapshot" aria-label="Active fusion engine"><div><span>Fusion run</span><strong>{engineOverview?.run_id || 'Not available'}</strong></div><div><span>Spatial matcher</span><strong>{engineOverview?.spatial_engine?.name || 'Not reported'}</strong></div><div><span>Semantic backend</span><strong>{engineOverview?.semantic_engine?.semantic_backend?.semantic_backend || 'Not reported'}</strong></div><div><span>Confidence calibration</span><strong>{engineOverview?.confidence_engine?.coverage ? `${Math.round(engineOverview.confidence_engine.coverage * 100)}% coverage` : 'Not reported'}</strong></div></section>
+    <CapabilityCenter sources={sources} jobActive={Boolean(job)} lastRun={lastRun} onRun={run} onOpenSources={() => { setTab('Data Sources'); document.getElementById('operations')?.scrollIntoView({ behavior: 'smooth' }); }} notify={notify} />
+    <FusionLabs ready={hasHarmonizedRun} notify={notify} onSelectParcel={(parcelId) => { const parcel = allParcels.find((item) => item.canonical_parcel_id === parcelId); if (parcel) inspect(parcel); else notify(`${parcelId} is not in the current canonical set.`); document.getElementById('map-workspace')?.scrollIntoView({ behavior: 'smooth' }); }} /></>}
     {focusMode && <div className="focus-header"><div><span className="section-label">Focus review</span><strong>{selected?.canonical_parcel_id || 'Select a parcel'}</strong><span>Investigation workspace</span></div><ActionButton onClick={() => setFocusMode(false)} variant="secondary" icon={Minimize2}>Exit focus</ActionButton></div>}
-    <section id="map-workspace" className="investigation-workspace" aria-labelledby="map-workspace-title"><div className="map-workspace modern-map-toolbar"><div className="map-toolbar-title"><span className="section-label">Map workspace</span><strong id="map-workspace-title">Spatial context for {selected?.canonical_parcel_id || 'the review queue'}</strong></div><div className="map-modes" role="group" aria-label="Map view"><button type="button" className={mode === 'sources' ? 'active' : ''} aria-pressed={mode === 'sources'} onClick={() => setMode('sources')}>Sources</button><button type="button" className={mode === 'harmonized' ? 'active' : ''} aria-pressed={mode === 'harmonized'} onClick={() => setMode('harmonized')}>AI harmonized</button><button type="button" className={mode === 'compare' ? 'active' : ''} aria-pressed={mode === 'compare'} onClick={() => setMode('compare')}>Before / after</button></div><div className="map-toolbar-actions"><button type="button" className="toolbar-button" onClick={() => { searchRef.current?.focus(); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }}><Search size={15} aria-hidden="true" /> Search parcel</button><button type="button" className={`toolbar-button ${layersOpen ? 'active' : ''}`} aria-pressed={layersOpen} onClick={() => setLayersOpen(!layersOpen)}><Layers3 size={15} aria-hidden="true" /> Layers</button><button type="button" className="toolbar-button" onClick={() => setMode('compare')}><SlidersHorizontal size={15} aria-hidden="true" /> Compare</button><button type="button" className="toolbar-button" onClick={() => notify('Measurement mode is ready for the selected map context.')}><Ruler size={15} aria-hidden="true" /> Measure</button><button type="button" className="toolbar-button" onClick={() => setBasemapVisible(!basemapVisible)} aria-pressed={!basemapVisible}><MapPinned size={15} aria-hidden="true" /> {basemapVisible ? 'Satellite' : 'Dark base'}</button></div>{mode === 'compare' && <label className="compare-slider"><span>Source</span><input type="range" min="10" max="100" value={compare} onChange={(event) => setCompare(Number(event.target.value))} aria-label="Compare source and canonical layers" /><span>Canonical</span></label>}{layersOpen && <div className="map-layer-popover"><div><span className="section-label">Map layers</span><button type="button" onClick={() => setLayersOpen(false)} aria-label="Close map layers"><X size={15} aria-hidden="true" /></button></div><p>Source layers</p>{sourceOptions.slice(0, 3).map((source) => <label key={source.key}><input type="checkbox" checked={layerVisibility[source.key]} onChange={() => setLayerVisibility((current) => ({ ...current, [source.key]: !current[source.key] }))} /><span className={`comparison-swatch swatch-${source.color}`} />{source.label}</label>)}<p>Canonical</p><label><input type="checkbox" checked={layerVisibility.canonical} onChange={() => setLayerVisibility((current) => ({ ...current, canonical: !current.canonical }))} /><span className="comparison-swatch swatch-green" />Harmonized boundary</label><p>Context</p><label><input type="checkbox" checked={basemapVisible} onChange={() => setBasemapVisible(!basemapVisible)} /><span className="layer-dot satellite-dot" />Satellite imagery</label><small>Blue = selection · green = validated · amber = warning · red = blocking conflict</small></div>}</div><div className="demo-map-grid"><div className="map-panel"><div className="map-panel-head"><div><span className="section-label">DEMO WARD 14 / BENGALURU</span><strong>Canonical parcel map</strong></div><span className="map-selected-label">{activeSource === 'canonical' ? 'Harmonized boundary' : `${sourceOptions.find((source) => source.key === activeSource)?.label} highlighted`}</span></div><MapView mode={mode} compare={compare} layerVisibility={layerVisibility} selected={selected} activeSource={activeSource} basemapVisible={basemapVisible} harmonizationReady={hasHarmonizedRun} onSelect={inspect} onSourceSelect={chooseSource} /><div className="map-legend"><span><i className="status-dot success" /> Trusted</span><span><i className="status-dot warning" /> AI assisted</span><span><i className="status-dot danger" /> Conflict</span></div><div className="map-note"><MapPinned size={13} aria-hidden="true" /> Click a parcel or source layer to inspect evidence</div></div><Inspector selected={selected} detail={detail} queue={reviewQueue} activeSource={activeSource} onSelect={inspect} onSourceSelect={chooseSource} /></div>{selected && detailLoading && <div className="detail-loading" role="status"><LoaderCircle size={18} className="spin" aria-hidden="true" /> Loading parcel evidence…</div>}{selected && detail && <ReconciliationWorkspace selected={selected} detail={detail} changes={changes} activeSource={activeSource} onSourceSelect={chooseSource} decisionLoading={decisionLoading} onDecision={decide} />}</section>
-    {!focusMode && <section id="operations" className="demo-operations modern-operations"><div className="operation-tabs" role="tablist" aria-label="Operational records"><div><span className="section-label">Operational records</span><strong>Audit and source workspace</strong></div>{(['Review Queue', 'Data Sources', 'Changes', 'Export'] as DemoTab[]).map((item) => <button type="button" role="tab" aria-selected={tab === item} key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{item}{item === 'Review Queue' && <span>{reviewQueue.length}</span>}</button>)}</div>{tab === 'Review Queue' ? <div className="queue-handoff"><BadgeCheck size={19} aria-hidden="true" /><div><strong>The review queue is at the top of this workspace.</strong><span>Use the filters to prioritize work, then open a record to connect its map, evidence, and recommendation.</span></div><button type="button" className="text-action" onClick={() => document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' })}>Return to queue <ArrowDown size={14} aria-hidden="true" /></button></div> : tab === 'Data Sources' ? <SourceTab sources={sources} onSelect={(source) => { chooseSource(sourceKeyFromName(source.dataset_type || source.name)); document.getElementById('reconciliation')?.scrollIntoView({ behavior: 'smooth' }); }} /> : tab === 'Changes' ? <div className="change-table">{changes.length ? changes.map((change) => <div key={change.id}><span>{change.parcel_id}</span><span>{change.old_value} <ArrowRight size={13} /> {change.new_value}</span><span>{change.officer}</span><code>v{change.version}</code></div>) : <div className="empty-table"><Clock3 size={18} aria-hidden="true" /><div><strong>No changes recorded</strong><span>Decisions will appear here after an officer reviews a record.</span></div></div>}</div> : <div className="export-panel"><div><span className="icon-box"><Download size={20} aria-hidden="true" /></span><div><h3>Canonical Urban Land Record</h3><p>Current confidence, review status, source lineage, and geometry for every parcel in the ward.</p></div></div><a className="button button-primary" href={`${API}/export/canonical.geojson`}><Download size={16} aria-hidden="true" /> Download GeoJSON</a></div>}</section>}
+    <section id="map-workspace" className="investigation-workspace" aria-labelledby="map-workspace-title"><div className="map-workspace modern-map-toolbar"><div className="map-toolbar-title"><span className="section-label">Map workspace</span><strong id="map-workspace-title">Spatial context for {selected?.canonical_parcel_id || 'the review queue'}</strong></div><div className="map-modes" role="group" aria-label="Map view"><button type="button" className={mode === 'sources' ? 'active' : ''} aria-pressed={mode === 'sources'} onClick={() => setMode('sources')}>Sources</button><button type="button" className={mode === 'harmonized' ? 'active' : ''} aria-pressed={mode === 'harmonized'} onClick={() => setMode('harmonized')}>AI harmonized</button><button type="button" className={mode === 'compare' ? 'active' : ''} aria-pressed={mode === 'compare'} onClick={() => setMode('compare')}>Before / after</button></div><div className="map-toolbar-actions"><button type="button" className="toolbar-button" onClick={() => { searchRef.current?.focus(); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }}><Search size={15} aria-hidden="true" /> Search parcel</button><button type="button" className={`toolbar-button ${layersOpen ? 'active' : ''}`} aria-pressed={layersOpen} onClick={() => setLayersOpen(!layersOpen)}><Layers3 size={15} aria-hidden="true" /> Layers</button><button type="button" className="toolbar-button" onClick={() => setMode('compare')}><SlidersHorizontal size={15} aria-hidden="true" /> Compare</button><button type="button" className={`toolbar-button ${measureActive ? 'active' : ''}`} aria-pressed={measureActive} onClick={() => setMeasureActive((current) => !current)}><Ruler size={15} aria-hidden="true" /> {measureActive ? (measureMetres != null ? `${measureMetres} m` : 'Click two points') : 'Measure'}</button><button type="button" className="toolbar-button" onClick={() => setBasemapVisible(!basemapVisible)} aria-pressed={!basemapVisible}><MapPinned size={15} aria-hidden="true" /> {basemapVisible ? 'Satellite' : 'Dark base'}</button></div>{mode === 'compare' && <label className="compare-slider"><span>Source</span><input type="range" min="10" max="100" value={compare} onChange={(event) => setCompare(Number(event.target.value))} aria-label="Compare source and canonical layers" /><span>Canonical</span></label>}{layersOpen && <div className="map-layer-popover"><div><span className="section-label">Map layers</span><button type="button" onClick={() => setLayersOpen(false)} aria-label="Close map layers"><X size={15} aria-hidden="true" /></button></div><p>Source layers</p>{sourceOptions.filter((source) => source.key !== 'canonical').map((source) => <label key={source.key}><input type="checkbox" checked={layerVisibility[source.key]} onChange={() => setLayerVisibility((current) => ({ ...current, [source.key]: !current[source.key] }))} /><span className={`comparison-swatch swatch-${source.color}`} />{source.label}</label>)}<p>Canonical</p><label><input type="checkbox" checked={layerVisibility.canonical} onChange={() => setLayerVisibility((current) => ({ ...current, canonical: !current.canonical }))} /><span className="comparison-swatch swatch-green" />Harmonized boundary</label><p>Context</p><label><input type="checkbox" checked={basemapVisible} onChange={() => setBasemapVisible(!basemapVisible)} /><span className="layer-dot satellite-dot" />Satellite imagery</label><small>Blue = selection · green = validated · amber = warning · red = blocking conflict</small></div>}</div><div className="demo-map-grid"><div className="map-panel"><div className="map-panel-head"><div><span className="section-label">DEMO WARD 14 / BENGALURU</span><strong>Canonical parcel map</strong></div><span className="map-selected-label">{activeSource === 'canonical' ? 'Harmonized boundary' : `${sourceOptions.find((source) => source.key === activeSource)?.label} highlighted`}</span></div><MapView mode={mode} compare={compare} layerVisibility={layerVisibility} selected={selected} activeSource={activeSource} basemapVisible={basemapVisible} harmonizationReady={hasHarmonizedRun} measureActive={measureActive} onSelect={inspect} onSourceSelect={chooseSource} onMeasure={setMeasureMetres} /><div className="map-legend"><span><i className="status-dot success" /> Trusted</span><span><i className="status-dot warning" /> AI assisted</span><span><i className="status-dot danger" /> Conflict</span></div><div className="map-note"><MapPinned size={13} aria-hidden="true" /> Click a parcel or source layer to inspect evidence</div></div><Inspector selected={selected} detail={detail} queue={reviewQueue} activeSource={activeSource} onSelect={inspect} onSourceSelect={chooseSource} /></div>{selected && detailLoading && <div className="detail-loading" role="status"><LoaderCircle size={18} className="spin" aria-hidden="true" /> Loading parcel evidence…</div>}{selected && detail && <ReconciliationWorkspace selected={selected} detail={detail} changes={changes} activeSource={activeSource} onSourceSelect={chooseSource} decisionLoading={decisionLoading} onDecision={decide} />}</section>
+    {!focusMode && <section id="operations" className="demo-operations modern-operations"><div className="operation-tabs" role="tablist" aria-label="Operational records"><div><span className="section-label">Operational records</span><strong>Audit and source workspace</strong></div>{(['Review Queue', 'Data Sources', 'Changes', 'Export'] as DemoTab[]).map((item) => <button type="button" role="tab" aria-selected={tab === item} key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{item}{item === 'Review Queue' && <span>{reviewQueue.length}</span>}</button>)}</div>{tab === 'Review Queue' ? <div className="queue-handoff"><BadgeCheck size={19} aria-hidden="true" /><div><strong>The review queue is at the top of this workspace.</strong><span>Use the filters to prioritize work, then open a record to connect its map, evidence, and recommendation.</span></div><button type="button" className="text-action" onClick={() => document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' })}>Return to queue <ArrowDown size={14} aria-hidden="true" /></button></div> : tab === 'Data Sources' ? <SourceTab sources={sources} onSelect={(source) => { chooseSource(sourceKeyFromName(source.dataset_type || source.name)); document.getElementById('reconciliation')?.scrollIntoView({ behavior: 'smooth' }); }} /> : tab === 'Changes' ? <div className="change-table">{changes.length ? changes.map((change) => <div key={change.id}><span>{change.parcel_id}</span><span>{change.old_value} <ArrowRight size={13} /> {change.new_value}</span><span>{change.officer}</span><code>v{change.version}</code></div>) : <div className="empty-table"><Clock3 size={18} aria-hidden="true" /><div><strong>No changes recorded</strong><span>Decisions will appear here after an officer reviews a record.</span></div></div>}</div> : <div className="export-panel export-panel-multi"><div><span className="icon-box"><Download size={20} aria-hidden="true" /></span><div><h3>Canonical Urban Land Record</h3><p>Geometry, confidence, review status, and source lineage for inter-departmental exchange.</p></div></div><div className="export-actions"><a className="button button-primary" href={`${API}/export/canonical.geojson`}><Download size={16} aria-hidden="true" /> GeoJSON</a><a className="button button-secondary" href={`${API}/export/reconciliation.csv`}><Download size={16} aria-hidden="true" /> Reconciliation CSV</a><a className="button button-secondary" href={`${API}/export/audit.json`}><Download size={16} aria-hidden="true" /> Audit JSON</a></div></div>}</section>}
     {!focusMode && <details className="keyboard-help"><summary><Keyboard size={15} /> Keyboard shortcuts <ChevronDown size={14} /></summary><div><span><b>J / K</b> Next or previous record</span><span><b>A</b> Approve</span><span><b>R</b> Keep in review</span><span><b>E</b> Evidence</span><span><b>M</b> Focus map</span><span><b>/</b> Search</span></div></details>}
   </div></main>;
 }
