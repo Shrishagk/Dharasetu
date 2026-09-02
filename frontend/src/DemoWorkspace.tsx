@@ -132,6 +132,24 @@ type Detail = {
   };
 };
 
+type MapContext = {
+  title: string;
+  display_label: string;
+  dataset_mode: string;
+  dataset_label: string;
+  disclaimer: string;
+  basemap?: { provider?: string; role?: string; label?: string };
+  coverage?: {
+    bbox?: number[];
+    fit_bounds?: number[];
+    center?: [number, number];
+    feature_count?: number;
+    layer_count?: number;
+    source_layers?: Record<string, { feature_count?: number; geometry_type?: string; bbox?: number[] | null }>;
+  };
+  coverage_boundary?: any;
+};
+
 const sourceOptions: { key: SourceKey; label: string; color: string }[] = [
   { key: 'cadastral', label: 'Cadastral', color: 'blue' },
   { key: 'municipal', label: 'Municipal', color: 'violet' },
@@ -145,6 +163,9 @@ const formatNumber = (value?: number) => value === undefined ? '—' : new Intl.
 const formatConfidence = (value?: number) => value === undefined ? '—' : `${Math.round(value * 100)}%`;
 const titleCase = (value?: string) => value ? value.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()) : 'No unresolved conflict';
 const statusLabel = (value?: string) => value ? titleCase(value) : 'Unknown';
+const isPublishedStatus = (value?: string) => value === 'AI_ACCEPTED' || value === 'OFFICER_APPROVED';
+const fallbackMapCenter: [number, number] = [77.597, 12.971];
+const fallbackMapBounds: [[number, number], [number, number]] = [[77.589, 12.967], [77.605, 12.975]];
 const toParcel = (properties: any): Parcel => ({
   canonical_parcel_id: String(properties.canonical_parcel_id ?? properties.id),
   survey_number: String(properties.survey_number ?? 'Not available'),
@@ -218,6 +239,19 @@ function matchesIssue(parcel: Parcel, issue: IssueFilter) {
   return text.includes(issue === 'land_use' ? 'land' : issue);
 }
 
+function geometryBounds(geometry: any) {
+  const bounds = new maplibregl.LngLatBounds();
+  const visit = (value: any): void => {
+    if (Array.isArray(value) && value.length >= 2 && typeof value[0] === 'number' && typeof value[1] === 'number') {
+      bounds.extend([value[0], value[1]]);
+      return;
+    }
+    if (Array.isArray(value)) value.forEach(visit);
+  };
+  visit(geometry?.coordinates);
+  return bounds.isEmpty() ? undefined : bounds;
+}
+
 function MapView({ mode, compare, layerVisibility, selected, activeSource, basemapVisible, harmonizationReady, measureActive, onSelect, onSourceSelect, onMeasure }: { mode: DemoMode; compare: number; layerVisibility: Record<SourceKey, boolean>; selected: Parcel | null; activeSource: SourceKey; basemapVisible: boolean; harmonizationReady: boolean; measureActive: boolean; onSelect: (parcel: Parcel) => void; onSourceSelect: (source: SourceKey) => void; onMeasure: (metres: number | null) => void }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -225,15 +259,21 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
   const onSourceSelectRef = useRef(onSourceSelect);
   const measurePointsRef = useRef<[number, number][]>([]);
   const [mapReady, setMapReady] = useState(false);
+  const [mapContext, setMapContext] = useState<MapContext>();
   const mapHarmonizationReady = harmonizationReady;
   const [mapError, setMapError] = useState('');
+  const [mapContextWarning, setMapContextWarning] = useState('');
   useEffect(() => { onSelectRef.current = onSelect; onSourceSelectRef.current = onSourceSelect; }, [onSelect, onSourceSelect]);
 
   useEffect(() => {
     if (!containerRef.current) return;
+    const contextRequest = fetch(`${API}/map/context`).then((response) => response.ok ? response.json() as Promise<MapContext> : Promise.reject(new Error('Map context unavailable'))).catch(() => {
+      setMapContextWarning('Data extent could not be verified; showing the safe demo fallback view.');
+      return undefined;
+    });
     const instance = new maplibregl.Map({
       container: containerRef.current,
-      center: [77.597, 12.971],
+      center: fallbackMapCenter,
       zoom: 15.6,
       pitch: 38,
       bearing: -14,
@@ -242,9 +282,12 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
     });
     mapRef.current = instance;
     instance.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+    instance.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: 'Esri World Imagery' }), 'bottom-left');
     instance.on('load', async () => {
       try {
         setMapError('');
+        const context = await contextRequest;
+        if (context) setMapContext(context);
         const vectorLayers: { name: SourceKey; paint: any; type: 'line' | 'fill-extrusion' | 'circle' }[] = [
           { name: 'canonical', type: 'line', paint: { 'line-color': ['case', ['==', ['get', 'review_status'], 'HUMAN_REVIEW'], '#ef4444', ['==', ['get', 'review_status'], 'AI_ASSISTED'], '#f59e0b', '#3b82f6'], 'line-width': 2.5, 'line-opacity': 0.95 } },
           { name: 'cadastral', type: 'line', paint: { 'line-color': '#60a5fa', 'line-width': 1.4, 'line-opacity': 0.72 } },
@@ -266,11 +309,22 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
           instance.on('mouseenter', layer.name, () => { instance.getCanvas().style.cursor = 'pointer'; });
           instance.on('mouseleave', layer.name, () => { instance.getCanvas().style.cursor = ''; });
         }
+        if (context?.coverage_boundary) {
+          instance.addSource('data-extent', { type: 'geojson', data: { type: 'FeatureCollection', features: [context.coverage_boundary] } });
+          instance.addLayer({ id: 'data-extent-fill', type: 'fill', source: 'data-extent', paint: { 'fill-color': '#34d399', 'fill-opacity': 0.025 } });
+          instance.addLayer({ id: 'data-extent-line', type: 'line', source: 'data-extent', paint: { 'line-color': '#34d399', 'line-width': 1.5, 'line-dasharray': [3, 2], 'line-opacity': 0.82 } });
+        }
         instance.addSource('selected', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         instance.addLayer({ id: 'selected', type: 'line', source: 'selected', paint: { 'line-color': '#f5f5f7', 'line-width': 4, 'line-opacity': 0.98 } });
         instance.addSource('measure', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         instance.addLayer({ id: 'measure-line', type: 'line', source: 'measure', paint: { 'line-color': '#fbbf24', 'line-width': 2, 'line-dasharray': [1.4, 1.2] } });
         instance.addLayer({ id: 'measure-points', type: 'circle', source: 'measure', paint: { 'circle-color': '#fbbf24', 'circle-radius': 4 } });
+        if (context?.coverage?.fit_bounds?.length === 4) {
+          const [west, south, east, north] = context.coverage.fit_bounds;
+          instance.fitBounds([[west, south], [east, north]], { padding: { top: 90, right: 30, bottom: 90, left: 30 }, maxZoom: 16.4, duration: 0 });
+          instance.setPitch(38);
+          instance.setBearing(-14);
+        }
         setMapReady(true);
       } catch { setMapError('Map layers are temporarily unavailable. The review queue remains available above.'); }
     });
@@ -297,6 +351,8 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
       instance.setPaintProperty('canonical', 'line-opacity', activeSource === 'canonical' ? 1 : mode === 'compare' ? compare / 100 : .95);
       instance.setPaintProperty('canonical', 'line-width', activeSource === 'canonical' ? 4 : 2.5);
     }
+    if (instance.getLayer('data-extent-line')) instance.setLayoutProperty('data-extent-line', 'visibility', 'visible');
+    if (instance.getLayer('data-extent-fill')) instance.setLayoutProperty('data-extent-fill', 'visibility', 'visible');
     if (instance.getLayer('satellite')) instance.setLayoutProperty('satellite', 'visibility', basemapVisible ? 'visible' : 'none');
   }, [activeSource, basemapVisible, compare, mapHarmonizationReady, layerVisibility, mapReady, mode]);
 
@@ -320,8 +376,13 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
 
   useEffect(() => {
     if (!mapRef.current || !mapReady || !selected) return;
-    const source = mapRef.current.getSource('selected') as maplibregl.GeoJSONSource | undefined;
-    if (source) fetch(`${API}/parcels/${selected.canonical_parcel_id}`).then((response) => response.json()).then((data) => source.setData(data.parcel)).catch(() => undefined);
+    const instance = mapRef.current;
+    const source = instance.getSource('selected') as maplibregl.GeoJSONSource | undefined;
+    if (source) fetch(`${API}/parcels/${selected.canonical_parcel_id}`).then((response) => response.json()).then((data) => {
+      source.setData(data.parcel);
+      const bounds = geometryBounds(data.parcel?.geometry);
+      if (bounds) instance.fitBounds(bounds, { padding: { top: 105, right: 55, bottom: 95, left: 55 }, maxZoom: 18.2, duration: 550 });
+    }).catch(() => undefined);
   }, [mapReady, selected]);
 
   useEffect(() => {
@@ -353,7 +414,20 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
     return () => { instance.off('click', onClick); };
   }, [mapReady, measureActive, onMeasure]);
 
-  return <div ref={containerRef} className="map-canvas" role="application" aria-label="Interactive map of Demo Ward 14. Select a canonical parcel to inspect its evidence.">{mapError && <div className="map-error" role="alert"><CircleAlert size={18} aria-hidden="true" /><span>{mapError}</span></div>}</div>;
+  const fitToDataExtent = () => {
+    const bounds = mapContext?.coverage?.fit_bounds;
+    const instance = mapRef.current;
+    if (!instance || !bounds || bounds.length !== 4) return;
+    instance.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: { top: 90, right: 30, bottom: 90, left: 30 }, maxZoom: 16.4, duration: 450 });
+    instance.setPitch(38);
+    instance.setBearing(-14);
+  };
+
+  return <div ref={containerRef} className="map-canvas" role="application" aria-label="Interactive map of the loaded land-data extent. Select a canonical parcel to inspect its evidence.">
+    {mapContext && <div className="map-context-badge" role="note"><div><span>{mapContext.dataset_label}</span><strong>{mapContext.coverage?.feature_count ?? 0} loaded features · {mapContext.coverage?.layer_count ?? 0} layers</strong></div><small>{mapContext.disclaimer}</small><button type="button" onClick={fitToDataExtent}>Fit to loaded extent</button></div>}
+    {mapContextWarning && <div className="map-context-warning" role="status"><CircleAlert size={14} aria-hidden="true" /> {mapContextWarning}</div>}
+    {mapError && <div className="map-error" role="alert"><CircleAlert size={18} aria-hidden="true" /><span>{mapError}</span></div>}
+  </div>;
 }
 
 type SummaryCounts = {
@@ -452,9 +526,11 @@ function SourceComparison({ selected, detail, activeSource, onSourceSelect }: { 
 
 function Lifecycle({ status }: { status: string }) {
   const normalized = status.toUpperCase();
-  const current = normalized === 'AI_ACCEPTED' ? 6 : normalized === 'EVIDENCE_REQUESTED' ? 7 : normalized === 'HUMAN_REVIEW' ? 6 : normalized === 'AI_ASSISTED' ? 5 : 5;
+  const published = isPublishedStatus(normalized);
+  const officerApproved = normalized === 'OFFICER_APPROVED';
+  const current = published ? 6 : normalized === 'EVIDENCE_REQUESTED' ? 7 : normalized === 'HUMAN_REVIEW' ? 6 : normalized === 'AI_ASSISTED' ? 5 : 5;
   const stages = ['Ingested', 'Validated', 'Matched', 'Harmonized', 'Recommended'];
-  return <div className="lifecycle"><div className="lifecycle-track">{stages.map((stage, index) => <div className={index < current - 1 ? 'complete' : index === current - 1 ? 'current' : ''} key={stage}><span>{index < current - 1 ? <Check size={12} /> : index + 1}</span><b>{stage}</b></div>)}</div><div className="lifecycle-branch"><span className={normalized === 'AI_ACCEPTED' ? 'current' : ''}><CircleCheck size={14} /> Approved <small>→ Published</small></span><span className={normalized !== 'AI_ACCEPTED' ? 'current' : ''}><CircleAlert size={14} /> In review <small>→ More evidence</small></span></div></div>;
+  return <div className="lifecycle"><div className="lifecycle-track">{stages.map((stage, index) => <div className={index < current - 1 ? 'complete' : index === current - 1 ? 'current' : ''} key={stage}><span>{index < current - 1 ? <Check size={12} /> : index + 1}</span><b>{stage}</b></div>)}</div><div className="lifecycle-branch"><span className={published ? 'current' : ''}><CircleCheck size={14} /> {officerApproved ? 'Officer approved' : 'Auto-approved'} <small>→ Published</small></span><span className={!published ? 'current' : ''}><CircleAlert size={14} /> In review <small>→ More evidence</small></span></div></div>;
 }
 
 function TechnicalDetails({ detail }: { detail: Detail }) {
@@ -471,7 +547,7 @@ function VersionHistory({ selected, detail, changes }: { selected: Parcel; detai
 function ReconciliationWorkspace({ selected, detail, changes, activeSource, onSourceSelect, decisionLoading, onDecision }: { selected: Parcel; detail: Detail; changes: any[]; activeSource: SourceKey; onSourceSelect: (source: SourceKey) => void; decisionLoading: boolean; onDecision: (action: string) => void }) {
   const [showVersions, setShowVersions] = useState(false);
   const sourceName = detail.source_values[0]?.source || 'Cadastral survey';
-  const isPublished = selected.review_status === 'AI_ACCEPTED';
+  const isPublished = isPublishedStatus(selected.review_status);
   const version = selected.canonical_version ?? detail.lineage.version ?? 1;
   return <section id="reconciliation" className="reconciliation-workspace modern-reconciliation" aria-labelledby="evidence-workspace-title"><div className="workspace-visual"><div className="workspace-heading"><div><span className="section-label">Evidence workspace</span><h2 id="evidence-workspace-title">Source comparison</h2><p>{detail.source_values.length} source record{detail.source_values.length === 1 ? '' : 's'} matched to the same canonical parcel.</p></div><button type="button" className="version-button" aria-expanded={showVersions} onClick={() => setShowVersions(!showVersions)}><BadgeCheck size={15} aria-hidden="true" /> v{version} <ChevronDown size={14} aria-hidden="true" /></button></div><SourceComparison selected={selected} detail={detail} activeSource={activeSource} onSourceSelect={onSourceSelect} /><div className="workspace-relationship"><span>Source relationships resolved</span><b>Geometry and attribute evidence are linked to this record.</b></div>{showVersions && <VersionHistory selected={selected} detail={detail} changes={changes} />}<TechnicalDetails detail={detail} /></div><div className="workspace-evidence"><span className="section-label">System recommendation</span><div className="recommendation-card"><h3>{isPublished ? `Canonical version ${version} published` : detail.recommendation.replace('Canonical record published at', 'Recommended canonical version')}</h3><p className="recommendation-why">{detail.explanation} {detail.evidence[0]?.detail ?? `The ${sourceName} record contributes the strongest available match signal.`}</p><div className="recommendation-action"><span>Recommended action</span><strong>{isPublished ? 'Published canonical record' : selected.conflict_type ? `Review ${sourceName} against contributing sources` : `Accept ${sourceName} as canonical evidence`}</strong></div></div><ConfidenceBreakdown selected={selected} /><div className="provenance-section"><div className="section-label">Record evidence</div><div className="provenance-list">{detail.source_values.slice(0, 4).map((item) => <div key={`${item.source}-${item.attribute}`}><span>{item.attribute}</span><strong>{item.source}</strong><small>{item.value} · Match score {formatConfidence(item.score)}{item.detail ? ` · ${item.detail}` : ''}</small></div>)}</div></div><div className="evidence-summary"><div><span>Supporting signals</span><b>{detail.evidence.length}</b></div><div><span>Warnings</span><b className={selected.conflict_type ? 'warning-text' : ''}>{selected.conflict_type ? detail.evidence.filter((item) => item.source !== 'Fusion engine').length || 1 : 0}</b></div></div><div className="decision-actions"><ActionButton onClick={() => onDecision('approve')} icon={decisionLoading ? LoaderCircle : Check} disabled={isPublished || decisionLoading}>{decisionLoading ? 'Saving decision…' : 'Approve recommendation'}</ActionButton><ActionButton onClick={() => onDecision('reject')} variant="secondary" icon={decisionLoading ? LoaderCircle : X} disabled={decisionLoading}>{decisionLoading ? 'Saving decision…' : 'Keep in review'}</ActionButton><button type="button" className="text-action" onClick={() => onDecision('request_evidence')} disabled={decisionLoading}>Request additional evidence <ArrowRight size={14} aria-hidden="true" /></button></div><div className="decision-note"><ShieldCheck size={15} aria-hidden="true" /> Authorized officer approval is required before a canonical change is published.</div></div></section>;
 }
@@ -494,7 +570,27 @@ function QueueFilters({ statusFilter, setStatusFilter, issueFilter, setIssueFilt
 }
 
 function SourceTab({ sources, onSelect }: { sources: Source[]; onSelect: (source: Source) => void }) {
-  return <div className="source-tab-grid">{sources.map((source) => <button type="button" className="source-tab-card" key={source.id} onClick={() => onSelect(source)}><div><span className="source-tab-status"><CircleCheck size={14} aria-hidden="true" /> {statusLabel(source.status)}</span><strong>{source.name}</strong><small>{source.provider_name || source.dataset_type || 'Registered source'} · {source.format} · {source.crs || 'CRS not provided'}</small></div><div><b>{statusLabel(source.validation_status || source.status)}</b><span>{formatNumber(source.feature_count ?? source.records)} records</span></div><ArrowRight size={15} aria-hidden="true" /></button>)}</div>;
+  if (!sources.length) {
+    return <div className="empty-table"><Database size={18} aria-hidden="true" /><div><strong>No data sources registered</strong><span>Registered feeds will appear here after they are added to the workspace.</span></div></div>;
+  }
+  return (
+    <div className="source-tab-grid" role="list">
+      {sources.map((source) => (
+        <button type="button" className="source-tab-card" key={source.id} onClick={() => onSelect(source)}>
+          <span className="source-tab-status"><CircleCheck size={14} aria-hidden="true" /> {statusLabel(source.status)}</span>
+          <span className="source-tab-identity">
+            <strong>{source.name}</strong>
+            <small>{source.provider_name || source.dataset_type || 'Registered source'} · {source.format} · {source.crs || 'CRS not provided'}</small>
+          </span>
+          <span className="source-tab-meta">
+            <b>{statusLabel(source.validation_status || source.status)}</b>
+            <small>{formatNumber(source.feature_count ?? source.records)} records</small>
+          </span>
+          <ArrowRight size={15} aria-hidden="true" />
+        </button>
+      ))}
+    </div>
+  );
 }
 
 type CapabilityItem = {
@@ -641,20 +737,22 @@ export function ModernDemoPage({ dashboard, sources, changes, selectedSourceIds,
     return () => { delete document.documentElement.dataset.harmonizationReady; };
   }, [hasHarmonizedRun]);
 
-  const reviewQueue = useMemo(() => allParcels.filter((parcel) => parcel.review_status !== 'AI_ACCEPTED'), [allParcels]);
+  const reviewQueue = useMemo(() => allParcels.filter((parcel) => !isPublishedStatus(parcel.review_status)), [allParcels]);
   const summaryCounts = useMemo(() => ({
     processed: total,
-    autoApproved: hasHarmonizedRun ? Math.max(0, total - reviewQueue.length) : 0,
+    autoApproved: hasHarmonizedRun ? allParcels.filter((parcel) => parcel.review_status === 'AI_ACCEPTED').length : 0,
     needsReview: reviewQueue.length,
     conflicts: reviewQueue.filter((parcel) => Boolean(parcel.conflict_type)).length,
-    changes: hasHarmonizedRun ? dashboard?.summary.changes ?? 0 : 0,
-  }), [allParcels, dashboard?.summary.changes, hasHarmonizedRun, reviewQueue.length, total]);
+    // The Changes tab is backed by persisted officer actions. Use that same
+    // list for the KPI so automated temporal detections never appear as edits.
+    changes: hasHarmonizedRun ? changes.length : 0,
+  }), [allParcels, changes.length, hasHarmonizedRun, reviewQueue.length, total]);
 
   const rows = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     const filtered = allParcels.filter((parcel) => {
       const searchMatches = !normalizedQuery || [parcel.canonical_parcel_id, parcel.survey_number, parcel.land_use, 'Demo Ward 14', 'owner reference'].join(' ').toLowerCase().includes(normalizedQuery);
-      const statusMatches = statusFilter === 'all' || (statusFilter === 'needs-review' && parcel.review_status !== 'AI_ACCEPTED') || (statusFilter === 'published' && parcel.review_status === 'AI_ACCEPTED') || (statusFilter === 'human' && parcel.review_status === 'HUMAN_REVIEW') || (statusFilter === 'conflicts' && Boolean(parcel.conflict_type)) || (statusFilter === 'assisted' && parcel.review_status === 'AI_ASSISTED');
+      const statusMatches = statusFilter === 'all' || (statusFilter === 'needs-review' && !isPublishedStatus(parcel.review_status)) || (statusFilter === 'published' && isPublishedStatus(parcel.review_status)) || (statusFilter === 'human' && parcel.review_status === 'HUMAN_REVIEW') || (statusFilter === 'conflicts' && Boolean(parcel.conflict_type) && !isPublishedStatus(parcel.review_status)) || (statusFilter === 'assisted' && parcel.review_status === 'AI_ASSISTED');
       const confidenceMatches = confidenceFilter === 'all' || confidenceBand(parcel.overall_confidence) === confidenceFilter;
       return searchMatches && statusMatches && matchesIssue(parcel, issueFilter) && confidenceMatches && mapSourceMatches(parcel, sourceFilter);
     });
@@ -716,7 +814,7 @@ export function ModernDemoPage({ dashboard, sources, changes, selectedSourceIds,
       if (event.key === '/') { event.preventDefault(); searchRef.current?.focus(); }
       if (event.key === 'e') document.getElementById('reconciliation')?.scrollIntoView({ behavior: 'smooth' });
       if (event.key === 'm') document.getElementById('map-workspace')?.scrollIntoView({ behavior: 'smooth' });
-       if (event.key === 'a' && selected && selected.review_status !== 'AI_ACCEPTED') decide('approve');
+       if (event.key === 'a' && selected && !isPublishedStatus(selected.review_status)) decide('approve');
       if (event.key === 'r' && selected) decide('reject');
       if (event.key === 'j' || event.key === 'k') { const index = rows.findIndex((parcel) => parcel.canonical_parcel_id === selected?.canonical_parcel_id); const nextIndex = event.key === 'j' ? Math.min(rows.length - 1, index + 1) : Math.max(0, index < 0 ? 0 : index - 1); if (rows[nextIndex]) inspect(rows[nextIndex]); }
     };
@@ -726,12 +824,11 @@ export function ModernDemoPage({ dashboard, sources, changes, selectedSourceIds,
   const statusText = !hasHarmonizedRun ? 'Run harmonization to populate results' : statusFilter === 'published' ? `${rows.length} published records` : statusFilter === 'all' ? `${rows.length} records in the current view` : `${rows.length} records need your attention`;
   const lastRun = hasHarmonizedRun ? dashboard?.latest_job : undefined;
   return <main className={`demo-shell modern-demo-shell ${focusMode ? 'demo-focus' : ''}`}><div className="page-container">
-    {!focusMode && <><div className="demo-topline"><div><span className="pill pill-green"><i /> LIVE DEMO · DEMO WARD 14</span><span className="demo-updated"><i className="live-dot" /> {hasHarmonizedRun ? `Synthetic benchmark · ${total} canonical parcels` : `${stagedRecordCount || 'Demo'} source records staged · results locked`}</span></div><div className="demo-top-actions"><ActionButton onClick={activateFocus} variant="secondary" icon={Focus}>Focus review</ActionButton><ActionButton onClick={run} disabled={job} icon={job ? RefreshCwIcon : Play}>{job ? 'Running harmonization…' : 'Run harmonization'}</ActionButton></div></div><div className="demo-heading"><div><span className="section-label">Operational workspace</span><h1>Review the record, <em>not the raw layers.</em></h1><p>Start with what needs attention, then inspect the map, recommendation, and evidence as one review workflow.</p></div><div className="job-status"><span>LAST PIPELINE RUN</span><strong>{job ? 'RUNNING' : lastRun?.status === 'COMPLETED' ? 'COMPLETED' : lastRun ? statusLabel(lastRun.status) : 'READY'}</strong><small>{lastRun ? lastRun.id : 'Awaiting a first run'}</small>{engineOverview?.run_id && <small className="engine-run-label">Engine {engineOverview.run_id}</small>}</div></div><div className="demo-metrics modern-metrics"><MetricButton label="Processed" value={summaryCounts.processed} caption="Records in Ward 14" active={statusFilter === 'all'} onClick={() => { setStatusFilter('all'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Auto-approved" value={summaryCounts.autoApproved} caption="Published canonical records" active={statusFilter === 'published'} onClick={() => { setStatusFilter('published'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Needs review" value={summaryCounts.needsReview} caption="Officer decision needed" active={statusFilter === 'needs-review'} onClick={() => { setStatusFilter('needs-review'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Conflicts" value={summaryCounts.conflicts} caption="Prioritized inconsistencies" active={statusFilter === 'conflicts'} onClick={() => { setStatusFilter('conflicts'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} tone="alert" /><MetricButton label="Changed" value={summaryCounts.changes} caption="Audit events" active={tab === 'Changes'} onClick={() => { setTab('Changes'); document.getElementById('operations')?.scrollIntoView({ behavior: 'smooth' }); }} /></div><HarmonizationProgress total={total} job={job} /><section id="review-queue" className="queue-overview" aria-labelledby="review-queue-title"><div className="queue-overview-head"><div><span className="section-label">Review queue</span><h2 id="review-queue-title">What needs my attention?</h2><p>{statusText}. Every KPI above filters this queue.</p></div><div className="queue-head-meta"><span><CircleAlert size={15} aria-hidden="true" /> {summaryCounts.conflicts} open conflicts</span><span><Clock3 size={15} aria-hidden="true" /> Updated after each run</span></div></div><QueueFilters statusFilter={statusFilter} setStatusFilter={setStatusFilter} issueFilter={issueFilter} setIssueFilter={setIssueFilter} confidenceFilter={confidenceFilter} setConfidenceFilter={setConfidenceFilter} sourceFilter={sourceFilter} setSourceFilter={setSourceFilter} sortMode={sortMode} setSortMode={setSortMode} query={query} setQuery={setQuery} onSubmit={submitSearch} onClear={clearFilters} />{dataError && <div className="workspace-alert" role="alert"><CircleAlert size={16} aria-hidden="true" /><span>{dataError} Refresh the page after the API is available.</span></div>}{parcelsLoading ? <QueueSkeleton /> : <QueueTable rows={rows} onSelect={inspect} emptyLabel={statusFilter === 'conflicts' ? 'No unresolved conflicts' : statusFilter === 'human' ? 'No records require human review' : statusFilter === 'published' ? 'No published records match these filters' : 'No records need your attention'} />}</section><section className="engine-snapshot" aria-label="Active fusion engine"><div><span>Fusion run</span><strong>{engineOverview?.run_id || 'Not available'}</strong></div><div><span>Spatial matcher</span><strong>{engineOverview?.spatial_engine?.name || 'Not reported'}</strong></div><div><span>Semantic backend</span><strong>{engineOverview?.semantic_engine?.semantic_backend?.semantic_backend || 'Not reported'}</strong></div><div><span>Confidence calibration</span><strong>{engineOverview?.confidence_engine?.coverage ? `${Math.round(engineOverview.confidence_engine.coverage * 100)}% coverage` : 'Not reported'}</strong></div></section>
+    {!focusMode && <><div className="demo-topline"><div><span className="pill pill-green"><i /> LIVE DEMO · DEMO WARD 14</span><span className="demo-updated"><i className="live-dot" /> {hasHarmonizedRun ? `Synthetic benchmark · ${total} canonical parcels` : `${stagedRecordCount || 'Demo'} source records staged · results locked`}</span></div><div className="demo-top-actions"><ActionButton onClick={activateFocus} variant="secondary" icon={Focus}>Focus review</ActionButton><ActionButton onClick={run} disabled={job} icon={job ? RefreshCwIcon : Play}>{job ? 'Running harmonization…' : 'Run harmonization'}</ActionButton></div></div><div className="demo-heading"><div><span className="section-label">Operational workspace</span><h1>Review the record, <em>not the raw layers.</em></h1><p>Start with what needs attention, then inspect the map, recommendation, and evidence as one review workflow.</p></div><div className="job-status"><span>LAST PIPELINE RUN</span><strong>{job ? 'RUNNING' : lastRun?.status === 'COMPLETED' ? 'COMPLETED' : lastRun ? statusLabel(lastRun.status) : 'READY'}</strong><small>{lastRun ? lastRun.id : 'Awaiting a first run'}</small>{engineOverview?.run_id && <small className="engine-run-label">Engine {engineOverview.run_id}</small>}</div></div><div className="demo-metrics modern-metrics"><MetricButton label="Processed" value={summaryCounts.processed} caption="Records in Ward 14" active={statusFilter === 'all'} onClick={() => { setStatusFilter('all'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Auto-approved" value={summaryCounts.autoApproved} caption="Published canonical records" active={statusFilter === 'published'} onClick={() => { setStatusFilter('published'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Needs review" value={summaryCounts.needsReview} caption="Officer decision needed" active={statusFilter === 'needs-review'} onClick={() => { setStatusFilter('needs-review'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} /><MetricButton label="Conflicts" value={summaryCounts.conflicts} caption="Prioritized inconsistencies" active={statusFilter === 'conflicts'} onClick={() => { setStatusFilter('conflicts'); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }} tone="alert" /><MetricButton label="Changed" value={summaryCounts.changes} caption="Latest decision per record" active={tab === 'Changes'} onClick={() => { setTab('Changes'); document.getElementById('operations')?.scrollIntoView({ behavior: 'smooth' }); }} /></div><HarmonizationProgress total={total} job={job} /><section id="review-queue" className="queue-overview" aria-labelledby="review-queue-title"><div className="queue-overview-head"><div><span className="section-label">Review queue</span><h2 id="review-queue-title">What needs my attention?</h2><p>{statusText}. Every KPI above filters this queue.</p></div><div className="queue-head-meta"><span><CircleAlert size={15} aria-hidden="true" /> {summaryCounts.conflicts} open conflicts</span><span><Clock3 size={15} aria-hidden="true" /> Updated after each run</span></div></div><QueueFilters statusFilter={statusFilter} setStatusFilter={setStatusFilter} issueFilter={issueFilter} setIssueFilter={setIssueFilter} confidenceFilter={confidenceFilter} setConfidenceFilter={setConfidenceFilter} sourceFilter={sourceFilter} setSourceFilter={setSourceFilter} sortMode={sortMode} setSortMode={setSortMode} query={query} setQuery={setQuery} onSubmit={submitSearch} onClear={clearFilters} />{dataError && <div className="workspace-alert" role="alert"><CircleAlert size={16} aria-hidden="true" /><span>{dataError} Refresh the page after the API is available.</span></div>}{parcelsLoading ? <QueueSkeleton /> : <QueueTable rows={rows} onSelect={inspect} emptyLabel={statusFilter === 'conflicts' ? 'No unresolved conflicts' : statusFilter === 'human' ? 'No records require human review' : statusFilter === 'published' ? 'No published records match these filters' : 'No records need your attention'} />}</section><section className="engine-snapshot" aria-label="Active fusion engine"><div><span>Fusion run</span><strong>{engineOverview?.run_id || 'Not available'}</strong></div><div><span>Spatial matcher</span><strong>{engineOverview?.spatial_engine?.name || 'Not reported'}</strong></div><div><span>Semantic backend</span><strong>{engineOverview?.semantic_engine?.semantic_backend?.semantic_backend || 'Not reported'}</strong></div><div><span>Confidence calibration</span><strong>{engineOverview?.confidence_engine?.coverage ? `${Math.round(engineOverview.confidence_engine.coverage * 100)}% coverage` : 'Not reported'}</strong></div></section>
     <CapabilityCenter sources={sources} jobActive={Boolean(job)} lastRun={lastRun} onRun={run} onOpenSources={() => { setTab('Data Sources'); document.getElementById('operations')?.scrollIntoView({ behavior: 'smooth' }); }} notify={notify} />
     <FusionLabs ready={hasHarmonizedRun} notify={notify} onSelectParcel={(parcelId) => { const parcel = allParcels.find((item) => item.canonical_parcel_id === parcelId); if (parcel) inspect(parcel); else notify(`${parcelId} is not in the current canonical set.`); document.getElementById('map-workspace')?.scrollIntoView({ behavior: 'smooth' }); }} /></>}
     {focusMode && <div className="focus-header"><div><span className="section-label">Focus review</span><strong>{selected?.canonical_parcel_id || 'Select a parcel'}</strong><span>Investigation workspace</span></div><ActionButton onClick={() => setFocusMode(false)} variant="secondary" icon={Minimize2}>Exit focus</ActionButton></div>}
-    <section id="map-workspace" className="investigation-workspace" aria-labelledby="map-workspace-title"><div className="map-workspace modern-map-toolbar"><div className="map-toolbar-title"><span className="section-label">Map workspace</span><strong id="map-workspace-title">Spatial context for {selected?.canonical_parcel_id || 'the review queue'}</strong></div><div className="map-modes" role="group" aria-label="Map view"><button type="button" className={mode === 'sources' ? 'active' : ''} aria-pressed={mode === 'sources'} onClick={() => setMode('sources')}>Sources</button><button type="button" className={mode === 'harmonized' ? 'active' : ''} aria-pressed={mode === 'harmonized'} onClick={() => setMode('harmonized')}>AI harmonized</button><button type="button" className={mode === 'compare' ? 'active' : ''} aria-pressed={mode === 'compare'} onClick={() => setMode('compare')}>Before / after</button></div><div className="map-toolbar-actions"><button type="button" className="toolbar-button" onClick={() => { searchRef.current?.focus(); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }}><Search size={15} aria-hidden="true" /> Search parcel</button><button type="button" className={`toolbar-button ${layersOpen ? 'active' : ''}`} aria-pressed={layersOpen} onClick={() => setLayersOpen(!layersOpen)}><Layers3 size={15} aria-hidden="true" /> Layers</button><button type="button" className="toolbar-button" onClick={() => setMode('compare')}><SlidersHorizontal size={15} aria-hidden="true" /> Compare</button><button type="button" className={`toolbar-button ${measureActive ? 'active' : ''}`} aria-pressed={measureActive} onClick={() => setMeasureActive((current) => !current)}><Ruler size={15} aria-hidden="true" /> {measureActive ? (measureMetres != null ? `${measureMetres} m` : 'Click two points') : 'Measure'}</button><button type="button" className="toolbar-button" onClick={() => setBasemapVisible(!basemapVisible)} aria-pressed={!basemapVisible}><MapPinned size={15} aria-hidden="true" /> {basemapVisible ? 'Satellite' : 'Dark base'}</button></div>{mode === 'compare' && <label className="compare-slider"><span>Source</span><input type="range" min="10" max="100" value={compare} onChange={(event) => setCompare(Number(event.target.value))} aria-label="Compare source and canonical layers" /><span>Canonical</span></label>}{layersOpen && <div className="map-layer-popover"><div><span className="section-label">Map layers</span><button type="button" onClick={() => setLayersOpen(false)} aria-label="Close map layers"><X size={15} aria-hidden="true" /></button></div><p>Source layers</p>{sourceOptions.filter((source) => source.key !== 'canonical').map((source) => <label key={source.key}><input type="checkbox" checked={layerVisibility[source.key]} onChange={() => setLayerVisibility((current) => ({ ...current, [source.key]: !current[source.key] }))} /><span className={`comparison-swatch swatch-${source.color}`} />{source.label}</label>)}<p>Canonical</p><label><input type="checkbox" checked={layerVisibility.canonical} onChange={() => setLayerVisibility((current) => ({ ...current, canonical: !current.canonical }))} /><span className="comparison-swatch swatch-green" />Harmonized boundary</label><p>Context</p><label><input type="checkbox" checked={basemapVisible} onChange={() => setBasemapVisible(!basemapVisible)} /><span className="layer-dot satellite-dot" />Satellite imagery</label><small>Blue = selection · green = validated · amber = warning · red = blocking conflict</small></div>}</div><div className="demo-map-grid"><div className="map-panel"><div className="map-panel-head"><div><span className="section-label">DEMO WARD 14 / BENGALURU</span><strong>Canonical parcel map</strong></div><span className="map-selected-label">{activeSource === 'canonical' ? 'Harmonized boundary' : `${sourceOptions.find((source) => source.key === activeSource)?.label} highlighted`}</span></div><MapView mode={mode} compare={compare} layerVisibility={layerVisibility} selected={selected} activeSource={activeSource} basemapVisible={basemapVisible} harmonizationReady={hasHarmonizedRun} measureActive={measureActive} onSelect={inspect} onSourceSelect={chooseSource} onMeasure={setMeasureMetres} /><div className="map-legend"><span><i className="status-dot success" /> Trusted</span><span><i className="status-dot warning" /> AI assisted</span><span><i className="status-dot danger" /> Conflict</span></div><div className="map-note"><MapPinned size={13} aria-hidden="true" /> Click a parcel or source layer to inspect evidence</div></div><Inspector selected={selected} detail={detail} queue={reviewQueue} activeSource={activeSource} onSelect={inspect} onSourceSelect={chooseSource} /></div>{selected && detailLoading && <div className="detail-loading" role="status"><LoaderCircle size={18} className="spin" aria-hidden="true" /> Loading parcel evidence…</div>}{selected && detail && <ReconciliationWorkspace selected={selected} detail={detail} changes={changes} activeSource={activeSource} onSourceSelect={chooseSource} decisionLoading={decisionLoading} onDecision={decide} />}</section>
-    {!focusMode && <section id="operations" className="demo-operations modern-operations"><div className="operation-tabs" role="tablist" aria-label="Operational records"><div><span className="section-label">Operational records</span><strong>Audit and source workspace</strong></div>{(['Review Queue', 'Data Sources', 'Changes', 'Export'] as DemoTab[]).map((item) => <button type="button" role="tab" aria-selected={tab === item} key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{item}{item === 'Review Queue' && <span>{reviewQueue.length}</span>}</button>)}</div>{tab === 'Review Queue' ? <div className="queue-handoff"><BadgeCheck size={19} aria-hidden="true" /><div><strong>The review queue is at the top of this workspace.</strong><span>Use the filters to prioritize work, then open a record to connect its map, evidence, and recommendation.</span></div><button type="button" className="text-action" onClick={() => document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' })}>Return to queue <ArrowDown size={14} aria-hidden="true" /></button></div> : tab === 'Data Sources' ? <SourceTab sources={sources} onSelect={(source) => { chooseSource(sourceKeyFromName(source.dataset_type || source.name)); document.getElementById('reconciliation')?.scrollIntoView({ behavior: 'smooth' }); }} /> : tab === 'Changes' ? <div className="change-table">{changes.length ? changes.map((change) => <div key={change.id}><span>{change.parcel_id}</span><span>{change.old_value} <ArrowRight size={13} /> {change.new_value}</span><span>{change.officer}</span><code>v{change.version}</code></div>) : <div className="empty-table"><Clock3 size={18} aria-hidden="true" /><div><strong>No changes recorded</strong><span>Decisions will appear here after an officer reviews a record.</span></div></div>}</div> : <div className="export-panel export-panel-multi"><div><span className="icon-box"><Download size={20} aria-hidden="true" /></span><div><h3>Canonical Urban Land Record</h3><p>Geometry, confidence, review status, and source lineage for inter-departmental exchange.</p></div></div><div className="export-actions"><a className="button button-primary" href={`${API}/export/canonical.geojson`}><Download size={16} aria-hidden="true" /> GeoJSON</a><a className="button button-secondary" href={`${API}/export/reconciliation.csv`}><Download size={16} aria-hidden="true" /> Reconciliation CSV</a><a className="button button-secondary" href={`${API}/export/audit.json`}><Download size={16} aria-hidden="true" /> Audit JSON</a></div></div>}</section>}
+    <section id="map-workspace" className="investigation-workspace" aria-labelledby="map-workspace-title"><div className="map-workspace modern-map-toolbar"><div className="map-toolbar-title"><span className="section-label">Map workspace</span><strong id="map-workspace-title">Spatial context for {selected?.canonical_parcel_id || 'the review queue'}</strong></div><div className="map-modes" role="group" aria-label="Map view"><button type="button" className={mode === 'sources' ? 'active' : ''} aria-pressed={mode === 'sources'} onClick={() => setMode('sources')}>Sources</button><button type="button" className={mode === 'harmonized' ? 'active' : ''} aria-pressed={mode === 'harmonized'} onClick={() => setMode('harmonized')}>AI harmonized</button><button type="button" className={mode === 'compare' ? 'active' : ''} aria-pressed={mode === 'compare'} onClick={() => setMode('compare')}>Before / after</button></div><div className="map-toolbar-actions"><button type="button" className="toolbar-button" onClick={() => { searchRef.current?.focus(); document.getElementById('review-queue')?.scrollIntoView({ behavior: 'smooth' }); }}><Search size={15} aria-hidden="true" /> Search parcel</button><button type="button" className={`toolbar-button ${layersOpen ? 'active' : ''}`} aria-pressed={layersOpen} onClick={() => setLayersOpen(!layersOpen)}><Layers3 size={15} aria-hidden="true" /> Layers</button><button type="button" className="toolbar-button" onClick={() => setMode('compare')}><SlidersHorizontal size={15} aria-hidden="true" /> Compare</button><button type="button" className={`toolbar-button ${measureActive ? 'active' : ''}`} aria-pressed={measureActive} onClick={() => setMeasureActive((current) => !current)}><Ruler size={15} aria-hidden="true" /> {measureActive ? (measureMetres != null ? `${measureMetres} m` : 'Click two points') : 'Measure'}</button><button type="button" className="toolbar-button" onClick={() => setBasemapVisible(!basemapVisible)} aria-pressed={!basemapVisible}><MapPinned size={15} aria-hidden="true" /> {basemapVisible ? 'Satellite context' : 'Dark base'}</button></div>{mode === 'compare' && <label className="compare-slider"><span>Source</span><input type="range" min="10" max="100" value={compare} onChange={(event) => setCompare(Number(event.target.value))} aria-label="Compare source and canonical layers" /><span>Canonical</span></label>}{layersOpen && <div className="map-layer-popover"><div><span className="section-label">Map layers</span><button type="button" onClick={() => setLayersOpen(false)} aria-label="Close map layers"><X size={15} aria-hidden="true" /></button></div><p>Loaded benchmark layers</p>{sourceOptions.filter((source) => source.key !== 'canonical').map((source) => <label key={source.key}><input type="checkbox" checked={layerVisibility[source.key]} onChange={() => setLayerVisibility((current) => ({ ...current, [source.key]: !current[source.key] }))} /><span className={`comparison-swatch swatch-${source.color}`} />{source.label}</label>)}<p>Derived output</p><label><input type="checkbox" checked={layerVisibility.canonical} onChange={() => setLayerVisibility((current) => ({ ...current, canonical: !current.canonical }))} /><span className="comparison-swatch swatch-green" />Harmonized parcel boundaries</label><p>Context only</p><label><input type="checkbox" checked={basemapVisible} onChange={() => setBasemapVisible(!basemapVisible)} /><span className="layer-dot satellite-dot" />Satellite imagery</label><small>Green dashed line = loaded data extent. The basemap contains landmarks, but no landmark/POI records are inspected.</small></div>}</div><div className="demo-map-grid"><div className="map-panel"><div className="map-panel-head"><div><span className="section-label">DATA EXTENT · DEMO WARD 14 / BENGALURU</span><strong>Source-aligned parcel map</strong></div><span className="map-selected-label">{activeSource === 'canonical' ? 'Harmonized boundary' : `${sourceOptions.find((source) => source.key === activeSource)?.label} highlighted`}</span></div><MapView mode={mode} compare={compare} layerVisibility={layerVisibility} selected={selected} activeSource={activeSource} basemapVisible={basemapVisible} harmonizationReady={hasHarmonizedRun} measureActive={measureActive} onSelect={inspect} onSourceSelect={chooseSource} onMeasure={setMeasureMetres} /><div className="map-legend"><span><i className="status-dot success" /> Trusted</span><span><i className="status-dot warning" /> AI assisted</span><span><i className="status-dot danger" /> Conflict</span></div><div className="map-note"><MapPinned size={13} aria-hidden="true" /> Canonical parcels are inspectable · satellite is contextual only</div></div><Inspector selected={selected} detail={detail} queue={reviewQueue} activeSource={activeSource} onSelect={inspect} onSourceSelect={chooseSource} /></div>{selected && detailLoading && <div className="detail-loading" role="status"><LoaderCircle size={18} aria-hidden="true" /> Loading parcel evidence…</div>}{selected && detail && <ReconciliationWorkspace selected={selected} detail={detail} changes={changes} activeSource={activeSource} onSourceSelect={chooseSource} decisionLoading={decisionLoading} onDecision={decide} />}</section>
     {!focusMode && <details className="keyboard-help"><summary><Keyboard size={15} /> Keyboard shortcuts <ChevronDown size={14} /></summary><div><span><b>J / K</b> Next or previous record</span><span><b>A</b> Approve</span><span><b>R</b> Keep in review</span><span><b>E</b> Evidence</span><span><b>M</b> Focus map</span><span><b>/</b> Search</span></div></details>}
   </div></main>;
 }

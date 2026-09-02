@@ -45,7 +45,7 @@ Do not browse to `0.0.0.0`; it is a server binding address. Use `localhost`.
 
 ## Current functionality
 
-- Live satellite image basemap with reference labels, centered near Bengaluru.
+- Live satellite image basemap used as contextual background; camera and dashed coverage envelope are derived from loaded vector extents.
 - Synthetic canonical, cadastral, municipal, and AI-building overlays.
 - Road centerlines, parcel labels, and click-to-select canonical parcels.
 - Selected parcel inspector: survey number, land use, area, confidence, and review status.
@@ -74,7 +74,7 @@ Prithvi/Clay model or an LLM decision.
 
 ## Recent map implementation
 
-`frontend/src/main.tsx` uses public Esri raster tiles for satellite imagery and reference labels. No API key is needed for the present demo.
+`frontend/src/main.tsx` and `frontend/src/DemoWorkspace.tsx` use public Esri raster tiles for satellite imagery and reference labels. No API key is needed for the present demo. The workspace calls `GET /api/v1/map/context` to fit the camera to loaded geometries and identify the basemap as context-only. The dashed envelope is a data extent, not an official administrative boundary.
 
 For a production deployment, move to a licensed provider and store its key in environment variables. Candidate providers:
 

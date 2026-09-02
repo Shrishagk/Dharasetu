@@ -42,6 +42,9 @@ EXTENSION_ROOT = ROOT / "data" / "urbanland_extension_pack" / "extension_pack"
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(250 * 1024 * 1024)))
 STATE_VERSION = 7
 SUPPORTED_UPLOADS = {".geojson": "GeoJSON", ".json": "GeoJSON", ".csv": "CSV", ".tif": "GeoTIFF", ".tiff": "GeoTIFF", ".png": "Raster image", ".jpg": "Raster image", ".jpeg": "Raster image"}
+MAP_VECTOR_LAYERS = ("canonical", "cadastral", "municipal", "buildings", "gnss", "ground_truth")
+DEFAULT_MAP_BOUNDS = [77.589, 12.967, 77.605, 12.975]
+PUBLISHED_REVIEW_STATUSES = frozenset({"AI_ACCEPTED", "OFFICER_APPROVED"})
 store = PersistentStore()
 state_lock = threading.RLock()
 executor = ThreadPoolExecutor(max_workers=int(os.getenv("JOB_WORKERS", "2")), thread_name_prefix="urbanland-job")
@@ -74,6 +77,30 @@ async def request_guard(request: Request, call_next):
 
 def now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def is_published_review_status(status: str | None) -> bool:
+    return status in PUBLISHED_REVIEW_STATUSES
+
+
+def latest_record_changes(changes: list[dict]) -> list[dict]:
+    """Return the latest decision for each record for the operational view.
+
+    The immutable audit log keeps every decision, including decisions from
+    earlier review sessions. The dashboard and Changes tab represent the
+    current record state, so repeated decisions for the same parcel must not
+    inflate the Changed KPI or appear as duplicate rows.
+    """
+    ordered = sorted(changes, key=lambda item: item.get("timestamp", ""), reverse=True)
+    seen: set[str] = set()
+    latest: list[dict] = []
+    for event in ordered:
+        record_id = str(event.get("parcel_id") or event.get("id"))
+        if record_id in seen:
+            continue
+        seen.add(record_id)
+        latest.append(event)
+    return latest
 
 
 def read_json(name: str) -> dict:
@@ -194,10 +221,39 @@ def fresh_state() -> dict:
 def load_state() -> dict:
     persisted = store.load_state()
     if persisted and persisted.get("state_version") == STATE_VERSION:
+        _prune_stale_changes(persisted)
         return persisted
     state = fresh_state()
     store.save_state(state)
     return state
+
+
+def _prune_stale_changes(state: dict) -> None:
+    """Remove change records that no longer match the current feature state.
+
+    When a harmonization run regenerates canonical features, all review
+    statuses are reset.  Change records from earlier sessions become stale
+    because the feature they reference no longer reflects the recorded
+    decision.  Keeping them would inflate the Changes KPI and the Changes
+    tab with phantom edits.
+    """
+    changes = state.get("changes")
+    if not changes:
+        return
+    feature_status: dict[str, str] = {}
+    for feature in state.get("features", []):
+        parcel_id = feature.get("id") or (feature.get("properties") or {}).get("canonical_parcel_id")
+        if parcel_id:
+            feature_status[parcel_id] = (feature.get("properties") or {}).get("review_status", "")
+    valid: list[dict] = []
+    for change in changes:
+        parcel_id = str(change.get("parcel_id") or change.get("id"))
+        expected_status = change.get("new_value", "")
+        current_status = feature_status.get(parcel_id, "")
+        if current_status == expected_status:
+            valid.append(change)
+    if len(valid) != len(changes):
+        state["changes"] = valid
 
 
 STATE = load_state()
@@ -210,6 +266,113 @@ def persist() -> None:
 
 def canonical() -> dict:
     return {"type": "FeatureCollection", "name": "canonical_urban_land_records", "crs": {"type": "name", "properties": {"name": "EPSG:4326"}}, "features": STATE["features"]}
+
+
+def _merge_map_bounds(bounds: list[list[float]]) -> list[float] | None:
+    """Merge valid WGS84 extents for the layers currently shown on the map."""
+    valid = []
+    for item in bounds:
+        if len(item) != 4:
+            continue
+        try:
+            west, south, east, north = (float(value) for value in item)
+        except (TypeError, ValueError):
+            continue
+        if west <= east and south <= north:
+            valid.append((west, south, east, north))
+    if not valid:
+        return None
+    return [
+        round(min(item[0] for item in valid), 6),
+        round(min(item[1] for item in valid), 6),
+        round(max(item[2] for item in valid), 6),
+        round(max(item[3] for item in valid), 6),
+    ]
+
+
+def _map_boundary_feature(bounds: list[float], properties: dict) -> dict:
+    west, south, east, north = bounds
+    return {
+        "type": "Feature",
+        "id": "map-data-extent",
+        "properties": properties,
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[[west, south], [east, south], [east, north], [west, north], [west, south]]],
+        },
+    }
+
+
+@app.get("/api/v1/map/context")
+def map_context():
+    """Return the map's authoritative display extent and provenance.
+
+    The basemap is only contextual imagery. The extent and boundary shown to
+    the operator come from the loaded GeoJSON layer geometries, so the camera
+    cannot silently drift away from the records being reviewed.
+    """
+    with state_lock:
+        collections = {"canonical": canonical()}
+        for layer_name in MAP_VECTOR_LAYERS:
+            if layer_name == "canonical":
+                continue
+            collection = STATE.get("source_previews", {}).get(layer_name)
+            if collection:
+                collections[layer_name] = collection
+
+        layer_metadata = {}
+        all_bounds = []
+        feature_count = 0
+        for layer_name, collection in collections.items():
+            metadata = geo_metadata(collection)
+            layer_metadata[layer_name] = {
+                "feature_count": metadata["feature_count"],
+                "geometry_type": metadata["geometry_type"],
+                "bbox": metadata["bbox"],
+            }
+            feature_count += metadata["feature_count"]
+            if metadata["bbox"]:
+                all_bounds.append(metadata["bbox"])
+
+    bounds = _merge_map_bounds(all_bounds) or list(DEFAULT_MAP_BOUNDS)
+    west, south, east, north = bounds
+    longitude_span = max(east - west, 0.000001)
+    latitude_span = max(north - south, 0.000001)
+    padding_longitude = max(longitude_span * 0.08, 0.00018)
+    padding_latitude = max(latitude_span * 0.12, 0.00018)
+    fit_bounds = [
+        round(west - padding_longitude, 6),
+        round(south - padding_latitude, 6),
+        round(east + padding_longitude, 6),
+        round(north + padding_latitude, 6),
+    ]
+    boundary_properties = {
+        "layer_role": "data_extent",
+        "label": "Loaded vector-data extent",
+        "is_official_ward_boundary": False,
+        "description": "Derived from the loaded vector geometries; this is not an administrative ward boundary.",
+    }
+    return {
+        "title": "Demo Ward 14 · Bengaluru",
+        "display_label": "DATA EXTENT · DEMO WARD 14 / BENGALURU",
+        "dataset_mode": "synthetic_benchmark",
+        "dataset_label": "Synthetic parcel and building benchmark",
+        "disclaimer": "Satellite imagery is contextual only. Parcel and building overlays are the records being reviewed.",
+        "basemap": {
+            "provider": "Esri World Imagery",
+            "role": "context_only",
+            "label": "Contextual satellite imagery",
+        },
+        "coverage": {
+            "bbox": bounds,
+            "fit_bounds": fit_bounds,
+            "center": [round((west + east) / 2, 6), round((south + north) / 2, 6)],
+            "feature_count": feature_count,
+            "layer_count": len(layer_metadata),
+            "source_layers": layer_metadata,
+        },
+        "coverage_boundary": _map_boundary_feature(bounds, boundary_properties),
+    }
 
 
 def parcel_feature(parcel_id: str) -> dict:
@@ -287,6 +450,7 @@ def run_job(job_id: str, selected_ids: list[str]) -> None:
             STATE["features"] = deepcopy(run.get("canonical_features", STATE["features"]))
             apply_engine_results(STATE["features"], run)
             STATE["engine_run"] = run
+            STATE["changes"] = []
             STATE["started"] = True
             job.update({"status": "COMPLETED", "completed_at": now(), "stage": "Canonical dataset generated", "records": len(STATE["features"]), "engine_run_id": run.get("run_id")})
             job_result(job, STATE["features"])
@@ -335,9 +499,13 @@ def dashboard():
     with state_lock:
         features = deepcopy(STATE["features"])
         latest = deepcopy(STATE["jobs"][-1]) if STATE["jobs"] else None
-    review = sorted((item.get("properties", {}) | {"canonical_parcel_id": item.get("id")} for item in features if item.get("properties", {}).get("review_status") != "AI_ACCEPTED"), key=lambda item: item.get("priority", 0), reverse=True)
-    conflicts = [item for item in features if item.get("properties", {}).get("conflict_type") and item.get("properties", {}).get("review_status") != "AI_ACCEPTED"]
-    return {"ward": "Demo Ward 14", "started": STATE["started"], "summary": {"total_parcels": len(features), "harmonized": len(features) - len(conflicts), "conflicts": len(conflicts), "human_review": sum(item.get("review_status") == "HUMAN_REVIEW" for item in review), "changes": len(STATE["changes"]) + len((STATE.get("engine_run") or {}).get("change_detection", {}).get("changes", []))}, "review_queue": review, "latest_job": latest, "engine_metrics": (STATE.get("engine_run") or {}).get("metrics", {}), "persistence": store.status}
+        change_count = len(latest_record_changes(STATE["changes"]))
+    review = sorted((item.get("properties", {}) | {"canonical_parcel_id": item.get("id")} for item in features if not is_published_review_status(item.get("properties", {}).get("review_status"))), key=lambda item: item.get("priority", 0), reverse=True)
+    conflicts = [item for item in features if item.get("properties", {}).get("conflict_type") and not is_published_review_status(item.get("properties", {}).get("review_status"))]
+    # Keep this KPI aligned with the Changes tab: it counts persisted review
+    # decisions only. Automated temporal change-detection signals are analysis
+    # output and must not look like user edits to the canonical records.
+    return {"ward": "Demo Ward 14", "started": STATE["started"], "summary": {"total_parcels": len(features), "harmonized": len(features) - len(conflicts), "conflicts": len(conflicts), "human_review": sum(item.get("review_status") == "HUMAN_REVIEW" for item in review), "changes": change_count}, "review_queue": review, "latest_job": latest, "engine_metrics": (STATE.get("engine_run") or {}).get("metrics", {}), "persistence": store.status}
 
 
 @app.get("/api/v1/engines/overview")
@@ -572,7 +740,7 @@ def retry_job(job_id: str, request: Request):
 
 @app.get("/api/v1/conflicts")
 def conflicts():
-    return [item.get("properties", {}) | {"canonical_parcel_id": item.get("id")} for item in STATE["features"] if item.get("properties", {}).get("conflict_type") and item.get("properties", {}).get("review_status") != "AI_ACCEPTED"]
+    return [item.get("properties", {}) | {"canonical_parcel_id": item.get("id")} for item in STATE["features"] if item.get("properties", {}).get("conflict_type") and not is_published_review_status(item.get("properties", {}).get("review_status"))]
 
 
 @app.get("/api/v1/parcels/{parcel_id}")
@@ -599,7 +767,9 @@ def decide(parcel_id: str, decision: Decision, request: Request):
     props = item.setdefault("properties", {})
     old = props.get("review_status", "HUMAN_REVIEW")
     if decision.action == "approve":
-        props["review_status"], props["canonical_version"], detail = "AI_ACCEPTED", props.get("canonical_version", 1) + 1, "AI recommendation approved; canonical record published."
+        if is_published_review_status(old):
+            raise HTTPException(409, "This canonical record is already published.")
+        props["review_status"], props["canonical_version"], detail = "OFFICER_APPROVED", props.get("canonical_version", 1) + 1, "Officer approval recorded; canonical record published."
     elif decision.action == "reject":
         props["review_status"], detail = "HUMAN_REVIEW", "AI recommendation rejected; retained in human review."
     else:
@@ -615,7 +785,9 @@ def decide(parcel_id: str, decision: Decision, request: Request):
 
 @app.get("/api/v1/changes")
 def changes():
-    return {"changes": STATE["changes"]}
+    with state_lock:
+        current_changes = deepcopy(STATE["changes"])
+    return {"changes": latest_record_changes(current_changes)}
 
 
 @app.get("/api/v1/audit")

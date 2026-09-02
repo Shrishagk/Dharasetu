@@ -148,9 +148,21 @@ def test_conflicts_and_explainable_parcel_detail(server):
 
 def test_dashboard_engine_and_quality_endpoints(server):
     run_harmonization(server)
+    context = requests.get(f"{BASE}/api/v1/map/context").json()
+    assert context["dataset_mode"] == "synthetic_benchmark"
+    assert context["basemap"]["role"] == "context_only"
+    assert context["coverage"]["bbox"][0] <= 77.59
+    assert context["coverage"]["bbox"][1] <= 12.968
+    assert context["coverage"]["bbox"][2] >= 77.604
+    assert context["coverage"]["bbox"][3] >= 12.974443
+    assert context["coverage_boundary"]["properties"]["is_official_ward_boundary"] is False
+    assert context["coverage_boundary"]["geometry"]["type"] == "Polygon"
+
     dashboard = requests.get(f"{BASE}/api/v1/dashboard").json()
     assert dashboard["summary"]["total_parcels"] == 72
     assert dashboard["summary"]["conflicts"] >= 8
+    # Automated temporal signals are analysis output, not user changes.
+    assert dashboard["summary"]["changes"] == 0
     assert len(dashboard["review_queue"]) >= 8
 
     overview = requests.get(f"{BASE}/api/v1/engines/overview").json()
@@ -188,6 +200,9 @@ def test_decision_audit_and_persistent_exports(server):
     event = decision.json()["event"]
     assert event["event_hash"]
     assert event["previous_hash"] is not None
+    assert event["new_value"] == "OFFICER_APPROVED"
+    assert decision.json()["parcel"]["properties"]["review_status"] == "OFFICER_APPROVED"
+    assert requests.get(f"{BASE}/api/v1/dashboard").json()["summary"]["changes"] == 1
 
     audit = requests.get(f"{BASE}/api/v1/audit").json()
     assert audit["immutable"] is True

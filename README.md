@@ -72,6 +72,7 @@ Ground truth, conflict metadata, and success targets are saved in [data/generate
 | `GET /health` | API readiness check |
 | `GET /api/v1/dashboard` | Counts and priority-ranked review cases |
 | `GET /api/v1/layers/{canonical|cadastral|municipal|buildings|gnss|ground_truth}` | GeoJSON map layers |
+| `GET /api/v1/map/context` | Data-derived map extent, coverage boundary, layer counts, and basemap provenance |
 | `GET /api/v1/parcels/{canonical_parcel_id}` | Parcel geometry, evidence, and AI recommendation |
 | `GET /api/v1/sources` | Data source catalog with readiness, validation, provenance, and harmonization metadata |
 | `GET /api/v1/sources/{source_id}` | Source detail, schema, validation checks, and preview link |
@@ -114,3 +115,12 @@ jobs asynchronously, signs bearer tokens when enabled, applies a request rate
 limit, and writes immutable hash-chained audit records. Foundation-model and
 hosted-LLM integrations remain explicit adapters with honest offline fallback
 metadata.
+
+### Map provenance
+
+The demo map fits its camera to the loaded vector geometries and draws a dashed
+data-extent envelope returned by `GET /api/v1/map/context`. The Esri satellite
+basemap is contextual imagery only; it may show roads, parks, or landmarks that
+are not part of the reviewed land-record layers. The demo parcel and building
+overlays remain the deterministic synthetic benchmark until authoritative ward
+and parcel data is registered.
