@@ -233,4 +233,4 @@ def topology_audit(features: list[dict[str, Any]], sliver_area_m2: float = 1.0) 
     by_type: dict[str, int] = {}
     for issue in issues:
         by_type[issue["type"]] = by_type.get(issue["type"], 0) + 1
-    return {"valid": not issues, "issue_count": len(issues), "issues": issues, "counts": by_type, "repair_strategy": "GEOS make_valid/buffer(0) plus authoritative-boundary selection"}
+    return {"valid": not issues, "feature_count": len(features), "issue_count": len(issues), "issues": issues, "counts": by_type, "repair_strategy": "GEOS make_valid/buffer(0) plus authoritative-boundary selection"}

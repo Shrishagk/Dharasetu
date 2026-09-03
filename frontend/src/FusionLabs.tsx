@@ -108,6 +108,18 @@ export function FusionLabs({ ready, notify, onSelectParcel }: { ready: boolean; 
     ['exchange', 'API exchange'],
     ['audit', 'Provenance'],
   ];
+  const topologyFeatureCount = topology?.feature_count;
+  const topologyIssueCount = topology?.issue_count ?? topology?.issues?.length ?? 0;
+  const topologyAlgorithm = overview?.topology_engine?.algorithm || topology?.repair_strategy;
+  const topologyDescription = !ready
+    ? 'Topology audit has not run yet. Run harmonization to audit the canonical set.'
+    : loading
+      ? 'Loading topology audit results for the current canonical set.'
+      : !topology
+        ? 'Topology audit results are unavailable for the current run.'
+        : topologyFeatureCount === 0
+          ? 'The current run has no canonical features available for topology audit.'
+          : `${topologyFeatureCount} canonical feature${topologyFeatureCount === 1 ? '' : 's'} audited; ${topologyIssueCount} issue${topologyIssueCount === 1 ? '' : 's'} found.${topologyAlgorithm ? ` Algorithm: ${topologyAlgorithm}.` : ''}`;
 
   return <section id="fusion-labs" className="fusion-labs" aria-labelledby="fusion-labs-title">
     <div className="fusion-labs-head">
@@ -123,14 +135,14 @@ export function FusionLabs({ ready, notify, onSelectParcel }: { ready: boolean; 
     </div>
     <div className="fusion-labs-body">
       {tab === 'topology' && <div className="fusion-lab-panel">
-        <div className="fusion-lab-intro"><ScanLine size={18} /><div><strong>Automated topology correction</strong><p>{overview?.topology_engine?.algorithm || 'Invalid rings, overlaps, gaps, and slivers are audited. Repairs are proposed, not silently applied to source layers.'}</p></div></div>
+        <div className="fusion-lab-intro"><ScanLine size={18} /><div><strong>Automated topology correction</strong><p>{topologyDescription}</p></div></div>
         <div className="fusion-stat-row">
-          <div><span>Audit status</span><b>{topology ? (topology.valid ? 'Clean' : `${topology.issue_count} issue(s)`) : '—'}</b></div>
+          <div><span>Audit status</span><b>{topology ? (topologyFeatureCount === 0 ? 'No features' : topology.valid ? 'Clean' : `${topology.issue_count} issue(s)`) : '—'}</b></div>
           <div><span>Overlaps</span><b>{topology?.counts?.overlap ?? '—'}</b></div>
           <div><span>Gaps / slivers</span><b>{topology?.counts?.gap_or_sliver ?? '—'}</b></div>
           <div><span>Invalid geometry</span><b>{topology?.counts?.invalid_geometry ?? '—'}</b></div>
         </div>
-        <div className="fusion-list">{(topology?.issues ?? []).slice(0, 8).map((issue: any, index: number) => <button type="button" key={`${issue.type}-${index}`} onClick={() => { const id = issue.feature_id || issue.feature_ids?.[0]; if (id) onSelectParcel(String(id)); }}><strong>{String(issue.type).replace(/_/g, ' ')}</strong><small>{(issue.feature_ids || [issue.feature_id]).filter(Boolean).join(' · ')} · {issue.repair || (issue.details || []).join(', ')}</small></button>)}{ready && !(topology?.issues ?? []).length && <div className="fusion-empty">No topology issues on the current canonical set.</div>}</div>
+        <div className="fusion-list">{(topology?.issues ?? []).slice(0, 8).map((issue: any, index: number) => <button type="button" key={`${issue.type}-${index}`} onClick={() => { const id = issue.feature_id || issue.feature_ids?.[0]; if (id) onSelectParcel(String(id)); }}><strong>{String(issue.type).replace(/_/g, ' ')}</strong><small>{(issue.feature_ids || [issue.feature_id]).filter(Boolean).join(' · ')} · {issue.repair || (issue.details || []).join(', ')}</small></button>)}{topology && topologyFeatureCount !== 0 && !(topology.issues ?? []).length && <div className="fusion-empty">No topology issues on the current canonical set.</div>}</div>
       </div>}
       {tab === 'change' && <div className="fusion-lab-panel">
         <div className="fusion-lab-intro"><RefreshCw size={18} /><div><strong>Change detection</strong><p>{changes?.algorithm || 'Compares capture dates and building footprints so physical change is not treated as a GIS error.'}</p></div></div>

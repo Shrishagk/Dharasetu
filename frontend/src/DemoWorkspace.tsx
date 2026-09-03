@@ -607,8 +607,31 @@ function ReasoningChainPipeline({ selected }: { selected: Parcel }) {
 }
 
 function WhyThisDecision({ selected, detail }: { selected: Parcel; detail: Detail }) {
-  const review = Boolean(selected.conflict_type);
-  return <section className="why-decision-panel"><div className="why-decision-head"><div><span className="section-label">Defensible recommendation</span><h3>Why was this parcel recommended for {review ? 'officer review?' : 'canonical publication?'}</h3></div><b className={review ? 'decision-badge warning' : 'decision-badge'}>{review ? 'Publish with warning' : 'Auto-approve eligible'}</b></div><div className="why-evidence-grid"><div><strong>Primary supporting evidence</strong><ul><li>Cadastral boundary and GNSS/CORS agree within tolerance.</li><li>Revenue record matches survey number {selected.survey_number}.</li><li>Ground-truth observation supports {titleCase(selected.land_use)} land use.</li><li>Building footprint intersects the proposed boundary.</li></ul></div><div className="conflicting"><strong>Conflicting evidence</strong><ul><li>{review ? 'Municipal geometry differs by 2.7 m.' : 'No material geometry displacement detected.'}</li><li>{review ? 'Municipal land-use classification uses a legacy code.' : 'Source classifications are aligned.'}</li><li>{review ? 'Municipal capture date is stale relative to 2026 field evidence.' : 'No stale source materially affects the result.'}</li></ul></div><div className="reasoning"><strong>AI reasoning narrative</strong><p>{detail.explanation || 'The fusion engine selected the most recent authoritative evidence after comparing geometry, attributes, source authority, and observation dates.'}</p></div></div></section>;
+  const parcelProperties = detail.parcel?.properties ?? {};
+  const detailConflictTypes: string[] = Array.isArray(parcelProperties.conflict_types) ? parcelProperties.conflict_types.map(String) : parcelProperties.conflict_type ? [String(parcelProperties.conflict_type)] : [];
+  const conflictTypes: string[] = (selected.conflict_types?.length ? selected.conflict_types : selected.conflict_type ? [selected.conflict_type] : detailConflictTypes).filter(Boolean);
+  const conflictSources: string[] = (selected.conflict_sources?.length ? selected.conflict_sources : Array.isArray(parcelProperties.conflict_sources) ? parcelProperties.conflict_sources.map(String) : []).filter(Boolean);
+  const review = conflictTypes.length > 0;
+  const evidence = detail.evidence ?? [];
+  const sourceValues = detail.source_values ?? [];
+  const supportingSignals = [
+    ...evidence.filter((item) => item.score >= .8).map((item) => `${item.source}: ${item.detail || `match score ${formatConfidence(item.score)}`} (${formatConfidence(item.score)})`),
+    ...sourceValues.filter((item) => item.score >= .8).map((item) => `${item.source} matched ${item.attribute} as “${item.value}” (${formatConfidence(item.score)})`),
+  ];
+  const warningSignals = [
+    ...evidence.filter((item) => item.score < .8).map((item) => `${item.source}: ${item.detail || `warning score ${formatConfidence(item.score)}`} (${formatConfidence(item.score)})`),
+    ...conflictTypes.map((type) => `${titleCase(type)}${conflictSources.length ? ` reported by ${conflictSources.join(', ')}` : ''}.`),
+  ];
+  const confidenceValues = [
+    ['Geometry', selected.geometry_confidence ?? parcelProperties.geometry_confidence],
+    ['Semantic', selected.semantic_confidence ?? parcelProperties.semantic_confidence],
+    ['Conformal', selected.conformal_confidence ?? parcelProperties.conformal_confidence],
+  ].filter(([, value]) => value !== undefined && value !== null) as [string, number][];
+  const confidenceSummary = [...confidenceValues.map(([label, value]) => `${label} ${formatConfidence(value)}`), `Overall ${formatConfidence(selected.overall_confidence ?? parcelProperties.overall_confidence)}`].join(' · ');
+  const hasSourceEvidence = evidence.length > 0 || sourceValues.length > 0;
+  const fallbackSignals = hasSourceEvidence ? [] : [`Canonical parcel ${selected.canonical_parcel_id}.`, `Survey ${selected.survey_number}; ${titleCase(selected.land_use)} land use.`];
+  const narrative = detail.explanation?.trim() || detail.recommendation?.trim() || `Recommendation for parcel ${selected.canonical_parcel_id} is based on the available evidence.`;
+  return <section className="why-decision-panel"><div className="why-decision-head"><div><span className="section-label">Defensible recommendation</span><h3>Why was this parcel recommended for {review ? 'officer review?' : 'canonical publication?'}</h3></div><b className={review ? 'decision-badge warning' : 'decision-badge'}>{review ? 'Publish with warning' : 'Auto-approve eligible'}</b></div><div className="why-evidence-grid"><div><strong>Primary supporting evidence</strong><ul>{[...supportingSignals, ...confidenceValues.map(([label, value]) => `${label} confidence: ${formatConfidence(value)}.`), ...fallbackSignals].map((signal, index) => <li key={`${signal}-${index}`}>{signal}</li>)}</ul></div><div className="conflicting"><strong>Conflicting evidence</strong><ul>{warningSignals.length ? warningSignals.map((signal, index) => <li key={`${signal}-${index}`}>{signal}</li>) : <li>No conflicting evidence detected.</li>}</ul></div><div className="reasoning"><strong>AI reasoning narrative</strong><p>{narrative}</p><p>Confidence profile: {confidenceSummary}.</p></div></div></section>;
 }
 
 function SourceReliabilityDrilldown() {

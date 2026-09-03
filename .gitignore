@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# VS Code
+.vscode/
+
+# C/C++ temporary files
+tempCodeRunnerFile.c
+tempCodeRunnerFile.exe
