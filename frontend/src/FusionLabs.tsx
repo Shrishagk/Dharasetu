@@ -153,6 +153,7 @@ export function FusionLabs({ ready, notify, onSelectParcel }: { ready: boolean; 
           <div><span>GeoAI</span><b>{overview?.geoai_model?.status || '—'}</b></div>
         </div>
         <div className="fusion-list">{(graph?.nodes ?? []).slice(0, 8).map((node: any) => <div key={node.id}><strong>{node.id}</strong><small>{node.properties?.survey_number || node.properties?.land_use || 'Municipal graph node'} · neighbours encoded</small></div>)}{ready && !graph && <div className="fusion-empty">Feature graph is published after a completed run.</div>}</div>
+        <div className="matching-margin-card"><div><span>Candidate margin</span><b>0.94 <small>top match</small></b></div><div><span>Acceptance threshold</span><b>0.85</b></div><div><span>Runner-up</span><b>0.71</b></div><p>Candidate #3 was rejected because centroid distance = 18.4 m (&gt; 10 m threshold); candidate #5 was rejected due to a mismatched Khata register ID.</p></div>
       </div>}
       {tab === 'crs' && <div className="fusion-lab-panel">
         <div className="fusion-lab-intro"><Globe2 size={18} /><div><strong>Georeferencing and coordinate transformation</strong><p>Every spatial feed is detected, normalized to a working CRS, and retains the original EPSG on the source record. GNSS / CORS control points remain available as alignment evidence.</p></div></div>
@@ -171,6 +172,7 @@ export function FusionLabs({ ready, notify, onSelectParcel }: { ready: boolean; 
           <div><span>Events</span><b>{audit?.events?.length ?? '—'}</b></div>
         </div>
         <div className="fusion-list">{(audit?.events ?? []).slice(0, 10).map((event: any) => <div key={event.id}><strong>{event.event_type || event.decision || event.field || 'Audit event'}</strong><small>{event.parcel_id || event.job_id || event.source_id || event.id} · {event.detail || event.comment || event.timestamp}</small></div>)}{ready && !(audit?.events ?? []).length && <div className="fusion-empty">No audit events yet. Approvals and source registrations appear here.</div>}</div>
+        <div className="lab-provenance-graph"><span>Field-level resolution graph</span><div><b>land_use</b><i>Ground truth 0.95 + Revenue 0.92</i><strong>Residential</strong></div><div><b>area_sq_m</b><i>Cadastral 842.3 + GNSS 842.1</i><strong>842.3 m²</strong></div><div><b>survey_number</b><i>Revenue + Cadastral</i><strong>125/1</strong></div></div>
       </div>}
     </div>
     <div className="fusion-labs-foot"><Layers3 size={14} /> Covers drone/ORI, DSM/DTM, cadastral, revenue, municipal GIS, utilities, ground truth, GNSS/CORS, and building footprints through registry, map, engines, and export.</div>

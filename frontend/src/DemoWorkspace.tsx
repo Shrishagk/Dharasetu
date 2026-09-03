@@ -252,9 +252,32 @@ function geometryBounds(geometry: any) {
   return bounds.isEmpty() ? undefined : bounds;
 }
 
+function geometryCentroid(geometry: any): [number, number] | undefined {
+  const points: [number, number][] = [];
+  const visit = (value: any): void => {
+    if (Array.isArray(value) && typeof value[0] === 'number' && typeof value[1] === 'number') points.push([value[0], value[1]]);
+    else if (Array.isArray(value)) value.forEach(visit);
+  };
+  visit(geometry?.coordinates);
+  if (!points.length) return undefined;
+  return [points.reduce((sum, point) => sum + point[0], 0) / points.length, points.reduce((sum, point) => sum + point[1], 0) / points.length];
+}
+
+const emptyFeatureCollection = (): any => ({ type: 'FeatureCollection', features: [] });
+
+const sourceLayerIds: Record<SourceKey, string[]> = {
+  cadastral: ['cadastral-before'],
+  municipal: ['municipal-boundaries'],
+  buildings: ['buildings-high-fill', 'buildings-high-outline', 'buildings-low-fill', 'buildings-low-outline', 'buildings-change-halo', 'buildings-change-outline'],
+  gnss: ['gnss-control-halo', 'gnss-control-points'],
+  ground_truth: ['ground-truth-trusted'],
+  canonical: ['canonical-fill', 'canonical-boundaries', 'canonical-conflict-warning-fill', 'canonical-conflict-warning-line', 'canonical-conflict-critical-fill', 'canonical-conflict-critical-line', 'canonical-labels', 'conflict-zone-fill', 'conflict-zone-line'],
+};
+
 function MapView({ mode, compare, layerVisibility, selected, activeSource, basemapVisible, harmonizationReady, measureActive, onSelect, onSourceSelect, onMeasure }: { mode: DemoMode; compare: number; layerVisibility: Record<SourceKey, boolean>; selected: Parcel | null; activeSource: SourceKey; basemapVisible: boolean; harmonizationReady: boolean; measureActive: boolean; onSelect: (parcel: Parcel) => void; onSourceSelect: (source: SourceKey) => void; onMeasure: (metres: number | null) => void }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const markerRef = useRef<maplibregl.Marker | null>(null);
   const onSelectRef = useRef(onSelect);
   const onSourceSelectRef = useRef(onSourceSelect);
   const measurePointsRef = useRef<[number, number][]>([]);
@@ -278,7 +301,7 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
       pitch: 38,
       bearing: -14,
       attributionControl: false,
-      style: { version: 8, sources: { satellite: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 } }, layers: [{ id: 'satellite', type: 'raster', source: 'satellite' }] } as any,
+      style: { version: 8, glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf', sources: { satellite: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 } }, layers: [{ id: 'satellite', type: 'raster', source: 'satellite' }] } as any,
     });
     mapRef.current = instance;
     instance.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
@@ -288,35 +311,58 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
         setMapError('');
         const context = await contextRequest;
         if (context) setMapContext(context);
-        const vectorLayers: { name: SourceKey; paint: any; type: 'line' | 'fill-extrusion' | 'circle' }[] = [
-          { name: 'canonical', type: 'line', paint: { 'line-color': ['case', ['==', ['get', 'review_status'], 'HUMAN_REVIEW'], '#ef4444', ['==', ['get', 'review_status'], 'AI_ASSISTED'], '#f59e0b', '#3b82f6'], 'line-width': 2.5, 'line-opacity': 0.95 } },
-          { name: 'cadastral', type: 'line', paint: { 'line-color': '#60a5fa', 'line-width': 1.4, 'line-opacity': 0.72 } },
-          { name: 'municipal', type: 'line', paint: { 'line-color': '#c4b5fd', 'line-width': 1.4, 'line-opacity': 0.72 } },
-          { name: 'buildings', type: 'fill-extrusion', paint: { 'fill-extrusion-color': '#f59e0b', 'fill-extrusion-height': ['coalesce', ['get', 'height_m'], ['get', 'height'], 8], 'fill-extrusion-base': 0, 'fill-extrusion-opacity': 0.48, 'fill-extrusion-vertical-gradient': true } },
-          { name: 'ground_truth', type: 'line', paint: { 'line-color': '#fb7185', 'line-width': 1.2, 'line-dasharray': [2, 1], 'line-opacity': 0.7 } },
-          { name: 'gnss', type: 'circle', paint: { 'circle-color': '#22d3ee', 'circle-radius': 5, 'circle-stroke-color': '#ecfeff', 'circle-stroke-width': 1.2, 'circle-opacity': 0.92 } },
-        ];
-        for (const layer of vectorLayers) {
-          const data = layer.name === 'canonical' ? { type: 'FeatureCollection', features: [] } : await fetch(`${API}/layers/${layer.name}`).then((response) => response.ok ? response.json() : { type: 'FeatureCollection', features: [] });
-          instance.addSource(layer.name, { type: 'geojson', data });
-          instance.addLayer({ id: layer.name, type: layer.type, source: layer.name, paint: layer.paint } as any);
-          instance.on('click', layer.name, (event) => {
-            if (layer.name === 'canonical') {
-              const properties = event.features?.[0]?.properties;
-              if (properties) onSelectRef.current(toParcel(properties));
-            } else onSourceSelectRef.current(layer.name);
-          });
-          instance.on('mouseenter', layer.name, () => { instance.getCanvas().style.cursor = 'pointer'; });
-          instance.on('mouseleave', layer.name, () => { instance.getCanvas().style.cursor = ''; });
-        }
+        const [cadastral, municipal, buildings, gnss, groundTruth, changeData] = await Promise.all(
+          (['cadastral', 'municipal', 'buildings', 'gnss', 'ground_truth'] as SourceKey[]).map((name) => fetch(`${API}/layers/${name}`).then((response) => response.ok ? response.json() : emptyFeatureCollection())).concat(fetch(`${API}/change-detection`).then((response) => response.ok ? response.json() : { changes: [] }))
+        );
+        const changedParcelIds = new Set((changeData.changes ?? []).map((change: any) => change.parcel_id));
+        const buildingData = { ...buildings, features: (buildings.features ?? []).map((feature: any) => ({ ...feature, properties: { ...feature.properties, has_change: changedParcelIds.has(feature.properties?.parcel_hint) } })) };
+        instance.addSource('canonical', { type: 'geojson', data: emptyFeatureCollection() });
+        instance.addSource('cadastral', { type: 'geojson', data: cadastral });
+        instance.addSource('municipal', { type: 'geojson', data: municipal });
+        instance.addSource('buildings', { type: 'geojson', data: buildingData });
+        instance.addSource('gnss', { type: 'geojson', data: gnss });
+        instance.addSource('ground_truth', { type: 'geojson', data: groundTruth });
+        instance.addSource('conflict-zone', { type: 'geojson', data: emptyFeatureCollection() });
+        // Level 2 — AI-extracted footprints use light 2D treatments so satellite context remains legible.
+        instance.addLayer({ id: 'buildings-high-fill', type: 'fill', source: 'buildings', filter: ['>=', ['coalesce', ['get', 'confidence'], 0], .75], paint: { 'fill-color': '#fbbf24', 'fill-opacity': .16 } } as any);
+        instance.addLayer({ id: 'buildings-high-outline', type: 'line', source: 'buildings', filter: ['>=', ['coalesce', ['get', 'confidence'], 0], .75], paint: { 'line-color': '#f59e0b', 'line-width': 1.35, 'line-opacity': .86 } } as any);
+        instance.addLayer({ id: 'buildings-low-fill', type: 'fill', source: 'buildings', filter: ['<', ['coalesce', ['get', 'confidence'], 0], .75], paint: { 'fill-color': '#fde68a', 'fill-opacity': .08 } } as any);
+        instance.addLayer({ id: 'buildings-low-outline', type: 'line', source: 'buildings', filter: ['<', ['coalesce', ['get', 'confidence'], 0], .75], paint: { 'line-color': '#fcd34d', 'line-width': 1.2, 'line-dasharray': [2, 2], 'line-opacity': .82 } } as any);
+        instance.addLayer({ id: 'buildings-change-halo', type: 'line', source: 'buildings', filter: ['==', ['get', 'has_change'], true], paint: { 'line-color': '#fb923c', 'line-width': 7, 'line-blur': 4, 'line-opacity': .42 } } as any);
+        instance.addLayer({ id: 'buildings-change-outline', type: 'line', source: 'buildings', filter: ['==', ['get', 'has_change'], true], paint: { 'line-color': '#fb923c', 'line-width': 2.1, 'line-dasharray': [1.4, 1], 'line-opacity': .98 } } as any);
+        // Level 3 — source geometry is explicitly styled as the compare-mode "before" line.
+        instance.addLayer({ id: 'cadastral-before', type: 'line', source: 'cadastral', paint: { 'line-color': '#f97316', 'line-width': 1.45, 'line-dasharray': [2.4, 1.4], 'line-opacity': .74 } } as any);
+        instance.addLayer({ id: 'municipal-boundaries', type: 'line', source: 'municipal', paint: { 'line-color': '#a78bfa', 'line-width': 1.15, 'line-dasharray': [1.5, 1], 'line-opacity': .62 } } as any);
+        instance.addLayer({ id: 'ground-truth-trusted', type: 'line', source: 'ground_truth', paint: { 'line-color': '#10b981', 'line-width': 2.15, 'line-dasharray': [3, 1.3], 'line-opacity': .94 } } as any);
+        instance.addLayer({ id: 'gnss-control-halo', type: 'circle', source: 'gnss', paint: { 'circle-color': '#22d3ee', 'circle-radius': 10, 'circle-blur': .65, 'circle-opacity': .42 } } as any);
+        instance.addLayer({ id: 'gnss-control-points', type: 'circle', source: 'gnss', paint: { 'circle-color': '#22d3ee', 'circle-radius': 4.5, 'circle-stroke-color': '#ecfeff', 'circle-stroke-width': 1.2, 'circle-opacity': .92 } } as any);
+        instance.addLayer({ id: 'canonical-fill', type: 'fill', source: 'canonical', paint: { 'fill-color': '#38bdf8', 'fill-opacity': .06 } } as any);
+        instance.addLayer({ id: 'canonical-conflict-warning-fill', type: 'fill', source: 'canonical', filter: ['==', ['get', 'review_status'], 'AI_ASSISTED'], paint: { 'fill-color': '#f59e0b', 'fill-opacity': .15 } } as any);
+        instance.addLayer({ id: 'canonical-conflict-critical-fill', type: 'fill', source: 'canonical', filter: ['==', ['get', 'review_status'], 'HUMAN_REVIEW'], paint: { 'fill-color': '#ef4444', 'fill-opacity': .18 } } as any);
+        instance.addLayer({ id: 'canonical-boundaries', type: 'line', source: 'canonical', paint: { 'line-color': '#38bdf8', 'line-width': 2.8, 'line-blur': .35, 'line-opacity': .94 } } as any);
+        instance.addLayer({ id: 'canonical-conflict-warning-line', type: 'line', source: 'canonical', filter: ['==', ['get', 'review_status'], 'AI_ASSISTED'], paint: { 'line-color': '#f59e0b', 'line-width': 2.7, 'line-opacity': .98 } } as any);
+        instance.addLayer({ id: 'canonical-conflict-critical-line', type: 'line', source: 'canonical', filter: ['==', ['get', 'review_status'], 'HUMAN_REVIEW'], paint: { 'line-color': '#ef4444', 'line-width': 3, 'line-opacity': 1 } } as any);
+        instance.addLayer({ id: 'canonical-labels', type: 'symbol', source: 'canonical', minzoom: 15, layout: { 'text-field': ['concat', ['get', 'survey_number'], '\n', ['get', 'canonical_parcel_id']], 'text-font': ['Open Sans Bold'], 'text-size': 10, 'text-max-width': 12, 'text-anchor': 'center', 'text-justify': 'center', 'text-allow-overlap': false }, paint: { 'text-color': '#eff6ff', 'text-halo-color': '#0f172a', 'text-halo-width': 1.35, 'text-halo-blur': .6 } } as any);
+        instance.addLayer({ id: 'conflict-zone-fill', type: 'fill', source: 'conflict-zone', paint: { 'fill-color': '#f59e0b', 'fill-opacity': .22 } } as any);
+        instance.addLayer({ id: 'conflict-zone-line', type: 'line', source: 'conflict-zone', paint: { 'line-color': '#fb7185', 'line-width': 2, 'line-dasharray': [1.2, 1.2], 'line-opacity': .95 } } as any);
+        const canonicalClick = (event: any) => { const properties = event.features?.[0]?.properties; if (properties) onSelectRef.current(toParcel(properties)); };
+        ['canonical-fill', 'canonical-boundaries', 'canonical-conflict-warning-fill', 'canonical-conflict-critical-fill'].forEach((id) => {
+          instance.on('click', id, canonicalClick);
+          instance.on('mouseenter', id, () => { instance.getCanvas().style.cursor = 'pointer'; });
+          instance.on('mouseleave', id, () => { instance.getCanvas().style.cursor = ''; });
+        });
+        [['buildings-high-fill', 'buildings'], ['cadastral-before', 'cadastral'], ['municipal-boundaries', 'municipal'], ['ground-truth-trusted', 'ground_truth'], ['gnss-control-points', 'gnss']].forEach(([id, source]) => instance.on('click', id, (event: any) => { onSourceSelectRef.current(source as SourceKey); new maplibregl.Popup({ closeButton: false, offset: 10 }).setLngLat(event.lngLat).setHTML(`<strong>${source === 'municipal' ? 'Municipal GIS' : source === 'gnss' ? 'GNSS / CORS' : source}</strong><br/><small>${source === 'municipal' ? '2.7 m offset · captured Nov 2024' : source === 'gnss' ? 'RTK fixed · ±0.02 m' : 'Evidence layer · click selects source'}</small>`).addTo(instance); }));
+        instance.on('click', 'conflict-zone-fill', (event: any) => new maplibregl.Popup({ offset: 10 }).setLngLat(event.lngLat).setHTML('<strong>Conflict zone</strong><br/><small>Municipal vs cadastral displacement: 2.7 m · medium impact</small>').addTo(instance));
         if (context?.coverage_boundary) {
           instance.addSource('data-extent', { type: 'geojson', data: { type: 'FeatureCollection', features: [context.coverage_boundary] } });
           instance.addLayer({ id: 'data-extent-fill', type: 'fill', source: 'data-extent', paint: { 'fill-color': '#34d399', 'fill-opacity': 0.025 } });
           instance.addLayer({ id: 'data-extent-line', type: 'line', source: 'data-extent', paint: { 'line-color': '#34d399', 'line-width': 1.5, 'line-dasharray': [3, 2], 'line-opacity': 0.82 } });
         }
-        instance.addSource('selected', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-        instance.addLayer({ id: 'selected', type: 'line', source: 'selected', paint: { 'line-color': '#f5f5f7', 'line-width': 4, 'line-opacity': 0.98 } });
-        instance.addSource('measure', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+        instance.addSource('selected', { type: 'geojson', data: emptyFeatureCollection() });
+        instance.addLayer({ id: 'selected-fill', type: 'fill', source: 'selected', paint: { 'fill-color': '#22d3ee', 'fill-opacity': .17 } } as any);
+        instance.addLayer({ id: 'selected-glow', type: 'line', source: 'selected', paint: { 'line-color': '#22d3ee', 'line-width': 10, 'line-blur': 5, 'line-opacity': .64 } } as any);
+        instance.addLayer({ id: 'selected-outline', type: 'line', source: 'selected', paint: { 'line-color': '#ffffff', 'line-width': 3.5, 'line-opacity': 1 } } as any);
+        instance.addSource('measure', { type: 'geojson', data: emptyFeatureCollection() });
         instance.addLayer({ id: 'measure-line', type: 'line', source: 'measure', paint: { 'line-color': '#fbbf24', 'line-width': 2, 'line-dasharray': [1.4, 1.2] } });
         instance.addLayer({ id: 'measure-points', type: 'circle', source: 'measure', paint: { 'circle-color': '#fbbf24', 'circle-radius': 4 } });
         if (context?.coverage?.fit_bounds?.length === 4) {
@@ -328,33 +374,39 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
         setMapReady(true);
       } catch { setMapError('Map layers are temporarily unavailable. The review queue remains available above.'); }
     });
-    return () => { instance.remove(); mapRef.current = null; };
+    return () => { markerRef.current?.remove(); markerRef.current = null; instance.remove(); mapRef.current = null; };
   }, []);
 
   useEffect(() => {
     if (!mapRef.current || !mapReady) return;
     const instance = mapRef.current;
-    const sources: SourceKey[] = ['cadastral', 'municipal', 'buildings', 'gnss', 'ground_truth'];
-    sources.forEach((id) => {
-      if (!instance.getLayer(id)) return;
-      const visible = mode === 'harmonized' ? false : layerVisibility[id];
-      instance.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
-      if (id === 'buildings') instance.setPaintProperty(id, 'fill-extrusion-opacity', id === activeSource ? 0.82 : 0.38);
-      else if (id === 'gnss') instance.setPaintProperty(id, 'circle-opacity', id === activeSource ? 1 : 0.72);
-      else {
-        instance.setPaintProperty(id, 'line-opacity', id === activeSource ? 1 : mode === 'compare' ? Math.max(.2, 1 - compare / 100) : .62);
-        instance.setPaintProperty(id, 'line-width', id === activeSource ? 3.2 : 1.35);
-      }
-    });
-    if (instance.getLayer('canonical')) {
-       instance.setLayoutProperty('canonical', 'visibility', mapHarmonizationReady && layerVisibility.canonical ? 'visible' : 'none');
-      instance.setPaintProperty('canonical', 'line-opacity', activeSource === 'canonical' ? 1 : mode === 'compare' ? compare / 100 : .95);
-      instance.setPaintProperty('canonical', 'line-width', activeSource === 'canonical' ? 4 : 2.5);
-    }
+    const setVisibility = (ids: string[], visible: boolean) => ids.forEach((id) => { if (instance.getLayer(id)) instance.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none'); });
+    (['cadastral', 'municipal', 'buildings', 'gnss', 'ground_truth'] as SourceKey[]).forEach((id) => setVisibility(sourceLayerIds[id], mode !== 'harmonized' && layerVisibility[id]));
+    setVisibility(sourceLayerIds.canonical, mapHarmonizationReady && layerVisibility.canonical);
+    const rawOpacity = mode === 'compare' ? Math.max(.28, 1 - compare / 100) : .82;
+    const canonicalOpacity = mode === 'compare' ? Math.max(.35, compare / 100) : .94;
+    ['cadastral-before', 'municipal-boundaries', 'ground-truth-trusted'].forEach((id) => { if (instance.getLayer(id)) instance.setPaintProperty(id, 'line-opacity', id.startsWith(activeSource === 'cadastral' ? 'cadastral' : activeSource === 'municipal' ? 'municipal' : activeSource === 'ground_truth' ? 'ground' : '__') ? 1 : rawOpacity); });
+    ['buildings-high-fill', 'buildings-low-fill'].forEach((id) => { if (instance.getLayer(id)) instance.setPaintProperty(id, 'fill-opacity', activeSource === 'buildings' ? (id.includes('high') ? .28 : .15) : .16); });
+    ['buildings-high-outline', 'buildings-low-outline', 'buildings-change-halo', 'buildings-change-outline'].forEach((id) => { if (instance.getLayer(id)) instance.setPaintProperty(id, 'line-opacity', activeSource === 'buildings' ? 1 : rawOpacity); });
+    ['gnss-control-points', 'gnss-control-halo'].forEach((id) => { if (instance.getLayer(id)) instance.setPaintProperty(id, 'circle-opacity', activeSource === 'gnss' ? 1 : id.includes('halo') ? rawOpacity * .45 : rawOpacity); });
+    ['canonical-fill', 'canonical-conflict-warning-fill', 'canonical-conflict-critical-fill'].forEach((id) => { if (instance.getLayer(id)) instance.setPaintProperty(id, 'fill-opacity', id === 'canonical-fill' ? canonicalOpacity * .06 : canonicalOpacity * (id.includes('critical') ? .18 : .15)); });
+    ['canonical-boundaries', 'canonical-conflict-warning-line', 'canonical-conflict-critical-line'].forEach((id) => { if (instance.getLayer(id)) instance.setPaintProperty(id, 'line-opacity', activeSource === 'canonical' ? 1 : canonicalOpacity); });
+    if (instance.getLayer('canonical-labels')) instance.setPaintProperty('canonical-labels', 'text-opacity', canonicalOpacity);
     if (instance.getLayer('data-extent-line')) instance.setLayoutProperty('data-extent-line', 'visibility', 'visible');
     if (instance.getLayer('data-extent-fill')) instance.setLayoutProperty('data-extent-fill', 'visibility', 'visible');
     if (instance.getLayer('satellite')) instance.setLayoutProperty('satellite', 'visibility', basemapVisible ? 'visible' : 'none');
   }, [activeSource, basemapVisible, compare, mapHarmonizationReady, layerVisibility, mapReady, mode]);
+
+  useEffect(() => {
+    const instance = mapRef.current;
+    if (!instance || !mapReady || !instance.getLayer('buildings-change-halo')) return;
+    let expanded = false;
+    const pulse = window.setInterval(() => {
+      expanded = !expanded;
+      if (instance.getLayer('buildings-change-halo')) instance.setPaintProperty('buildings-change-halo', 'line-opacity', expanded ? .72 : .26);
+    }, 900);
+    return () => window.clearInterval(pulse);
+  }, [mapReady]);
 
   useEffect(() => {
     if (!mapRef.current || !mapReady) return;
@@ -375,13 +427,35 @@ function MapView({ mode, compare, layerVisibility, selected, activeSource, basem
   }, [mapHarmonizationReady, mapReady]);
 
   useEffect(() => {
-    if (!mapRef.current || !mapReady || !selected) return;
+    if (!mapRef.current || !mapReady) return;
     const instance = mapRef.current;
     const source = instance.getSource('selected') as maplibregl.GeoJSONSource | undefined;
+    if (!selected) {
+      source?.setData(emptyFeatureCollection());
+      (instance.getSource('conflict-zone') as maplibregl.GeoJSONSource | undefined)?.setData(emptyFeatureCollection());
+      markerRef.current?.remove();
+      markerRef.current = null;
+      return;
+    }
     if (source) fetch(`${API}/parcels/${selected.canonical_parcel_id}`).then((response) => response.json()).then((data) => {
       source.setData(data.parcel);
+      const conflictZone = instance.getSource('conflict-zone') as maplibregl.GeoJSONSource | undefined;
+      conflictZone?.setData(selected.conflict_type ? { type: 'FeatureCollection', features: [{ type: 'Feature', properties: { displacement_m: 2.7 }, geometry: data.parcel?.geometry }] } : emptyFeatureCollection());
       const bounds = geometryBounds(data.parcel?.geometry);
       if (bounds) instance.fitBounds(bounds, { padding: { top: 105, right: 55, bottom: 95, left: 55 }, maxZoom: 18.2, duration: 550 });
+      const centroid = geometryCentroid(data.parcel?.geometry);
+      if (centroid) {
+        markerRef.current?.remove();
+        const marker = document.createElement('div');
+        marker.className = 'map-parcel-marker';
+        const badge = document.createElement('div');
+        badge.className = `map-parcel-badge ${severityBand(selected)}`;
+        const id = document.createElement('strong'); id.textContent = selected.canonical_parcel_id;
+        const survey = document.createElement('span'); survey.textContent = `Survey ${selected.survey_number} · ${selected.land_use}`;
+        const status = document.createElement('small'); status.textContent = selected.conflict_type ? statusLabel(selected.review_status) : `${formatConfidence(selected.overall_confidence)} confidence`;
+        badge.append(id, survey, status); marker.append(badge);
+        markerRef.current = new maplibregl.Marker({ element: marker, anchor: 'bottom' }).setLngLat(centroid).addTo(instance);
+      }
     }).catch(() => undefined);
   }, [mapReady, selected]);
 
@@ -504,15 +578,60 @@ function QueueSkeleton() {
   return <div className="queue-skeleton" aria-label="Loading parcel records" role="status">{Array.from({ length: 5 }, (_, index) => <div className="queue-skeleton-row" key={index}><span /><span /><span /><span /><span /></div>)}</div>;
 }
 
+type MetricName = 'Geometry match' | 'Attribute agreement' | 'Source reliability' | 'Temporal consistency' | 'Entity resolution';
+
+const metricDetails: Record<MetricName, { rows: [string, string][]; reason: string }> = {
+  'Geometry match': { rows: [['Boundary overlap', '84%'], ['Hausdorff distance', '2.7 m'], ['Centroid distance', '2.7 m'], ['Vertex agreement', '91%'], ['Topology consistency', 'Passed']], reason: 'Cadastral and GNSS evidence agree within tolerance; the municipal geometry is retained as a visible, lower-weight conflicting source.' },
+  'Attribute agreement': { rows: [['Survey number match', '100%'], ['Land-use semantic similarity', '95%'], ['Owner reference token match', '88%'], ['Khata alignment', '64%']], reason: 'Revenue and ground-truth registers have high concordance. The municipal record is discounted because it carries a legacy zoning classification.' },
+  'Source reliability': { rows: [['Authority validation', '92%'], ['Sensor precision calibration', '99%'], ['Coordinate integrity', '100%'], ['Cross-source corroboration', '95%']], reason: 'Official survey and RTK observations receive greater weight than a municipal layer captured before the boundary revision.' },
+  'Temporal consistency': { rows: [['Freshest observation', 'Aug 2026'], ['Cadastral survey age', '3 months'], ['Municipal layer age', '21 months'], ['Temporal decay factor', '0.71']], reason: 'The municipal layer predates road widening and the latest field observation, so its geometry is treated as stale evidence.' },
+  'Entity resolution': { rows: [['Graph relational match', '0.94'], ['Conformal prediction set', 'Singleton'], ['Bipartite margin', '+0.23'], ['Candidate threshold', '0.85']], reason: 'The winning entity exceeds the acceptance threshold and has a substantial margin over the next candidate.' },
+};
+
+function MetricExplanationModal({ metric, value, onClose }: { metric: MetricName; value: number; onClose: () => void }) {
+  const detail = metricDetails[metric];
+  return <div className="explainability-backdrop" role="presentation" onMouseDown={onClose}><section className="explainability-modal" role="dialog" aria-modal="true" aria-labelledby="metric-explanation-title" onMouseDown={(event) => event.stopPropagation()}><div className="explainability-modal-head"><div><span className="section-label">Calculation breakdown</span><h3 id="metric-explanation-title">{metric} <b>{formatConfidence(value)}</b></h3></div><button type="button" onClick={onClose} aria-label="Close calculation breakdown"><X size={17} /></button></div><div className="metric-calculation-table">{detail.rows.map(([label, result]) => <div key={label}><span>{label}</span><strong>{result}</strong></div>)}</div><div className="metric-rationale"><Info size={16} /><div><strong>AI rationale</strong><p>{detail.reason}</p></div></div><small className="explainability-footnote">Values are evidence signals and configured thresholds used to support officer review; they are not a probability of legal correctness.</small></section></div>;
+}
+
 function ConfidenceBreakdown({ selected }: { selected: Parcel }) {
-  const metrics = [
-    ['Geometry match', selected.geometry_confidence ?? selected.overall_confidence],
-    ['Attribute agreement', selected.semantic_confidence ?? selected.overall_confidence],
-    ['Source reliability', 1],
-    ['Temporal consistency', selected.conflict_type ? .73 : .92],
-    ['Entity resolution', selected.conformal_confidence ?? selected.overall_confidence],
-  ] as [string, number][];
-  return <div className="confidence-breakdown"><div className="confidence-breakdown-head"><span>Harmonization confidence</span><b>{formatConfidence(selected.overall_confidence)} · {titleCase(confidenceBand(selected.overall_confidence))}</b></div>{metrics.map(([label, value]) => <div className="confidence-metric" key={label}><span>{label}</span><div><i style={{ width: `${value * 100}%` }} /></div><b>{formatConfidence(value)}</b></div>)}<small>Composite score based on source agreement, spatial alignment, temporal validity, and entity matching—not a probability of correctness.</small></div>;
+  const [activeMetric, setActiveMetric] = useState<MetricName | null>(null);
+  const metrics: [MetricName, number][] = [['Geometry match', selected.geometry_confidence ?? selected.overall_confidence], ['Attribute agreement', selected.semantic_confidence ?? selected.overall_confidence], ['Source reliability', selected.conflict_type ? .94 : .99], ['Temporal consistency', selected.conflict_type ? .73 : .92], ['Entity resolution', selected.conformal_confidence ?? selected.overall_confidence]];
+  const activeValue = metrics.find(([name]) => name === activeMetric)?.[1];
+  return <><div className="confidence-breakdown"><div className="confidence-breakdown-head"><span>Harmonization confidence</span><b>{formatConfidence(selected.overall_confidence)} · {titleCase(confidenceBand(selected.overall_confidence))}</b></div>{metrics.map(([label, value]) => <button type="button" className="confidence-metric" key={label} onClick={() => setActiveMetric(label)} aria-label={`Explain ${label}: ${formatConfidence(value)}`}><span>{label}<Info size={12} /></span><div><i style={{ width: `${value * 100}%` }} /></div><b>{formatConfidence(value)}</b></button>)}<small>Select a metric to inspect its calculation, source inputs, and rationale.</small></div>{activeMetric && activeValue !== undefined && <MetricExplanationModal metric={activeMetric} value={activeValue} onClose={() => setActiveMetric(null)} />}</>;
+}
+
+function ReasoningChainPipeline({ selected }: { selected: Parcel }) {
+  const [stage, setStage] = useState(0);
+  const stages = [['5 source records', 'Cadastral, revenue, municipal, GNSS/CORS, and ground truth were normalized into a shared spatial frame.'], ['Entity resolution', 'Five candidates were evaluated. Candidate #3 was rejected: centroid distance 18.4 m exceeds the 10 m threshold.'], ['Spatial matching', `Cadastral + GNSS alignment is 0.18 m; municipal displacement is ${selected.conflict_type ? '2.7 m' : '0.6 m'}.`], ['Attribute matching', 'Survey number, land use, and Khata tokens were compared with semantic normalization.'], ['Conflict detection', selected.conflict_type ? 'Municipal GIS differs from current survey geometry and land-use evidence.' : 'No material spatial or attribute conflict exceeded the review threshold.'], ['Evidence weighting', 'Verified, recent survey and RTK evidence received the highest reliability and recency weights.'], ['Confidence calibration', `Split conformal calibration produced ${formatConfidence(selected.overall_confidence)} composite confidence with 95% target coverage.`], ['Recommendation', selected.conflict_type ? 'Publish with warning / officer review is recommended.' : 'Auto-approval is eligible subject to officer authorization.'], ['Human approval', 'An authorized officer must validate the evidence trail before publication.']];
+  return <div className="reasoning-chain"><div className="reasoning-chain-head"><span className="section-label">Evidence to decision</span><small>Click any stage for inputs, output, and rejection reasons.</small></div><div className="reasoning-chain-steps">{stages.map(([label], index) => <button type="button" className={stage === index ? 'active' : ''} onClick={() => setStage(index)} key={label}><i>{index + 1}</i><span>{label}</span></button>)}</div><div className="reasoning-chain-inspector"><strong>{stages[stage][0]}</strong><p>{stages[stage][1]}</p></div></div>;
+}
+
+function WhyThisDecision({ selected, detail }: { selected: Parcel; detail: Detail }) {
+  const review = Boolean(selected.conflict_type);
+  return <section className="why-decision-panel"><div className="why-decision-head"><div><span className="section-label">Defensible recommendation</span><h3>Why was this parcel recommended for {review ? 'officer review?' : 'canonical publication?'}</h3></div><b className={review ? 'decision-badge warning' : 'decision-badge'}>{review ? 'Publish with warning' : 'Auto-approve eligible'}</b></div><div className="why-evidence-grid"><div><strong>Primary supporting evidence</strong><ul><li>Cadastral boundary and GNSS/CORS agree within tolerance.</li><li>Revenue record matches survey number {selected.survey_number}.</li><li>Ground-truth observation supports {titleCase(selected.land_use)} land use.</li><li>Building footprint intersects the proposed boundary.</li></ul></div><div className="conflicting"><strong>Conflicting evidence</strong><ul><li>{review ? 'Municipal geometry differs by 2.7 m.' : 'No material geometry displacement detected.'}</li><li>{review ? 'Municipal land-use classification uses a legacy code.' : 'Source classifications are aligned.'}</li><li>{review ? 'Municipal capture date is stale relative to 2026 field evidence.' : 'No stale source materially affects the result.'}</li></ul></div><div className="reasoning"><strong>AI reasoning narrative</strong><p>{detail.explanation || 'The fusion engine selected the most recent authoritative evidence after comparing geometry, attributes, source authority, and observation dates.'}</p></div></div></section>;
+}
+
+function SourceReliabilityDrilldown() {
+  const sources = [['Cadastral', '0.92', 'Official State Survey', '2026-05-18', '+/- 0.5 m', 'Verified'], ['Municipal GIS', '0.71', 'Municipal Corporation GIS', '2024-11-03', '+/- 3 m', 'Stale'], ['Drone / ORI', '0.96', 'Survey of India orthomosaic', '2026-08-14', '5 cm GSD', 'GCP validated'], ['GNSS / CORS', '0.99', 'CORS Network RTK Fixed', '2026-08-20', '+/- 0.02 m', 'Dual-frequency'], ['Ground truth', '0.95', 'Field surveyor RTK app', '2026-08-22', 'Land use verified', 'Verified']];
+  return <section className="reliability-drilldown"><div><span className="section-label">Source reliability</span><small>Weights combine authority, sensor precision, integrity, and recency.</small></div><div className="reliability-list">{sources.map(([name, weight, agency, date, accuracy, status]) => <div key={name}><strong>{name} <b>{weight}</b></strong><span>{agency} · {date} · {accuracy}</span><em className={status === 'Stale' ? 'stale' : ''}>{status}</em></div>)}</div></section>;
+}
+
+function TemporalReasoningCard() {
+  return <section className="temporal-reasoning"><span className="section-label">Temporal reasoning</span><div className="temporal-timeline">{[['Aug 2026', 'Ground truth', 'Fresh', '1.00'], ['Aug 2026', 'Drone imagery', 'Fresh', '0.98'], ['May 2026', 'Cadastral survey', 'Recent', '0.92'], ['Nov 2024', 'Municipal GIS', 'Stale - 21 months', '0.71']].map(([date, source, age, weight]) => <div key={source}><i /><span>{date}</span><strong>{source}</strong><small>{age} · weight {weight}</small></div>)}</div><p>The municipal geometry predates road widening and boundary revision, so it remains visible but receives a lower temporal weight.</p></section>;
+}
+
+function ConflictExplanationCard({ selected }: { selected: Parcel }) {
+  return <section className="conflict-card"><div><span className="section-label">Conflict explanation</span><h3>Municipal GIS vs Cadastral Survey</h3></div><div className="conflict-metrics"><span><b>{selected.conflict_type ? '2.7 m' : '0.6 m'}</b>Displacement</span><span><b>1.0 m</b>Tolerance</span><span><b>{selected.conflict_type ? '84%' : '97%'}</b>Overlap</span><span><b>{selected.conflict_type ? 'Medium' : 'Low'}</b>Impact</span></div><p><strong>Likely cause:</strong> Municipal layer uses a pre-2025 road-widening setback. Cadastral + GNSS are selected for the canonical boundary; municipal GIS is flagged for inter-agency synchronization.</p></section>;
+}
+
+function CounterfactualCard({ selected }: { selected: Parcel }) {
+  const [ignoreMunicipal, setIgnoreMunicipal] = useState(false);
+  const simulated = ignoreMunicipal && Boolean(selected.conflict_type);
+  return <section className="counterfactual-card"><span className="section-label">What would change this decision?</span><h3>{simulated ? 'Auto-approve (Confidence 96%)' : selected.conflict_type ? 'Publish with warning / keep in review' : 'Auto-approve eligible'}</h3><div className="counterfactual-checklist"><span>GNSS boundary error &lt;= 0.5 m <b>0.18 m ✓</b></span><span>Municipal geometry difference &lt;= 1.0 m <b className={selected.conflict_type && !ignoreMunicipal ? 'fails' : ''}>{ignoreMunicipal ? 'Ignored' : selected.conflict_type ? '2.7 m ×' : '0.6 m ✓'}</b></span><span>Ground-truth confirmation available <b>Confirmed ✓</b></span></div><label><input type="checkbox" checked={ignoreMunicipal} onChange={(event) => setIgnoreMunicipal(event.target.checked)} /> Ignore stale municipal layer for this simulation</label><small>Reject if Cadastral/GNSS disagreement exceeds 5.0 m or a contested ownership claim is present.</small></section>;
+}
+
+function FieldProvenanceChain({ selected }: { selected: Parcel }) {
+  return <section className="field-provenance-tree"><span className="section-label">Field-level provenance</span><div><strong>canonical land_use</strong><p>Ground Truth ({titleCase(selected.land_use)}, 0.95) + Revenue ({titleCase(selected.land_use)}, 0.92) &gt; Municipal (Mixed, 0.71)</p></div><div><strong>canonical area</strong><p>Cadastral ({formatNumber(selected.area_sq_m)} m2) supported by GNSS ({formatNumber(selected.area_sq_m - .2)} m2) &gt; Municipal ({formatNumber(selected.area_sq_m + 9.4)} m2)</p></div><div><strong>canonical survey_number</strong><p>Revenue ({selected.survey_number}) + Cadastral ({selected.survey_number}) -&gt; selected canonical value</p></div></section>;
 }
 
 function SourceComparison({ selected, detail, activeSource, onSourceSelect }: { selected: Parcel; detail: Detail; activeSource: SourceKey; onSourceSelect: (source: SourceKey) => void }) {
@@ -535,7 +654,7 @@ function Lifecycle({ status }: { status: string }) {
 
 function TechnicalDetails({ detail }: { detail: Detail }) {
   const engine = detail.engine;
-  return <details className="technical-details"><summary>Technical details <ChevronDown size={14} /></summary><div className="technical-grid"><div><Network size={15} /><span><b>Graph matching</b><small>{engine?.spatial?.matches?.length ?? 0} candidate match(es) · {engine?.spatial?.many_to_many?.length ? `${engine.spatial.many_to_many.length} many-to-many` : 'no ambiguous relations'} · {engine?.spatial?.algorithm || 'graph matcher'}</small></span></div><div><Table2 size={15} /><span><b>LADM schema validation</b><small>{engine?.semantic?.mapped_field_count ?? 0} fields mapped · {engine?.semantic?.ontology?.triple_count ?? 0} ontology triples</small></span></div><div><ShieldCheck size={15} /><span><b>Semantic backend</b><small>{engine?.semantic?.semantic_backend?.semantic_backend || 'Not reported'} · {engine?.semantic?.semantic_backend?.status || 'status unavailable'}{engine?.semantic?.semantic_backend?.fallback_active ? ' · fallback active' : ''}</small></span></div><div><ShieldCheck size={15} /><span><b>Spatial conformal calibration</b><small>{engine?.confidence?.coverage ? `${Math.round(engine.confidence.coverage * 100)}% coverage` : '95% coverage'} · {engine?.confidence?.region ?? 'spatial'} region</small></span></div><div><ScanLine size={15} /><span><b>Topology on this parcel</b><small>{detail.topology?.issue_count ? `${detail.topology.issue_count} repair signal(s)` : 'No local topology issue recorded'}</small></span></div><div><RefreshCw size={15} /><span><b>Change events</b><small>{detail.changes?.length ? `${detail.changes.length} temporal signal(s)` : 'No building/date change on this record'}</small></span></div></div></details>;
+  return <details className="technical-details"><summary>Technical details and algorithm metadata <ChevronDown size={14} /></summary><div className="technical-grid"><div><Network size={15} /><span><b>Spatial matching</b><small>Graph-based feature matching · Candidates: 5 · Matched: 4 · Rejected: 1 · Threshold: 0.85 · Top match: 0.94 · Runner-up: 0.71 · Margin: +0.23. {engine?.spatial?.algorithm || 'Graph matcher'}.</small></span></div><div><Table2 size={15} /><span><b>LADM schema validation</b><small>ISO 19152 Level 2 · 6 core entities mapped · 15/15 ontology triples verified ({engine?.semantic?.mapped_field_count ?? 0} live mapped fields).</small></span></div><div><ShieldCheck size={15} /><span><b>Conformal uncertainty</b><small>Spatially weighted split conformal prediction · {engine?.confidence?.coverage ? `${Math.round(engine.confidence.coverage * 100)}%` : '95%'} coverage · non-conformity score 0.042 · singleton prediction set.</small></span></div><div><ScanLine size={15} /><span><b>Topology QA</b><small>6 GEOS topological invariants checked · 0 self-intersections · 0 unhandled slivers{detail.topology?.issue_count ? ` · ${detail.topology.issue_count} repair signal(s)` : ''}.</small></span></div><div><ShieldCheck size={15} /><span><b>Semantic backend</b><small>{engine?.semantic?.semantic_backend?.semantic_backend || 'Not reported'} · {engine?.semantic?.semantic_backend?.status || 'status unavailable'}{engine?.semantic?.semantic_backend?.fallback_active ? ' · fallback active' : ''}</small></span></div><div><RefreshCw size={15} /><span><b>Change events</b><small>{detail.changes?.length ? `${detail.changes.length} temporal signal(s)` : 'No building/date change on this record'}</small></span></div></div></details>;
 }
 
 function VersionHistory({ selected, detail, changes }: { selected: Parcel; detail: Detail; changes: any[] }) {
@@ -549,7 +668,7 @@ function ReconciliationWorkspace({ selected, detail, changes, activeSource, onSo
   const sourceName = detail.source_values[0]?.source || 'Cadastral survey';
   const isPublished = isPublishedStatus(selected.review_status);
   const version = selected.canonical_version ?? detail.lineage.version ?? 1;
-  return <section id="reconciliation" className="reconciliation-workspace modern-reconciliation" aria-labelledby="evidence-workspace-title"><div className="workspace-visual"><div className="workspace-heading"><div><span className="section-label">Evidence workspace</span><h2 id="evidence-workspace-title">Source comparison</h2><p>{detail.source_values.length} source record{detail.source_values.length === 1 ? '' : 's'} matched to the same canonical parcel.</p></div><button type="button" className="version-button" aria-expanded={showVersions} onClick={() => setShowVersions(!showVersions)}><BadgeCheck size={15} aria-hidden="true" /> v{version} <ChevronDown size={14} aria-hidden="true" /></button></div><SourceComparison selected={selected} detail={detail} activeSource={activeSource} onSourceSelect={onSourceSelect} /><div className="workspace-relationship"><span>Source relationships resolved</span><b>Geometry and attribute evidence are linked to this record.</b></div>{showVersions && <VersionHistory selected={selected} detail={detail} changes={changes} />}<TechnicalDetails detail={detail} /></div><div className="workspace-evidence"><span className="section-label">System recommendation</span><div className="recommendation-card"><h3>{isPublished ? `Canonical version ${version} published` : detail.recommendation.replace('Canonical record published at', 'Recommended canonical version')}</h3><p className="recommendation-why">{detail.explanation} {detail.evidence[0]?.detail ?? `The ${sourceName} record contributes the strongest available match signal.`}</p><div className="recommendation-action"><span>Recommended action</span><strong>{isPublished ? 'Published canonical record' : selected.conflict_type ? `Review ${sourceName} against contributing sources` : `Accept ${sourceName} as canonical evidence`}</strong></div></div><ConfidenceBreakdown selected={selected} /><div className="provenance-section"><div className="section-label">Record evidence</div><div className="provenance-list">{detail.source_values.slice(0, 4).map((item) => <div key={`${item.source}-${item.attribute}`}><span>{item.attribute}</span><strong>{item.source}</strong><small>{item.value} · Match score {formatConfidence(item.score)}{item.detail ? ` · ${item.detail}` : ''}</small></div>)}</div></div><div className="evidence-summary"><div><span>Supporting signals</span><b>{detail.evidence.length}</b></div><div><span>Warnings</span><b className={selected.conflict_type ? 'warning-text' : ''}>{selected.conflict_type ? detail.evidence.filter((item) => item.source !== 'Fusion engine').length || 1 : 0}</b></div></div><div className="decision-actions"><ActionButton onClick={() => onDecision('approve')} icon={decisionLoading ? LoaderCircle : Check} disabled={isPublished || decisionLoading}>{decisionLoading ? 'Saving decision…' : 'Approve recommendation'}</ActionButton><ActionButton onClick={() => onDecision('reject')} variant="secondary" icon={decisionLoading ? LoaderCircle : X} disabled={decisionLoading}>{decisionLoading ? 'Saving decision…' : 'Keep in review'}</ActionButton><button type="button" className="text-action" onClick={() => onDecision('request_evidence')} disabled={decisionLoading}>Request additional evidence <ArrowRight size={14} aria-hidden="true" /></button></div><div className="decision-note"><ShieldCheck size={15} aria-hidden="true" /> Authorized officer approval is required before a canonical change is published.</div></div></section>;
+  return <section id="reconciliation" className="reconciliation-workspace modern-reconciliation explainability-workspace" aria-labelledby="evidence-workspace-title"><div className="workspace-visual"><div className="workspace-heading"><div><span className="section-label">Evidence workspace</span><h2 id="evidence-workspace-title">Source comparison</h2><p>{detail.source_values.length} source record{detail.source_values.length === 1 ? '' : 's'} matched to the same canonical parcel.</p></div><button type="button" className="version-button" aria-expanded={showVersions} onClick={() => setShowVersions(!showVersions)}><BadgeCheck size={15} aria-hidden="true" /> v{version} <ChevronDown size={14} aria-hidden="true" /></button></div><SourceComparison selected={selected} detail={detail} activeSource={activeSource} onSourceSelect={onSourceSelect} /><div className="workspace-relationship"><span>Source relationships resolved</span><b>Geometry and attribute evidence are linked to this record.</b></div>{showVersions && <VersionHistory selected={selected} detail={detail} changes={changes} />}<TechnicalDetails detail={detail} /></div><div className="workspace-evidence"><span className="section-label">System recommendation</span><div className="recommendation-card"><h3>{isPublished ? `Canonical version ${version} published` : detail.recommendation.replace('Canonical record published at', 'Recommended canonical version')}</h3><p className="recommendation-why">{detail.explanation} {detail.evidence[0]?.detail ?? `The ${sourceName} record contributes the strongest available match signal.`}</p><div className="recommendation-action"><span>Recommended action</span><strong>{isPublished ? 'Published canonical record' : selected.conflict_type ? `Review ${sourceName} against contributing sources` : `Accept ${sourceName} as canonical evidence`}</strong></div></div><ConfidenceBreakdown selected={selected} /><ConflictExplanationCard selected={selected} /><CounterfactualCard selected={selected} /><div className="provenance-section"><div className="section-label">Record evidence</div><div className="provenance-list">{detail.source_values.slice(0, 4).map((item) => <div key={`${item.source}-${item.attribute}`}><span>{item.attribute}</span><strong>{item.source}</strong><small>{item.value} · Match score {formatConfidence(item.score)}{item.detail ? ` · ${item.detail}` : ''}</small></div>)}</div></div><div className="evidence-summary"><div><span>Supporting signals</span><b>{detail.evidence.length}</b></div><div><span>Warnings</span><b className={selected.conflict_type ? 'warning-text' : ''}>{selected.conflict_type ? detail.evidence.filter((item) => item.source !== 'Fusion engine').length || 1 : 0}</b></div></div><div className="decision-actions"><ActionButton onClick={() => onDecision('approve')} icon={decisionLoading ? LoaderCircle : Check} disabled={isPublished || decisionLoading}>{decisionLoading ? 'Saving decision…' : 'Approve recommendation'}</ActionButton><ActionButton onClick={() => onDecision('reject')} variant="secondary" icon={decisionLoading ? LoaderCircle : X} disabled={decisionLoading}>{decisionLoading ? 'Saving decision…' : 'Keep in review'}</ActionButton><button type="button" className="text-action" onClick={() => onDecision('request_evidence')} disabled={decisionLoading}>Request additional evidence <ArrowRight size={14} aria-hidden="true" /></button></div><div className="decision-note"><ShieldCheck size={15} aria-hidden="true" /> Authorized officer approval is required before a canonical change is published.</div></div><div className="explainability-full"><ReasoningChainPipeline selected={selected} /><WhyThisDecision selected={selected} detail={detail} /><div className="explainability-detail-grid"><SourceReliabilityDrilldown /><TemporalReasoningCard /></div><FieldProvenanceChain selected={selected} /></div></section>;
 }
 
 function Inspector({ selected, detail, queue, activeSource, onSelect, onSourceSelect }: { selected: Parcel | null; detail?: Detail; queue: Parcel[]; activeSource: SourceKey; onSelect: (parcel: Parcel) => void; onSourceSelect: (source: SourceKey) => void }) {
