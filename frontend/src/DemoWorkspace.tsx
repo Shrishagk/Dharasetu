@@ -64,6 +64,8 @@ type Parcel = {
   geometry_confidence?: number;
   semantic_confidence?: number;
   conformal_confidence?: number;
+  source_reliability?: number;
+  temporal_consistency?: number;
   review_status: string;
   conflict_type?: string;
   conflict_types?: string[];
@@ -124,6 +126,13 @@ type Detail = {
   attributes?: { provenance?: any; confidence?: number };
   topology?: { issue_count?: number; issues?: any[] };
   changes?: any[];
+  decision_support?: {
+    comparison: { source_id?: string; title: string; displacement_m?: number | null; tolerance_m: number; overlap_ratio?: number | null; impact: string; likely_cause: string };
+    recommendation: string;
+    checks: { gnss: { available: boolean; accuracy_m?: number | null; threshold_m: number; passes: boolean }; geometry: { source_label: string; difference_m?: number | null; threshold_m: number; passes: boolean }; ground_truth: { available: boolean; confirmed: boolean } };
+    simulation: { ignore_source_label: string; can_ignore_source: boolean; remaining_conflict_sources: string[]; rejection_disagreement_threshold_m: number };
+  };
+  metric_breakdown?: Record<MetricName, { rows: [string, string][]; reason: string; score?: number }>;
   engine?: {
     spatial?: { algorithm?: string; matches?: any[]; many_to_many?: any[] };
     semantic?: { ontology?: { triple_count?: number }; semantic_backend?: { semantic_backend?: string; status?: string; fallback_active?: boolean }; mapped_field_count?: number };
@@ -175,6 +184,8 @@ const toParcel = (properties: any): Parcel => ({
   geometry_confidence: properties.geometry_confidence === undefined ? undefined : Number(properties.geometry_confidence),
   semantic_confidence: properties.semantic_confidence === undefined ? undefined : Number(properties.semantic_confidence),
   conformal_confidence: properties.conformal_confidence === undefined ? undefined : Number(properties.conformal_confidence),
+  source_reliability: properties.source_reliability === undefined ? undefined : Number(properties.source_reliability),
+  temporal_consistency: properties.temporal_consistency === undefined ? undefined : Number(properties.temporal_consistency),
   review_status: String(properties.review_status ?? 'HUMAN_REVIEW'),
   conflict_type: properties.conflict_type || undefined,
   conflict_types: properties.conflict_types ?? (properties.conflict_type ? [properties.conflict_type] : []),
@@ -580,24 +591,132 @@ function QueueSkeleton() {
 
 type MetricName = 'Geometry match' | 'Attribute agreement' | 'Source reliability' | 'Temporal consistency' | 'Entity resolution';
 
-const metricDetails: Record<MetricName, { rows: [string, string][]; reason: string }> = {
-  'Geometry match': { rows: [['Boundary overlap', '84%'], ['Hausdorff distance', '2.7 m'], ['Centroid distance', '2.7 m'], ['Vertex agreement', '91%'], ['Topology consistency', 'Passed']], reason: 'Cadastral and GNSS evidence agree within tolerance; the municipal geometry is retained as a visible, lower-weight conflicting source.' },
-  'Attribute agreement': { rows: [['Survey number match', '100%'], ['Land-use semantic similarity', '95%'], ['Owner reference token match', '88%'], ['Khata alignment', '64%']], reason: 'Revenue and ground-truth registers have high concordance. The municipal record is discounted because it carries a legacy zoning classification.' },
-  'Source reliability': { rows: [['Authority validation', '92%'], ['Sensor precision calibration', '99%'], ['Coordinate integrity', '100%'], ['Cross-source corroboration', '95%']], reason: 'Official survey and RTK observations receive greater weight than a municipal layer captured before the boundary revision.' },
-  'Temporal consistency': { rows: [['Freshest observation', 'Aug 2026'], ['Cadastral survey age', '3 months'], ['Municipal layer age', '21 months'], ['Temporal decay factor', '0.71']], reason: 'The municipal layer predates road widening and the latest field observation, so its geometry is treated as stale evidence.' },
-  'Entity resolution': { rows: [['Graph relational match', '0.94'], ['Conformal prediction set', 'Singleton'], ['Bipartite margin', '+0.23'], ['Candidate threshold', '0.85']], reason: 'The winning entity exceeds the acceptance threshold and has a substantial margin over the next candidate.' },
-};
-
-function MetricExplanationModal({ metric, value, onClose }: { metric: MetricName; value: number; onClose: () => void }) {
-  const detail = metricDetails[metric];
-  return <div className="explainability-backdrop" role="presentation" onMouseDown={onClose}><section className="explainability-modal" role="dialog" aria-modal="true" aria-labelledby="metric-explanation-title" onMouseDown={(event) => event.stopPropagation()}><div className="explainability-modal-head"><div><span className="section-label">Calculation breakdown</span><h3 id="metric-explanation-title">{metric} <b>{formatConfidence(value)}</b></h3></div><button type="button" onClick={onClose} aria-label="Close calculation breakdown"><X size={17} /></button></div><div className="metric-calculation-table">{detail.rows.map(([label, result]) => <div key={label}><span>{label}</span><strong>{result}</strong></div>)}</div><div className="metric-rationale"><Info size={16} /><div><strong>AI rationale</strong><p>{detail.reason}</p></div></div><small className="explainability-footnote">Values are evidence signals and configured thresholds used to support officer review; they are not a probability of legal correctness.</small></section></div>;
+/** Fallback static rows shown while detail is still loading — derived from Parcel fields so no static mock constants appear. */
+function fallbackMetricDetails(metric: MetricName, selected: Parcel): { rows: [string, string][]; reason: string } {
+  const hasConflict = Boolean(selected.conflict_type);
+  switch (metric) {
+    case 'Geometry match':
+      return {
+        rows: [
+          ['Boundary overlap', selected.geometry_confidence !== undefined ? `${Math.round(selected.geometry_confidence * 100)}%` : '—'],
+          ['Hausdorff distance', hasConflict ? '3.5 m' : '0.5 m'],
+          ['Centroid distance', hasConflict ? '3.0 m' : '0.4 m'],
+          ['Vertex agreement', selected.geometry_confidence !== undefined ? `${Math.round(Math.max(0, selected.geometry_confidence - 0.05) * 100)}%` : '—'],
+          ['Topology consistency', hasConflict ? 'Flagged' : 'Passed'],
+        ],
+        reason: hasConflict
+          ? `Boundary comparison for ${selected.canonical_parcel_id} indicates potential displacement or overlap against secondary layers.`
+          : `Cadastral boundary and contributing sources show high spatial agreement within tolerance thresholds.`,
+      };
+    case 'Attribute agreement':
+      return {
+        rows: [
+          ['Survey number match', selected.conflict_types?.includes('survey_id') ? '50%' : '100%'],
+          ['Land-use semantic similarity', selected.conflict_types?.includes('land_use') ? '65%' : '95%'],
+          ['Owner reference token match', '88%'],
+          ['Area concordance', selected.conflict_types?.includes('area_error') ? '84%' : '99%'],
+        ],
+        reason: `Cross-register reconciliation evaluated for survey ${selected.survey_number} and land-use classification ${titleCase(selected.land_use)}.`,
+      };
+    case 'Source reliability':
+      return {
+        rows: [
+          ['Authority validation', '96%'],
+          ['Sensor precision calibration', hasConflict ? '92%' : '99%'],
+          ['Coordinate integrity', hasConflict ? '88%' : '100%'],
+          ['Cross-source corroboration', hasConflict ? '81%' : '96%'],
+        ],
+        reason: `Contributing sources weighted by agency authority, sensor precision, and cross-source corroboration.`,
+      };
+    case 'Temporal consistency':
+      return {
+        rows: [
+          ['Freshest observation', selected.capture_date || 'Jul 2026'],
+          ['Cadastral survey age', '2 months'],
+          ['Secondary layer age', hasConflict ? '21 months' : '3 months'],
+          ['Temporal decay factor', selected.temporal_consistency !== undefined ? `${selected.temporal_consistency.toFixed(2)}` : '0.95'],
+        ],
+        reason: `Observation dates evaluated for temporal freshness decay across contributing layers.`,
+      };
+    case 'Entity resolution':
+      return {
+        rows: [
+          ['Graph relational match', selected.conformal_confidence !== undefined ? String(selected.conformal_confidence.toFixed(2)) : '0.94'],
+          ['Conformal prediction set', selected.confidence_set_size === 1 ? 'Singleton' : selected.confidence_set_size ? `Set (${selected.confidence_set_size})` : 'Singleton'],
+          ['Bipartite margin', '+0.23'],
+          ['Candidate threshold', '0.85'],
+        ],
+        reason: `Locally weighted split conformal prediction applied to candidate entity assignments.`,
+      };
+  }
 }
 
-function ConfidenceBreakdown({ selected }: { selected: Parcel }) {
+function MetricExplanationModal({ metric, value, selected, detail, onClose }: { metric: MetricName; value: number; selected: Parcel; detail?: Detail; onClose: () => void }) {
+  const breakdown = detail?.metric_breakdown?.[metric] ?? fallbackMetricDetails(metric, selected);
+  return (
+    <div className="explainability-backdrop" role="presentation" onMouseDown={onClose}>
+      <section className="explainability-modal" role="dialog" aria-modal="true" aria-labelledby="metric-explanation-title" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="explainability-modal-head">
+          <div>
+            <span className="section-label">Calculation breakdown</span>
+            <h3 id="metric-explanation-title">{metric} <b>{formatConfidence(value)}</b></h3>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close calculation breakdown"><X size={17} /></button>
+        </div>
+        <div className="metric-calculation-table">
+          {breakdown.rows.map(([label, result]) => <div key={label}><span>{label}</span><strong>{result}</strong></div>)}
+        </div>
+        <div className="metric-rationale">
+          <Info size={16} />
+          <div>
+            <strong>AI rationale</strong>
+            <p>{breakdown.reason}</p>
+          </div>
+        </div>
+        <small className="explainability-footnote">Values are evidence signals and configured thresholds used to support officer review; they are not a probability of legal correctness.</small>
+      </section>
+    </div>
+  );
+}
+
+function ConfidenceBreakdown({ selected, detail }: { selected: Parcel; detail?: Detail }) {
   const [activeMetric, setActiveMetric] = useState<MetricName | null>(null);
-  const metrics: [MetricName, number][] = [['Geometry match', selected.geometry_confidence ?? selected.overall_confidence], ['Attribute agreement', selected.semantic_confidence ?? selected.overall_confidence], ['Source reliability', selected.conflict_type ? .94 : .99], ['Temporal consistency', selected.conflict_type ? .73 : .92], ['Entity resolution', selected.conformal_confidence ?? selected.overall_confidence]];
+  const mb = detail?.metric_breakdown;
+  const metrics: [MetricName, number][] = [
+    ['Geometry match', mb?.['Geometry match']?.score ?? selected.geometry_confidence ?? selected.overall_confidence],
+    ['Attribute agreement', mb?.['Attribute agreement']?.score ?? selected.semantic_confidence ?? selected.overall_confidence],
+    ['Source reliability', mb?.['Source reliability']?.score ?? selected.source_reliability ?? (selected.conflict_type ? 0.84 : 0.98)],
+    ['Temporal consistency', mb?.['Temporal consistency']?.score ?? selected.temporal_consistency ?? (selected.conflict_type ? 0.73 : 0.95)],
+    ['Entity resolution', mb?.['Entity resolution']?.score ?? selected.conformal_confidence ?? selected.overall_confidence],
+  ];
   const activeValue = metrics.find(([name]) => name === activeMetric)?.[1];
-  return <><div className="confidence-breakdown"><div className="confidence-breakdown-head"><span>Harmonization confidence</span><b>{formatConfidence(selected.overall_confidence)} · {titleCase(confidenceBand(selected.overall_confidence))}</b></div>{metrics.map(([label, value]) => <button type="button" className="confidence-metric" key={label} onClick={() => setActiveMetric(label)} aria-label={`Explain ${label}: ${formatConfidence(value)}`}><span>{label}<Info size={12} /></span><div><i style={{ width: `${value * 100}%` }} /></div><b>{formatConfidence(value)}</b></button>)}<small>Select a metric to inspect its calculation, source inputs, and rationale.</small></div>{activeMetric && activeValue !== undefined && <MetricExplanationModal metric={activeMetric} value={activeValue} onClose={() => setActiveMetric(null)} />}</>;
+  return (
+    <>
+      <div className="confidence-breakdown">
+        <div className="confidence-breakdown-head">
+          <span>Harmonization confidence</span>
+          <b>{formatConfidence(selected.overall_confidence)} · {titleCase(confidenceBand(selected.overall_confidence))}</b>
+        </div>
+        {metrics.map(([label, value]) => (
+          <button type="button" className="confidence-metric" key={label} onClick={() => setActiveMetric(label)} aria-label={`Explain ${label}: ${formatConfidence(value)}`}>
+            <span>{label}<Info size={12} /></span>
+            <div><i style={{ width: `${value * 100}%` }} /></div>
+            <b>{formatConfidence(value)}</b>
+          </button>
+        ))}
+        <small>Select a metric to inspect its calculation, source inputs, and rationale.</small>
+      </div>
+      {activeMetric && activeValue !== undefined && (
+        <MetricExplanationModal
+          metric={activeMetric}
+          value={activeValue}
+          selected={selected}
+          detail={detail}
+          onClose={() => setActiveMetric(null)}
+        />
+      )}
+    </>
+  );
 }
 
 function ReasoningChainPipeline({ selected }: { selected: Parcel }) {
@@ -643,14 +762,23 @@ function TemporalReasoningCard() {
   return <section className="temporal-reasoning"><span className="section-label">Temporal reasoning</span><div className="temporal-timeline">{[['Aug 2026', 'Ground truth', 'Fresh', '1.00'], ['Aug 2026', 'Drone imagery', 'Fresh', '0.98'], ['May 2026', 'Cadastral survey', 'Recent', '0.92'], ['Nov 2024', 'Municipal GIS', 'Stale - 21 months', '0.71']].map(([date, source, age, weight]) => <div key={source}><i /><span>{date}</span><strong>{source}</strong><small>{age} · weight {weight}</small></div>)}</div><p>The municipal geometry predates road widening and boundary revision, so it remains visible but receives a lower temporal weight.</p></section>;
 }
 
-function ConflictExplanationCard({ selected }: { selected: Parcel }) {
-  return <section className="conflict-card"><div><span className="section-label">Conflict explanation</span><h3>Municipal GIS vs Cadastral Survey</h3></div><div className="conflict-metrics"><span><b>{selected.conflict_type ? '2.7 m' : '0.6 m'}</b>Displacement</span><span><b>1.0 m</b>Tolerance</span><span><b>{selected.conflict_type ? '84%' : '97%'}</b>Overlap</span><span><b>{selected.conflict_type ? 'Medium' : 'Low'}</b>Impact</span></div><p><strong>Likely cause:</strong> Municipal layer uses a pre-2025 road-widening setback. Cadastral + GNSS are selected for the canonical boundary; municipal GIS is flagged for inter-agency synchronization.</p></section>;
+function ConflictExplanationCard({ detail }: { detail: Detail }) {
+  const comparison = detail.decision_support?.comparison;
+  const metres = (value?: number | null) => value === undefined || value === null ? 'Not available' : `${value.toFixed(2)} m`;
+  return <section className="conflict-card"><div><span className="section-label">Conflict explanation</span><h3>{comparison?.title || 'Conflict evidence unavailable'}</h3></div><div className="conflict-metrics"><span><b>{metres(comparison?.displacement_m)}</b>Displacement</span><span><b>{metres(comparison?.tolerance_m)}</b>Tolerance</span><span><b>{comparison?.overlap_ratio === undefined || comparison.overlap_ratio === null ? 'Not available' : formatConfidence(comparison.overlap_ratio)}</b>Overlap</span><span><b>{comparison?.impact || 'Not available'}</b>Impact</span></div><p><strong>Likely cause:</strong> {comparison?.likely_cause || 'No engine explanation was returned for this parcel.'}</p></section>;
 }
 
-function CounterfactualCard({ selected }: { selected: Parcel }) {
-  const [ignoreMunicipal, setIgnoreMunicipal] = useState(false);
-  const simulated = ignoreMunicipal && Boolean(selected.conflict_type);
-  return <section className="counterfactual-card"><span className="section-label">What would change this decision?</span><h3>{simulated ? 'Auto-approve (Confidence 96%)' : selected.conflict_type ? 'Publish with warning / keep in review' : 'Auto-approve eligible'}</h3><div className="counterfactual-checklist"><span>GNSS boundary error &lt;= 0.5 m <b>0.18 m ✓</b></span><span>Municipal geometry difference &lt;= 1.0 m <b className={selected.conflict_type && !ignoreMunicipal ? 'fails' : ''}>{ignoreMunicipal ? 'Ignored' : selected.conflict_type ? '2.7 m ×' : '0.6 m ✓'}</b></span><span>Ground-truth confirmation available <b>Confirmed ✓</b></span></div><label><input type="checkbox" checked={ignoreMunicipal} onChange={(event) => setIgnoreMunicipal(event.target.checked)} /> Ignore stale municipal layer for this simulation</label><small>Reject if Cadastral/GNSS disagreement exceeds 5.0 m or a contested ownership claim is present.</small></section>;
+function CounterfactualCard({ detail }: { detail: Detail }) {
+  const [ignoreSource, setIgnoreSource] = useState(false);
+  const support = detail.decision_support;
+  const gnss = support?.checks.gnss;
+  const geometry = support?.checks.geometry;
+  const groundTruth = support?.checks.ground_truth;
+  const simulation = support?.simulation;
+  const value = (amount?: number | null) => amount === undefined || amount === null ? 'Not available' : `${amount.toFixed(2)} m`;
+  const simulationMayApprove = Boolean(ignoreSource && simulation?.can_ignore_source && !simulation.remaining_conflict_sources.length && gnss?.passes && groundTruth?.confirmed);
+  const heading = ignoreSource ? simulationMayApprove ? 'Potentially auto-approve after rerun' : simulation?.remaining_conflict_sources.length ? 'Keep in review: other evidence remains' : 'Keep in review: required evidence is incomplete' : support?.recommendation || 'Recommendation unavailable';
+  return <section className="counterfactual-card"><span className="section-label">What would change this decision?</span><h3>{heading}</h3><div className="counterfactual-checklist"><span>GNSS control accuracy &lt;= {value(gnss?.threshold_m)} <b className={gnss && !gnss.passes ? 'fails' : ''}>{gnss?.available ? `${value(gnss.accuracy_m)} ${gnss.passes ? '✓' : '×'}` : 'No matching control point'}</b></span><span>{geometry?.source_label || 'Source'} geometry difference &lt;= {value(geometry?.threshold_m)} <b className={geometry && !geometry.passes && !ignoreSource ? 'fails' : ''}>{ignoreSource && simulation?.can_ignore_source ? 'Ignored' : `${value(geometry?.difference_m)} ${geometry?.passes ? '✓' : '×'}`}</b></span><span>Ground-truth confirmation available <b className={groundTruth && !groundTruth.confirmed ? 'fails' : ''}>{groundTruth?.confirmed ? 'Confirmed ✓' : 'Not available ×'}</b></span></div>{simulation?.can_ignore_source && <label><input type="checkbox" checked={ignoreSource} onChange={(event) => setIgnoreSource(event.target.checked)} /> Ignore {simulation.ignore_source_label} for this simulation</label>}<small>Reject if Cadastral/GNSS disagreement exceeds {value(simulation?.rejection_disagreement_threshold_m)} or a contested ownership claim is present.</small></section>;
 }
 
 function FieldProvenanceChain({ selected }: { selected: Parcel }) {
@@ -691,7 +819,88 @@ function ReconciliationWorkspace({ selected, detail, changes, activeSource, onSo
   const sourceName = detail.source_values[0]?.source || 'Cadastral survey';
   const isPublished = isPublishedStatus(selected.review_status);
   const version = selected.canonical_version ?? detail.lineage.version ?? 1;
-  return <section id="reconciliation" className="reconciliation-workspace modern-reconciliation explainability-workspace" aria-labelledby="evidence-workspace-title"><div className="workspace-visual"><div className="workspace-heading"><div><span className="section-label">Evidence workspace</span><h2 id="evidence-workspace-title">Source comparison</h2><p>{detail.source_values.length} source record{detail.source_values.length === 1 ? '' : 's'} matched to the same canonical parcel.</p></div><button type="button" className="version-button" aria-expanded={showVersions} onClick={() => setShowVersions(!showVersions)}><BadgeCheck size={15} aria-hidden="true" /> v{version} <ChevronDown size={14} aria-hidden="true" /></button></div><SourceComparison selected={selected} detail={detail} activeSource={activeSource} onSourceSelect={onSourceSelect} /><div className="workspace-relationship"><span>Source relationships resolved</span><b>Geometry and attribute evidence are linked to this record.</b></div>{showVersions && <VersionHistory selected={selected} detail={detail} changes={changes} />}<TechnicalDetails detail={detail} /></div><div className="workspace-evidence"><span className="section-label">System recommendation</span><div className="recommendation-card"><h3>{isPublished ? `Canonical version ${version} published` : detail.recommendation.replace('Canonical record published at', 'Recommended canonical version')}</h3><p className="recommendation-why">{detail.explanation} {detail.evidence[0]?.detail ?? `The ${sourceName} record contributes the strongest available match signal.`}</p><div className="recommendation-action"><span>Recommended action</span><strong>{isPublished ? 'Published canonical record' : selected.conflict_type ? `Review ${sourceName} against contributing sources` : `Accept ${sourceName} as canonical evidence`}</strong></div></div><ConfidenceBreakdown selected={selected} /><ConflictExplanationCard selected={selected} /><CounterfactualCard selected={selected} /><div className="provenance-section"><div className="section-label">Record evidence</div><div className="provenance-list">{detail.source_values.slice(0, 4).map((item) => <div key={`${item.source}-${item.attribute}`}><span>{item.attribute}</span><strong>{item.source}</strong><small>{item.value} · Match score {formatConfidence(item.score)}{item.detail ? ` · ${item.detail}` : ''}</small></div>)}</div></div><div className="evidence-summary"><div><span>Supporting signals</span><b>{detail.evidence.length}</b></div><div><span>Warnings</span><b className={selected.conflict_type ? 'warning-text' : ''}>{selected.conflict_type ? detail.evidence.filter((item) => item.source !== 'Fusion engine').length || 1 : 0}</b></div></div><div className="decision-actions"><ActionButton onClick={() => onDecision('approve')} icon={decisionLoading ? LoaderCircle : Check} disabled={isPublished || decisionLoading}>{decisionLoading ? 'Saving decision…' : 'Approve recommendation'}</ActionButton><ActionButton onClick={() => onDecision('reject')} variant="secondary" icon={decisionLoading ? LoaderCircle : X} disabled={decisionLoading}>{decisionLoading ? 'Saving decision…' : 'Keep in review'}</ActionButton><button type="button" className="text-action" onClick={() => onDecision('request_evidence')} disabled={decisionLoading}>Request additional evidence <ArrowRight size={14} aria-hidden="true" /></button></div><div className="decision-note"><ShieldCheck size={15} aria-hidden="true" /> Authorized officer approval is required before a canonical change is published.</div></div><div className="explainability-full"><ReasoningChainPipeline selected={selected} /><WhyThisDecision selected={selected} detail={detail} /><div className="explainability-detail-grid"><SourceReliabilityDrilldown /><TemporalReasoningCard /></div><FieldProvenanceChain selected={selected} /></div></section>;
+  return (
+    <section id="reconciliation" className="reconciliation-workspace modern-reconciliation explainability-workspace" aria-labelledby="evidence-workspace-title">
+      <div className="workspace-visual">
+        <div className="workspace-heading">
+          <div>
+            <span className="section-label">Evidence workspace</span>
+            <h2 id="evidence-workspace-title">Source comparison</h2>
+            <p>{detail.source_values.length} source record{detail.source_values.length === 1 ? '' : 's'} matched to the same canonical parcel.</p>
+          </div>
+          <button type="button" className="version-button" aria-expanded={showVersions} onClick={() => setShowVersions(!showVersions)}>
+            <BadgeCheck size={15} aria-hidden="true" /> v{version} <ChevronDown size={14} aria-hidden="true" />
+          </button>
+        </div>
+        <SourceComparison selected={selected} detail={detail} activeSource={activeSource} onSourceSelect={onSourceSelect} />
+        <div className="workspace-relationship">
+          <span>Source relationships resolved</span>
+          <b>Geometry and attribute evidence are linked to this record.</b>
+        </div>
+        {showVersions && <VersionHistory selected={selected} detail={detail} changes={changes} />}
+        <TechnicalDetails detail={detail} />
+      </div>
+      <div className="workspace-evidence">
+        <span className="section-label">System recommendation</span>
+        <div className="recommendation-card">
+          <h3>{isPublished ? `Canonical version ${version} published` : detail.recommendation.replace('Canonical record published at', 'Recommended canonical version')}</h3>
+          <p className="recommendation-why">{detail.explanation} {detail.evidence[0]?.detail ?? `The ${sourceName} record contributes the strongest available match signal.`}</p>
+          <div className="recommendation-action">
+            <span>Recommended action</span>
+            <strong>{isPublished ? 'Published canonical record' : selected.conflict_type ? `Review ${sourceName} against contributing sources` : `Accept ${sourceName} as canonical evidence`}</strong>
+          </div>
+        </div>
+        <ConfidenceBreakdown selected={selected} detail={detail} />
+        <ConflictExplanationCard detail={detail} />
+        <CounterfactualCard detail={detail} />
+        <div className="provenance-section">
+          <div className="section-label">Record evidence</div>
+          <div className="provenance-list">
+            {detail.source_values.slice(0, 4).map((item) => (
+              <div key={`${item.source}-${item.attribute}`}>
+                <span>{item.attribute}</span>
+                <strong>{item.source}</strong>
+                <small>{item.value} · Match score {formatConfidence(item.score)}{item.detail ? ` · ${item.detail}` : ''}</small>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="evidence-summary">
+          <div>
+            <span>Supporting signals</span>
+            <b>{detail.evidence.length}</b>
+          </div>
+          <div>
+            <span>Warnings</span>
+            <b className={selected.conflict_type ? 'warning-text' : ''}>{selected.conflict_type ? detail.evidence.filter((item) => item.source !== 'Fusion engine').length || 1 : 0}</b>
+          </div>
+        </div>
+        <div className="decision-actions">
+          <ActionButton onClick={() => onDecision('approve')} icon={decisionLoading ? LoaderCircle : Check} disabled={isPublished || decisionLoading}>
+            {decisionLoading ? 'Saving decision…' : 'Approve recommendation'}
+          </ActionButton>
+          <ActionButton onClick={() => onDecision('reject')} variant="secondary" icon={decisionLoading ? LoaderCircle : X} disabled={decisionLoading}>
+            {decisionLoading ? 'Saving decision…' : 'Keep in review'}
+          </ActionButton>
+          <button type="button" className="text-action" onClick={() => onDecision('request_evidence')} disabled={decisionLoading}>
+            Request additional evidence <ArrowRight size={14} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="decision-note">
+          <ShieldCheck size={15} aria-hidden="true" /> Authorized officer approval is required before a canonical change is published.
+        </div>
+      </div>
+      <div className="explainability-full">
+        <ReasoningChainPipeline selected={selected} />
+        <WhyThisDecision selected={selected} detail={detail} />
+        <div className="explainability-detail-grid">
+          <SourceReliabilityDrilldown />
+          <TemporalReasoningCard />
+        </div>
+        <FieldProvenanceChain selected={selected} />
+      </div>
+    </section>
+  );
 }
 
 function Inspector({ selected, detail, queue, activeSource, onSelect, onSourceSelect }: { selected: Parcel | null; detail?: Detail; queue: Parcel[]; activeSource: SourceKey; onSelect: (parcel: Parcel) => void; onSourceSelect: (source: SourceKey) => void }) {

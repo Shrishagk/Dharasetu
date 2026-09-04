@@ -1,1 +1,0 @@
-{"type": "FeatureCollection", "features": [{"type": "Feature", "id": "UPLOAD-TEST-1", "geometry": {"type": "Polygon", "coordinates": [[[77.5946, 12.9721], [77.5948, 12.9721], [77.5948, 12.9723], [77.5946, 12.9723], [77.5946, 12.9721]]]}, "properties": {"note": "no area_sq_m supplied on purpose"}}]}

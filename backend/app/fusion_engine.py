@@ -933,6 +933,7 @@ def execute_fusion_pipeline_legacy(data_dir: str | Path, selected_source_ids: li
             target_matches = [match for match in result["matches"] if match.get("target_feature_id") == target_id]
             for match in target_matches:
                 candidates.append({"target_feature_id": target_id, "score": match["score"], "source": source_id, "signals": match.get("signals", {})})
+                candidates.append({"target_feature_id": target_id, "source_feature_id": match.get("source_feature_id"), "score": match["score"], "source": source_id, "signals": match.get("signals", {})})
                 source_evidence.append({"source": source_id, "score": match["score"], "detail": f"Graph match for {match['source_feature_id']} uses morphology, position and relative neighbourhood signals."})
         candidates.sort(key=lambda candidate: candidate["score"], reverse=True)
         candidate_set = []
@@ -945,6 +946,33 @@ def execute_fusion_pipeline_legacy(data_dir: str | Path, selected_source_ids: li
         geometry_confidence = _clamp(sum(candidate["score"] for candidate in candidates) / max(1, len(candidates)))
         semantic_fields = [mapping for source_mappings in schema["sources"].values() for mapping in source_mappings if mapping.get("target_concept")]
         semantic_confidence = sum(mapping["confidence"] for mapping in semantic_fields) / max(1, len(semantic_fields))
+        
+        # Calculate dynamic source reliability
+        contributing_sources = {"cadastral"}
+        for item in candidates:
+            if item.get("source"):
+                contributing_sources.add(item["source"])
+        source_weights = []
+        for s in contributing_sources:
+            s_dict = SOURCE_RELIABILITY.get(s, {})
+            if s_dict:
+                source_weights.append(sum(s_dict.values()) / len(s_dict))
+            else:
+                source_weights.append(0.80)
+        base_source_rel = sum(source_weights) / max(1, len(source_weights)) if source_weights else 0.90
+        corroboration_penalty = (0.12 if conflict.get("severity") == "high" else 0.07) if conflict.get("types") else 0.0
+        source_reliability_confidence = _clamp(base_source_rel - corroboration_penalty, 0.40, 0.99)
+
+        # Calculate dynamic temporal consistency
+        dates = []
+        feature_date = (feature.get("properties") or {}).get("capture_date")
+        if feature_date:
+            dates.append(str(feature_date))
+        freshness_scores = [_freshness(d) for d in dates] if dates else [0.90]
+        avg_freshness = sum(freshness_scores) / max(1, len(freshness_scores))
+        temporal_penalty = (0.20 if "outdated_building" in conflict.get("types", []) else 0.06) if conflict.get("types") else 0.0
+        temporal_confidence = _clamp(avg_freshness - temporal_penalty, 0.35, 0.99)
+
         raw_joint = _clamp(0.70 * geometry_confidence + 0.18 * semantic_confidence + 0.12 * (1.0 if not conflict["types"] else 0.55))
         calibrated = _clamp(0.55 * conformal.get("calibrated_confidence", 0.0) + 0.45 * raw_joint)
         if conflict["types"]:
@@ -953,6 +981,10 @@ def execute_fusion_pipeline_legacy(data_dir: str | Path, selected_source_ids: li
         parcel_results[target_id] = {
             "geometry_confidence": _round(geometry_confidence),
             "semantic_confidence": _round(semantic_confidence),
+            "source_reliability_confidence": _round(source_reliability_confidence),
+            "source_reliability": _round(source_reliability_confidence),
+            "temporal_confidence": _round(temporal_confidence),
+            "temporal_consistency": _round(temporal_confidence),
             "raw_joint_confidence": _round(raw_joint),
             "calibrated_confidence": _round(calibrated),
             "conformal": conformal,
@@ -1047,7 +1079,8 @@ def execute_fusion_pipeline(data_dir: str | Path, selected_source_ids: list[str]
         candidates, source_evidence = [], []
         for source_id, result in matching.items():
             for match in [item for item in result["matches"] if item.get("target_feature_id") == target_id]:
-                candidates.append({"target_feature_id": target_id, "score": match["score"], "source": source_id, "signals": match.get("signals", {})})
+                candidates.append({"target_feature_id": target_id, "source_feature_id": match["source_feature_id"], "score": match["score"], "source": source_id, "signals": match.get("signals", {})})
+                candidates.append({"target_feature_id": target_id, "source_feature_id": match.get("source_feature_id"), "score": match["score"], "source": source_id, "signals": match.get("signals", {})})
                 source_evidence.append({"source": source_id, "score": match["score"], "detail": f"Graph match for {match['source_feature_id']} uses morphology, position and relative neighbourhood signals."})
         candidates.sort(key=lambda item: item["score"], reverse=True)
         conformal = predictor.predict([{ "target_feature_id": target_id, "score": candidates[0]["score"] }] if candidates else [], centroid(feature))
@@ -1069,12 +1102,81 @@ def execute_fusion_pipeline(data_dir: str | Path, selected_source_ids: list[str]
         semantic_fields = [mapping for mappings in schema["sources"].values() for mapping in mappings if mapping.get("target_concept")]
         semantic_confidence = sum(mapping["confidence"] for mapping in semantic_fields) / max(1, len(semantic_fields))
         topology_confidence = _clamp(1.0 - topology.get("issue_count", 0) * 0.15)
+
+        # Calculate dynamic source reliability
+        contributing_sources = {canonical_origin}
+        for item in candidates:
+            if item.get("source"):
+                contributing_sources.add(item["source"])
+        for item in attributes.get("provenance", {}).values():
+            for s in item.get("supporting_sources", []):
+                contributing_sources.add(s)
+        source_weights = []
+        for s in contributing_sources:
+            s_dict = SOURCE_RELIABILITY.get(s, {})
+            if s_dict:
+                source_weights.append(sum(s_dict.values()) / len(s_dict))
+            else:
+                source_weights.append(0.80)
+        base_source_rel = sum(source_weights) / max(1, len(source_weights)) if source_weights else 0.90
+        corroboration_penalty = (0.12 if conflict.get("severity") == "high" else 0.07) if conflict.get("types") else 0.0
+        source_reliability_confidence = _clamp(base_source_rel - corroboration_penalty, 0.40, 0.99)
+
+        # Calculate dynamic temporal consistency
+        parcel_changes = changes_by_parcel.get(target_id, [])
+        dates = []
+        feature_date = (feature.get("properties") or {}).get("capture_date")
+        if feature_date:
+            dates.append(str(feature_date))
+        date_prov = attributes.get("provenance", {}).get("capture_date", {})
+        for cand in date_prov.get("candidates", []):
+            if cand.get("value"):
+                dates.append(str(cand["value"]))
+        bldg_date = attributes.get("provenance", {}).get("building_capture_date", {})
+        for cand in bldg_date.get("candidates", []):
+            if cand.get("value"):
+                dates.append(str(cand["value"]))
+        freshness_scores = [_freshness(d) for d in dates] if dates else [0.90]
+        avg_freshness = sum(freshness_scores) / max(1, len(freshness_scores))
+        has_stale_change = any(c.get("change_type") == "stale_building_observation" for c in parcel_changes)
+        has_geom_change = any(c.get("change_type") in ("building_expansion", "building_reduction") for c in parcel_changes)
+        if has_stale_change or "outdated_building" in conflict.get("types", []):
+            temporal_penalty = 0.22
+        elif has_geom_change:
+            temporal_penalty = 0.08
+        elif conflict.get("types"):
+            temporal_penalty = 0.05
+        else:
+            temporal_penalty = 0.0
+        temporal_confidence = _clamp(avg_freshness - temporal_penalty, 0.35, 0.99)
+
         raw_joint = _clamp(0.58 * geometry_confidence + 0.18 * semantic_confidence + 0.12 * topology_confidence + 0.12 * (1.0 if not conflict["types"] else 0.55))
         calibrated = _clamp(0.55 * conformal.get("calibrated_confidence", 0.0) + 0.45 * raw_joint)
         if conflict["types"]:
             calibrated = _clamp(calibrated - (0.16 if conflict["severity"] == "high" else 0.09))
         decision = "human_review" if conflict["types"] or calibrated < 0.90 else "auto_merge"
-        parcel_results[target_id] = {"geometry_confidence": _round(geometry_confidence), "semantic_confidence": _round(semantic_confidence), "attribute_confidence": attributes["confidence"], "topology_confidence": _round(topology_confidence), "raw_joint_confidence": _round(raw_joint), "calibrated_confidence": _round(calibrated), "conformal": conformal, "decision": decision, "spatial_region": spatial_region(centroid(feature), all_centers), "conflict": conflict, "attributes": attributes, "topology": topology, "changes": changes_by_parcel.get(target_id, []), "matches": [{key: value for key, value in candidate.items() if key != "target_feature_id"} | {"target_feature_id": target_id} for candidate in candidates[:8]], "source_evidence": source_evidence, "many_to_many": [relation for result in matching.values() for relation in result["relations"] if relation.get("target_feature_id") == target_id]}
+        parcel_results[target_id] = {
+            "geometry_confidence": _round(geometry_confidence),
+            "semantic_confidence": _round(semantic_confidence),
+            "attribute_confidence": attributes["confidence"],
+            "topology_confidence": _round(topology_confidence),
+            "source_reliability_confidence": _round(source_reliability_confidence),
+            "source_reliability": _round(source_reliability_confidence),
+            "temporal_confidence": _round(temporal_confidence),
+            "temporal_consistency": _round(temporal_confidence),
+            "raw_joint_confidence": _round(raw_joint),
+            "calibrated_confidence": _round(calibrated),
+            "conformal": conformal,
+            "decision": decision,
+            "spatial_region": spatial_region(centroid(feature), all_centers),
+            "conflict": conflict,
+            "attributes": attributes,
+            "topology": topology,
+            "changes": changes_by_parcel.get(target_id, []),
+            "matches": [{key: value for key, value in candidate.items() if key != "target_feature_id"} | {"target_feature_id": target_id} for candidate in candidates[:8]],
+            "source_evidence": source_evidence,
+            "many_to_many": [relation for result in matching.values() for relation in result["relations"] if relation.get("target_feature_id") == target_id],
+        }
     detected = sum(bool(result["conflict"]["types"]) for result in parcel_results.values())
     expected_count = len(expected_conflicts)
     true_positive = sum(bool(parcel_results.get(target_id, {}).get("conflict", {}).get("types")) for target_id in expected_conflicts)
